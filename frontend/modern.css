@@ -1,0 +1,876 @@
+/* =========================================================
+   FIQHBOT MODERN UI
+   PASS 1 — Sidebar, chat workspace, messages and composer
+   ========================================================= */
+
+:root {
+    --bg-dark: #171310;
+    --bg-darker: #110e0c;
+    --bg-sidebar-glass: #15120f;
+
+    --accent-orange: #e9a23b;
+    --accent-orange-hover: #f0ad4e;
+    --accent-orange-gradient: linear-gradient(135deg, #f0aa43, #df8f26);
+
+    --text-light: #f5f1eb;
+    --text-muted: #a9a19a;
+
+    --border-color: rgba(255,255,255,0.075);
+    --btn-bg: rgba(255,255,255,0.045);
+    --btn-border: rgba(255,255,255,0.07);
+
+    --history-hover-bg: rgba(255,255,255,0.045);
+    --input-bg: #201a16;
+
+    --message-bot-bg: transparent;
+    --message-bot-border: transparent;
+    --message-bot-shadow: none;
+    --message-user-bg: #2a211b;
+
+    --input-placeholder-color: #746d67;
+}
+
+[data-theme="light"] {
+    --bg-dark: #fbfaf7;
+    --bg-darker: #f5f2ed;
+    --bg-sidebar-glass: #f2eee8;
+
+    --accent-orange: #b96f1e;
+    --text-light: #201b17;
+    --text-muted: #716a64;
+
+    --border-color: rgba(46,38,32,0.10);
+    --btn-bg: rgba(46,38,32,0.045);
+    --btn-border: rgba(46,38,32,0.08);
+
+    --history-hover-bg: rgba(46,38,32,0.055);
+    --input-bg: #ffffff;
+    --message-user-bg: #f0e8dd;
+    --input-placeholder-color: #9a938d;
+}
+
+/* ---------- Global ---------- */
+
+body {
+    background: var(--bg-dark);
+    letter-spacing: 0;
+    font-size: 16px;
+}
+
+body::before {
+    opacity: 0.012;
+}
+
+.app-container {
+    background: var(--bg-dark);
+}
+
+
+/* ---------- Sidebar ---------- */
+
+.sidebar {
+    width: 272px;
+    min-width: 240px;
+    max-width: 360px;
+
+    padding: 18px 14px 14px;
+
+    background: var(--bg-sidebar-glass);
+    border-right: 1px solid var(--border-color);
+
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+}
+
+.sidebar-top {
+    padding: 0 4px;
+    margin-bottom: 18px;
+}
+
+.reopen-logo {
+    width: 38px;
+    height: 38px;
+
+    border-radius: 11px;
+
+    font-size: 1rem;
+
+    box-shadow: none;
+}
+
+.sidebar-reopen-btn:hover .reopen-logo {
+    box-shadow: none;
+}
+
+.sidebar-brand-info h1 {
+    font-size: 1.05rem;
+    font-weight: 650;
+
+    background: none;
+
+    -webkit-text-fill-color: currentColor;
+
+    color: var(--text-light);
+}
+
+.sidebar-brand-info p {
+    margin-top: 2px;
+
+    font-size: 0.72rem;
+    font-style: normal;
+
+    color: var(--text-muted);
+
+    opacity: 1;
+}
+
+.sidebar-toggle {
+    width: 36px;
+    height: 36px;
+
+    border-radius: 9px;
+
+    background: transparent;
+}
+
+.sidebar-toggle:hover {
+    background: var(--btn-bg);
+    color: var(--text-light);
+}
+
+
+/* ---------- WhatsApp ---------- */
+
+.whatsapp-sidebar-btn {
+    height: 40px;
+
+    margin: 0 0 10px;
+
+    padding: 0 12px;
+
+    border-radius: 10px;
+    border: 1px solid var(--border-color);
+
+    justify-content: flex-start;
+
+    font-size: 0.82rem;
+    font-weight: 550;
+}
+
+.whatsapp-sidebar-btn:hover {
+    background: var(--btn-bg);
+    border-color: var(--border-color);
+}
+
+
+/* ---------- New Chat ---------- */
+
+.new-chat-btn {
+    min-height: 42px;
+
+    margin: 0 0 18px;
+
+    padding: 0 12px;
+
+    background: rgba(233,162,59,0.08);
+
+    border: 1px solid rgba(233,162,59,0.22);
+    border-radius: 10px;
+
+    color: var(--text-light);
+
+    font-size: 0.84rem;
+    font-weight: 600;
+}
+
+.new-chat-btn svg {
+    opacity: 0.9;
+}
+
+.new-chat-btn:hover {
+    background: rgba(233,162,59,0.13);
+
+    border-radius: 10px;
+}
+
+
+/* ---------- Recent Chats ---------- */
+
+.recent-label {
+    margin: 0 0 8px;
+
+    padding: 0 10px;
+
+    font-size: 0.67rem;
+    font-weight: 650;
+
+    letter-spacing: 0.09em;
+
+    color: var(--text-muted);
+
+    text-shadow: none;
+}
+
+.history-list {
+    gap: 3px;
+}
+
+.history-item {
+    min-height: 38px;
+
+    padding: 9px 10px;
+    padding-right: 38px;
+
+    border-radius: 9px;
+
+    gap: 9px;
+
+    font-size: 0.82rem;
+}
+
+.history-item i {
+    color: var(--text-muted);
+    opacity: 0.65;
+}
+
+.history-item.active {
+    background: rgba(255,255,255,0.055);
+
+    color: var(--text-light);
+
+    font-weight: 550;
+}
+
+.history-item.active i {
+    color: var(--accent-orange);
+}
+
+.history-item:hover {
+    background: var(--history-hover-bg);
+}
+
+
+/* ---------- Sidebar Footer ---------- */
+
+.sidebar-footer {
+    padding-top: 12px;
+}
+
+.current-madhab-display {
+    padding: 11px 12px;
+
+    border-radius: 11px;
+
+    background: rgba(255,255,255,0.025);
+
+    box-shadow: none;
+}
+
+.guidance-main strong {
+    font-size: 0.83rem;
+}
+
+#change-madhab-btn {
+    color: var(--accent-orange);
+}
+
+
+/* ---------- Main Workspace ---------- */
+
+.chat-interface {
+    background:
+        radial-gradient(
+            circle at 50% -10%,
+            rgba(233,162,59,0.035),
+            transparent 32%
+        ),
+        var(--bg-dark);
+}
+
+.chat-container {
+    padding:
+        42px
+        clamp(24px, 5vw, 72px)
+        20px;
+
+    gap: 24px;
+}
+
+
+/* ---------- Messages ---------- */
+
+.message {
+    width: 100%;
+    max-width: 900px;
+}
+
+.message-content {
+    font-size: 0.98rem;
+    line-height: 1.72;
+
+    box-shadow: none;
+}
+
+
+/* Assistant */
+
+.bot-message .message-content {
+    max-width: 82%;
+
+    padding: 8px 0;
+
+    background: transparent;
+
+    border: none;
+    border-radius: 0;
+
+    box-shadow: none;
+}
+
+.bot-message .message-content strong {
+    color: var(--text-light);
+}
+
+
+/* User */
+
+.user-message .message-content {
+    max-width: 72%;
+
+    padding: 11px 15px;
+
+    background: var(--message-user-bg);
+
+    border: 1px solid var(--border-color);
+    border-radius: 16px;
+
+    color: var(--text-light) !important;
+
+    box-shadow: none;
+}
+
+
+/* ---------- Message Actions ---------- */
+
+.speak-btn,
+.copy-btn,
+.sources-btn {
+    margin-top: 10px;
+
+    padding: 6px 8px;
+
+    background: transparent;
+
+    border: none;
+    border-radius: 8px;
+
+    color: var(--text-muted);
+
+    font-size: 0.76rem;
+}
+
+.copy-btn,
+.sources-btn {
+    margin-left: 2px;
+}
+
+.speak-btn:hover,
+.copy-btn:hover,
+.sources-btn:hover,
+.sources-btn.active {
+    background: var(--btn-bg);
+
+    border: none;
+
+    color: var(--text-light);
+}
+
+
+/* ---------- Composer ---------- */
+
+.input-area {
+    padding:
+        12px
+        clamp(24px, 5vw, 72px)
+        24px;
+
+    background:
+        linear-gradient(
+            to bottom,
+            transparent,
+            var(--bg-dark) 38%
+        );
+}
+
+.input-area > * {
+    width: 100%;
+    max-width: 900px;
+}
+
+.input-wrapper {
+    min-height: 64px;
+
+    padding: 8px 9px;
+
+    gap: 6px;
+
+    background: var(--input-bg);
+
+    border: 1px solid var(--border-color);
+    border-radius: 18px;
+
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+
+    box-shadow:
+        0 12px 32px
+        rgba(0,0,0,0.18);
+}
+
+.input-wrapper:focus-within {
+    border-color: rgba(233,162,59,0.32);
+
+    box-shadow:
+        0 12px 34px rgba(0,0,0,0.20),
+        0 0 0 3px rgba(233,162,59,0.055);
+}
+
+#user-input {
+    padding: 12px 10px;
+
+    font-size: 0.96rem;
+}
+
+#mic-btn,
+#send-btn {
+    width: 42px;
+    height: 42px;
+
+    border-radius: 12px;
+}
+
+#mic-btn {
+    background: transparent;
+
+    border-color: transparent;
+
+    font-size: 1rem;
+}
+
+#mic-btn:hover {
+    background: var(--btn-bg);
+
+    border-color: transparent;
+}
+
+#send-btn {
+    font-size: 0.95rem;
+
+    box-shadow: none;
+}
+
+#send-btn:hover {
+    transform: translateY(-1px);
+
+    box-shadow: none;
+}
+
+#send-btn:hover i {
+    transform: none;
+}
+
+
+/* ---------- Scroll Button ---------- */
+
+.scroll-bottom-btn {
+    bottom: 104px;
+
+    width: 36px;
+    height: 36px;
+
+    border-radius: 10px;
+
+    background: var(--input-bg);
+
+    border: 1px solid var(--border-color);
+
+    color: var(--text-muted);
+
+    box-shadow:
+        0 8px 24px
+        rgba(0,0,0,0.18);
+}
+
+
+/* ---------- Mobile ---------- */
+
+@media (max-width: 768px) {
+
+    .chat-container {
+        padding:
+            24px
+            16px
+            14px;
+
+        gap: 18px;
+    }
+
+    .input-area {
+        padding:
+            8px
+            16px
+            16px;
+    }
+
+    .message-content,
+    .bot-message .message-content,
+    .user-message .message-content {
+        max-width: 92%;
+    }
+
+    .input-wrapper {
+        min-height: 58px;
+
+        border-radius: 16px;
+    }
+
+    #mic-btn,
+    #send-btn {
+        width: 40px;
+        height: 40px;
+    }
+}
+
+
+/* =========================================================
+   FIQHBOT MODERN UI
+   PASS 2 — Preserve reference look, reduce static button blocks
+   ========================================================= */
+
+/* Sidebar actions behave like quiet navigation rows, not boxed controls. */
+.whatsapp-sidebar-btn,
+.new-chat-btn,
+.theme-toggle-btn {
+    min-height: 38px;
+    height: 38px;
+    margin-bottom: 4px;
+    padding: 0 10px;
+    background: transparent !important;
+    border: 0 !important;
+    border-radius: 8px;
+    box-shadow: none !important;
+    color: var(--text-muted);
+    transition: background 160ms ease, color 160ms ease, transform 160ms ease;
+}
+
+.new-chat-btn {
+    margin-bottom: 14px;
+    color: var(--text-light);
+    font-weight: 600;
+}
+
+.new-chat-btn svg {
+    color: var(--accent-orange);
+}
+
+.whatsapp-sidebar-btn:hover,
+.new-chat-btn:hover,
+.theme-toggle-btn:hover {
+    background: var(--history-hover-bg) !important;
+    color: var(--text-light);
+    transform: none;
+}
+
+.whatsapp-sidebar-btn:active,
+.new-chat-btn:active,
+.theme-toggle-btn:active {
+    transform: scale(0.985);
+}
+
+/* Selected history is indicated by hierarchy, not another card. */
+.history-item {
+    position: relative;
+    background: transparent;
+    border: 0;
+    border-radius: 7px;
+}
+
+.history-item.active {
+    background: transparent;
+    color: var(--text-light);
+}
+
+.history-item.active::before {
+    content: "";
+    position: absolute;
+    left: 2px;
+    top: 10px;
+    bottom: 10px;
+    width: 2px;
+    border-radius: 999px;
+    background: var(--accent-orange);
+}
+
+.history-item.active i {
+    color: var(--accent-orange);
+}
+
+.history-item:hover {
+    background: var(--history-hover-bg);
+}
+
+/* Guidance footer reads as account/context information, not a button card. */
+.current-madhab-display {
+    padding: 12px 10px 8px;
+    background: transparent;
+    border: 0;
+    border-top: 1px solid var(--border-color);
+    border-radius: 0;
+    box-shadow: none;
+}
+
+#change-madhab-btn {
+    padding: 0;
+    background: transparent;
+    border: 0;
+    border-radius: 0;
+    font-size: 0.69rem;
+    font-weight: 600;
+}
+
+#change-madhab-btn:hover {
+    background: transparent;
+    color: var(--accent-orange-hover);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+}
+
+/* Keep the attached page composition exactly: no added hero/header shell. */
+.chat-interface {
+    background:
+        radial-gradient(circle at 50% -12%, rgba(233,162,59,0.035), transparent 32%),
+        var(--bg-dark);
+}
+
+/* Assistant stays editorial/plain; only the user's own turn is bubbled. */
+.bot-message .message-content {
+    max-width: 82%;
+    padding: 7px 0;
+    background: transparent;
+    border: 0;
+    border-radius: 0;
+    box-shadow: none;
+}
+
+.user-message .message-content {
+    max-width: 72%;
+    padding: 10px 14px;
+    background: var(--message-user-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 16px 16px 5px 16px;
+    box-shadow: none;
+}
+
+/* Message utilities remain lightweight text/icon actions. */
+.speak-btn,
+.copy-btn,
+.sources-btn {
+    padding: 5px 6px;
+    background: transparent !important;
+    border: 0 !important;
+    border-radius: 6px;
+    color: var(--text-muted);
+}
+
+.speak-btn:hover,
+.copy-btn:hover,
+.sources-btn:hover,
+.sources-btn.active {
+    background: transparent !important;
+    color: var(--accent-orange);
+}
+
+/* Madhab choices become airy selections rather than four static dashboard blocks. */
+.madhab-selection {
+    padding: 26px 0 20px;
+    background: transparent;
+    border: 0;
+    box-shadow: none;
+}
+
+.madhab-selection h3 {
+    margin-bottom: 7px;
+    font-size: 1.1rem;
+    letter-spacing: -0.025em;
+}
+
+.madhab-sub {
+    margin-bottom: 18px;
+    color: var(--text-muted);
+}
+
+.madhab-grid {
+    gap: 0;
+    border-top: 1px solid var(--border-color);
+    border-bottom: 1px solid var(--border-color);
+}
+
+.madhab-card {
+    min-height: 122px;
+    padding: 18px 16px 16px;
+    background: transparent !important;
+    border: 0 !important;
+    border-right: 1px solid var(--border-color) !important;
+    border-radius: 0;
+    box-shadow: none !important;
+    transition: background 160ms ease, transform 160ms ease;
+}
+
+.madhab-card:last-child {
+    border-right: 0 !important;
+}
+
+.madhab-card:hover {
+    transform: none;
+    background: rgba(233,162,59,0.045) !important;
+    box-shadow: none !important;
+}
+
+.madhab-card.selected {
+    background: rgba(233,162,59,0.055) !important;
+    box-shadow: inset 0 -2px 0 var(--accent-orange) !important;
+}
+
+.madhab-icon-wrapper {
+    width: 32px;
+    height: 32px;
+    margin-bottom: 8px;
+    border-radius: 9px;
+    background: transparent;
+    border: 1px solid rgba(233,162,59,0.18);
+    box-shadow: none;
+}
+
+.madhab-card:hover .madhab-icon-wrapper {
+    transform: none;
+    background: rgba(233,162,59,0.06);
+}
+
+.madhab-card h4 {
+    font-size: 0.82rem;
+}
+
+.madhab-card p {
+    max-width: 20ch;
+    font-size: 0.69rem;
+    line-height: 1.5;
+    color: var(--text-muted);
+}
+
+/* Composer gets the modern chatbot treatment without becoming a floating card. */
+.input-area {
+    padding-bottom: 22px;
+}
+
+.input-wrapper {
+    min-height: 60px;
+    padding: 7px 8px;
+    border-radius: 16px;
+    background: var(--input-bg);
+    border: 1px solid var(--border-color);
+    box-shadow: 0 10px 28px rgba(0,0,0,0.14);
+}
+
+.input-wrapper:focus-within {
+    border-color: rgba(233,162,59,0.30);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.16), 0 0 0 3px rgba(233,162,59,0.045);
+}
+
+#mic-btn {
+    background: transparent;
+    border: 0;
+    color: var(--text-muted);
+}
+
+#mic-btn:hover {
+    background: transparent;
+    color: var(--text-light);
+}
+
+#send-btn {
+    width: 38px;
+    height: 38px;
+    border-radius: 11px;
+    box-shadow: none;
+}
+
+#send-btn:hover {
+    transform: translateY(-1px);
+    box-shadow: none;
+}
+
+/* Scroll affordance is present but visually quiet. */
+.scroll-bottom-btn {
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    background: var(--input-bg);
+    border: 1px solid var(--border-color);
+    box-shadow: 0 6px 18px rgba(0,0,0,0.12);
+}
+
+@media (max-width: 768px) {
+    .madhab-grid {
+        grid-template-columns: 1fr 1fr;
+    }
+
+    .madhab-card:nth-child(2) {
+        border-right: 0 !important;
+    }
+
+    .madhab-card:nth-child(-n+2) {
+        border-bottom: 1px solid var(--border-color) !important;
+    }
+}
+
+@media (max-width: 520px) {
+    .madhab-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .madhab-card,
+    .madhab-card:nth-child(2) {
+        min-height: auto;
+        border-right: 0 !important;
+        border-bottom: 1px solid var(--border-color) !important;
+        align-items: flex-start;
+        text-align: left;
+    }
+
+    .madhab-card:last-child {
+        border-bottom: 0 !important;
+    }
+}
+
+/* ==========================================================================
+   FIQHBOT BRAND + RECENT LIST CLEANUP V1
+   ========================================================================== */
+.sidebar-brand-info {
+    display: flex;
+    align-items: center;
+    min-height: 38px;
+}
+
+.sidebar-brand-info h1 {
+    margin: 0;
+    line-height: 1;
+    letter-spacing: -0.015em;
+}
+
+.history-item {
+    gap: 0;
+}
+
+.history-item .title {
+    margin-left: 0;
+}

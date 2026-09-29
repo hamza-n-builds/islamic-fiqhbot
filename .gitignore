@@ -1,0 +1,36 @@
+# Environments and secrets
+.env
+.env.*
+!.env.example
+venv/
+env/
+ENV/
+
+# Python cache & logs
+__pycache__/
+*.py[cod]
+*$py.class
+*.log
+*.err
+*.out
+server_err.log
+server_out.log
+
+# Large model weights (exceeds GitHub 100MB limit; base MiniLM is downloaded on demand)
+backend/models/
+models/
+*.safetensors
+*.bin
+*.pt
+*.onnx
+
+# Data & audio caches
+backend/q.mp3
+*.sqlite3
+*.db
+
+# IDE & OS
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
