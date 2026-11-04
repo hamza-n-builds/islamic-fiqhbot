@@ -34,6 +34,13 @@ Optional: to use the fine-tuned embedder, unzip `islamic_minilm/` into
 On Windows, use `../start_fiqhbot.cmd` for the normal local workflow. It opens
 the interface on an available loopback port after the RAG engine is ready.
 
+The launcher checks for a runnable 64-bit Python 3.11, preserves a broken virtual
+environment as `venv.backup-*`, and installs/checks dependencies in a fresh `venv`
+when needed. Set `FIQHBOT_PYTHON` to select a Python executable explicitly.
+Use `../start_fiqhbot.cmd --setup-only` for dependency setup, or `--check` for an
+offline runtime/import check. Neither option starts the server or calls Gemini.
+See the project README for PowerShell examples and retry behavior.
+
 For a manual fixed-port start:
 ```bash
 python app.py          # serves on http://localhost:5000

@@ -137,13 +137,16 @@ def init(verbose=True):
         return
 
     import nltk
+    local_nltk = os.path.join(HERE, ".cache", "nltk_data")
+    if local_nltk not in nltk.data.path:
+        nltk.data.path.insert(0, local_nltk)
     for pkg, resource in (("punkt", "tokenizers/punkt"),
                           ("punkt_tab", "tokenizers/punkt_tab"),
                           ("stopwords", "corpora/stopwords")):
         try:
             nltk.data.find(resource)
         except LookupError:
-            if not nltk.download(pkg, quiet=True):
+            if not nltk.download(pkg, download_dir=local_nltk, quiet=True):
                 raise RuntimeError(f"NLTK resource {pkg} is missing and could not be downloaded")
     from nltk.corpus import stopwords
     stop_words = set(stopwords.words("english"))

@@ -43,9 +43,49 @@ an available local port, so an old server on port 5000 cannot intercept requests
 Later starts reuse cached embeddings and are faster.
 
 On first use, the launcher creates `backend/venv` and installs dependencies if
-needed. Before starting, copy `backend/.env.example` to `backend/.env` and put
-your own `GEMINI_API_KEY` there. Python 3.11 and an internet connection are
-required. The `.env` file stays on this computer and is ignored by Git.
+needed. It checks that the interpreter can actually run Python 3.11 (64-bit),
+not just that `python.exe` exists. If an old/copied environment is broken, it
+preserves it as `backend/venv.backup-*` and creates a clean environment. Backups
+are ignored by Git; setup never removes your datasets, models or `.env`.
+
+Before starting, copy `backend/.env.example` to `backend/.env` and put your own
+`GEMINI_API_KEY` there. Python 3.11 (64-bit) and an internet connection for missing
+packages/models are required. The `.env` file stays on this computer and is
+ignored by Git. An existing `GEMINI_API_KEY` process environment variable also
+works without an `.env` file.
+
+The launcher tries a working project environment, `py -3.11`, `python3.11`, then
+`python`. To choose an interpreter explicitly in PowerShell:
+
+```powershell
+$env:FIQHBOT_PYTHON = 'C:\path\to\Python311\python.exe'
+.\start_fiqhbot.cmd --setup-only
+```
+
+Useful launcher options (run from this folder):
+
+```powershell
+.\start_fiqhbot.cmd --setup-only  # install/check dependencies; no app or browser
+.\start_fiqhbot.cmd --check       # read-only runtime/import check; no installs
+.\start_fiqhbot.cmd --no-browser  # run normally without opening the browser
+```
+
+`--check` does not read credentials, initialize the knowledge base, call Gemini,
+send WhatsApp messages, or verify answer correctness. First setup verifies package
+dependencies, core imports and local NLTK tokenizer/stopword resources before
+marking the environment ready. NLTK resources stay in `backend/.cache/nltk_data`.
+Whisper is still imported lazily by voice features; voice model/FFmpeg readiness
+is a separate check. Later launches
+reuse it; changed requirements or missing dependencies trigger setup again.
+For unattended commands, set `$env:FIQHBOT_NO_PAUSE = '1'` to preserve error exit
+codes without waiting for a key press. If installation fails, fix the reported
+issue and rerun `--setup-only`; the environment is not marked ready until checks
+pass.
+
+Startup verification and remaining scope are recorded in
+[`replica/test-plan.md`](replica/test-plan.md) and
+[`replica/backend.md`](replica/backend.md). Run the regression suite from `backend`
+with `venv\Scripts\python.exe -B -m unittest discover -s tests -v`.
 
 For local use, always open the page launched by `start_fiqhbot.cmd` rather than
 double-clicking `frontend/index.html`.
@@ -62,8 +102,8 @@ qualified scholar.
 ```bash
 cd backend
 
-# Create a virtual environment
-python -m venv venv
+# Create a virtual environment using Python 3.11 (64-bit)
+py -3.11 -m venv venv
 
 # Install dependencies
 venv\Scripts\python.exe -m pip install -r requirements.txt

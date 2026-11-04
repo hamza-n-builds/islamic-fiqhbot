@@ -1,0 +1,14 @@
+{
+  "checks": [
+    "Actual datasets/model warm-up and /health readiness",
+    "HTML and four frontend assets served byte-for-byte",
+    "Same-origin dynamic config with blank browser API key",
+    "Invalid question rejected before generation",
+    "Second launch reuses the ready instance without a browser"
+  ],
+  "external_network": "blocked in server processes",
+  "provider_generation_tested": false,
+  "browser_rendering_tested": false,
+  "startup_seconds": 11.62,
+  "status": "passed"
+}
