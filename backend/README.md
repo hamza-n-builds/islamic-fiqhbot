@@ -31,11 +31,15 @@ Optional: to use the fine-tuned embedder, unzip `islamic_minilm/` into
 `backend/models/` (or set `MINILM_DIR`). Without it, the base MiniLM is used.
 
 ## Run
+On Windows, use `../start_fiqhbot.cmd` for the normal local workflow. It opens
+the interface on an available loopback port after the RAG engine is ready.
+
+For a manual fixed-port start:
 ```bash
 python app.py          # serves on http://localhost:5000
 ```
-First start loads models and builds indexes (~30–60s); `/health` reports
-`engine_ready: true` when warm.
+The first start builds and caches embeddings. Later starts load the cache.
+`/health` reports `engine_ready: true` when warm.
 
 ## Endpoints
 - `GET /health` → `{ status, engine_ready }`

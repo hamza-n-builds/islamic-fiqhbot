@@ -8,7 +8,7 @@ single clean entry point:  answer_question(query, madhhab) -> dict
 The dict is JSON-serialisable and shared by BOTH the web frontend (/ask) and
 the WhatsApp webhook, so the two channels always behave identically.
 """
-import os, re, time, json, string
+import os, re, time, json, string, hashlib, tempfile
 import yaml
 import numpy as np
 
@@ -85,10 +85,9 @@ LOW_CONFIDENCE_PCT = int(os.environ.get("LOW_CONFIDENCE_PCT", "50"))
 ISLAMQA_URL        = os.environ.get("ISLAMQA_URL", "https://islamqa.info/en")
 GEMINI_KEY  = os.environ.get("GEMINI_API_KEY", "")
 GEMINI_MODELS = [
-    "models/gemini-2.0-flash-lite",
-    "models/gemini-2.5-flash",
-    "models/gemini-flash-lite-latest",
-    "models/gemini-flash-latest",
+    "gemini-3.5-flash-lite",
+    "gemini-3.1-flash-lite",
+    "gemini-flash-lite-latest",
 ]
 
 # Lazy-initialised globals (filled by init())
@@ -138,11 +137,14 @@ def init(verbose=True):
         return
 
     import nltk
-    for pkg in ("punkt", "punkt_tab", "stopwords"):
+    for pkg, resource in (("punkt", "tokenizers/punkt"),
+                          ("punkt_tab", "tokenizers/punkt_tab"),
+                          ("stopwords", "corpora/stopwords")):
         try:
-            nltk.download(pkg, quiet=True)
-        except Exception:
-            pass
+            nltk.data.find(resource)
+        except LookupError:
+            if not nltk.download(pkg, quiet=True):
+                raise RuntimeError(f"NLTK resource {pkg} is missing and could not be downloaded")
     from nltk.corpus import stopwords
     stop_words = set(stopwords.words("english"))
 
@@ -196,18 +198,54 @@ def init(verbose=True):
     from sentence_transformers import SentenceTransformer
     if os.path.isdir(FINETUNED_DIR):
         if verbose: print(f"Loading fine-tuned MiniLM from {FINETUNED_DIR}")
-        embedder = SentenceTransformer(FINETUNED_DIR)
+        embedder = SentenceTransformer(FINETUNED_DIR, local_files_only=True)
     else:
         if verbose: print(f"Fine-tuned model not found — using base {BASE_MODEL}")
         embedder = SentenceTransformer(BASE_MODEL)
 
-    if verbose: print("Embedding fiqh topics + topic examples...")
-    fiqh_embeddings = embedder.encode(fiqh_texts, convert_to_tensor=True, show_progress_bar=False)
     ex_texts, example_topic_ids = [], []
     for tid, exs in topic_examples.items():
         for ex in exs:
             ex_texts.append(ex); example_topic_ids.append(tid)
-    example_embeddings = embedder.encode(ex_texts, convert_to_tensor=True, show_progress_bar=False)
+
+    # These texts and model weights rarely change. Cache their embeddings so
+    # later launches do not encode thousands of examples again.
+    model_stamp = BASE_MODEL
+    if os.path.isdir(FINETUNED_DIR):
+        model_stamp = []
+        for root, dirs, files in os.walk(FINETUNED_DIR):
+            dirs.sort()
+            for name in sorted(files):
+                path = os.path.join(root, name)
+                stat = os.stat(path)
+                model_stamp.append((os.path.relpath(path, FINETUNED_DIR), stat.st_size, stat.st_mtime_ns))
+    cache_input = json.dumps((model_stamp, fiqh_texts, ex_texts), ensure_ascii=False).encode("utf-8")
+    cache_key = hashlib.sha256(cache_input).hexdigest()[:20]
+    cache_dir = os.path.join(HERE, ".cache")
+    cache_path = os.path.join(cache_dir, f"embeddings-{cache_key}.npz")
+    try:
+        import torch
+        with np.load(cache_path, allow_pickle=False) as cached:
+            if len(cached["fiqh"]) != len(fiqh_texts) or len(cached["examples"]) != len(ex_texts):
+                raise ValueError("Embedding cache does not match the datasets")
+            fiqh_embeddings = torch.from_numpy(cached["fiqh"].copy()).to(embedder.device)
+            example_embeddings = torch.from_numpy(cached["examples"].copy()).to(embedder.device)
+        if verbose: print("Loaded cached fiqh and example embeddings.")
+    except (OSError, ValueError, KeyError):
+        if verbose: print("Embedding fiqh topics + topic examples...")
+        fiqh_embeddings = embedder.encode(fiqh_texts, convert_to_tensor=True, show_progress_bar=False)
+        example_embeddings = embedder.encode(ex_texts, convert_to_tensor=True, show_progress_bar=False)
+        try:
+            os.makedirs(cache_dir, exist_ok=True)
+            with tempfile.NamedTemporaryFile(dir=cache_dir, suffix=".npz", delete=False) as temp:
+                temp_path = temp.name
+            np.savez(temp_path, fiqh=fiqh_embeddings.cpu().numpy(),
+                     examples=example_embeddings.cpu().numpy())
+            os.replace(temp_path, cache_path)
+        except OSError as error:
+            if verbose: print(f"Embedding cache could not be saved: {error}")
+            if 'temp_path' in locals() and os.path.exists(temp_path):
+                os.remove(temp_path)
 
     _READY = True
     if verbose:
@@ -403,6 +441,8 @@ def gemini_generate(prompt):
             if "503" in err or "UNAVAILABLE" in err:
                 time.sleep(2); continue
             if "429" in err or "QUOTA" in err.upper():
+                continue
+            if "404" in err or "NOT_FOUND" in err.upper():
                 continue
             raise
     raise RuntimeError(f"All Gemini models unavailable: {last}")

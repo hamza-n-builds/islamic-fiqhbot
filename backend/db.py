@@ -8,9 +8,36 @@ chatbot keeps working normally — logging is a nice-to-have, never a blocker.
 """
 import os
 import datetime
+import queue
+import threading
 
 _collection = None
 _init_done = False
+_log_queue = queue.Queue(maxsize=100)
+_log_worker = None
+_log_worker_lock = threading.Lock()
+
+
+def log_query_async(question, madhhab, result, channel="web", extra=None):
+    """Queue optional Mongo logging without delaying a chat answer."""
+    global _log_worker
+    with _log_worker_lock:
+        if _log_worker is None or not _log_worker.is_alive():
+            _log_worker = threading.Thread(target=_drain_log_queue, daemon=True)
+            _log_worker.start()
+    try:
+        _log_queue.put_nowait((question, madhhab, result, channel, extra))
+    except queue.Full:
+        print("[db] Query log queue is full; skipping this optional log entry.")
+
+
+def _drain_log_queue():
+    while True:
+        question, madhhab, result, channel, extra = _log_queue.get()
+        try:
+            log_query(question, madhhab, result, channel=channel, extra=extra)
+        finally:
+            _log_queue.task_done()
 
 
 def _get_collection():

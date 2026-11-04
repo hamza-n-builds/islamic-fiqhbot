@@ -1596,12 +1596,14 @@ body {
 /* ── Title ── */
 .loader-title {
     font-family: var(--font-heading);
-    font-size: 2rem;
-    font-weight: 700;
+    font-size: clamp(3rem, 5vw, 4.5rem);
+    font-weight: 800;
     background: var(--accent-orange-gradient);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
-    letter-spacing: 0.02em;
+    letter-spacing: 0.12em;
+    line-height: 1;
+    text-transform: uppercase;
 }
 
 .loader-subtitle {

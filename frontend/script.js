@@ -66,11 +66,28 @@ document.addEventListener('DOMContentLoaded', () => {
     const newChatBtn = document.getElementById('new-chat-btn');
     const historyList = document.getElementById('history-list');
     const themeToggleBtn = document.getElementById('theme-toggle-btn');
-    const themeToggleIcon = document.getElementById('theme-toggle-icon');
     const themeToggleText = document.getElementById('theme-toggle-text');
+    const whatsappLink = document.querySelector('.whatsapp-action');
+    const whatsappNumber = String((typeof CONFIG !== 'undefined' && CONFIG.WHATSAPP_NUMBER) || '').replace(/\D/g, '');
+    if (whatsappLink && /^\d{8,15}$/.test(whatsappNumber)) {
+        whatsappLink.href = `https://wa.me/${whatsappNumber}?text=Assalamu%20Alaikum`;
+        whatsappLink.hidden = false;
+    }
 
     // ── State ────────────────────────────────────────────────────
-    let chats = JSON.parse(localStorage.getItem('islamic_chatbot_chats')) || [];
+    let chats = [];
+    try {
+        const savedChats = JSON.parse(localStorage.getItem('islamic_chatbot_chats') || '[]');
+        if (Array.isArray(savedChats)) {
+            chats = savedChats.filter(chat => chat && typeof chat.id === 'string'
+                && typeof chat.title === 'string' && Array.isArray(chat.messages))
+                .map(chat => ({ ...chat, messages: chat.messages.filter(msg => msg
+                    && (msg.sender === 'user' || msg.sender === 'bot')
+                    && typeof msg.text === 'string') }));
+        }
+    } catch (error) {
+        console.warn('Saved chat history could not be read:', error);
+    }
     let currentChatId = localStorage.getItem('islamic_chatbot_current_id') || null;
     let apiKey = '';
     let isRecording = false;
@@ -87,14 +104,11 @@ document.addEventListener('DOMContentLoaded', () => {
     document.documentElement.setAttribute('data-theme', currentTheme);
 
     function updateThemeUI() {
-        if (!themeToggleIcon || !themeToggleText) return;
-        if (currentTheme === 'light') {
-            themeToggleIcon.className = 'fas fa-moon';
-            themeToggleText.textContent = 'Dark Mode';
-        } else {
-            themeToggleIcon.className = 'fas fa-sun';
-            themeToggleText.textContent = 'Light Mode';
-        }
+        if (!themeToggleBtn || !themeToggleText) return;
+        const action = currentTheme === 'light' ? 'dark' : 'light';
+        themeToggleText.textContent = action === 'dark' ? 'Dark Mode' : 'Light Mode';
+        themeToggleBtn.title = `Switch to ${action} mode`;
+        themeToggleBtn.setAttribute('aria-label', themeToggleBtn.title);
     }
     updateThemeUI();
 
@@ -432,7 +446,15 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function saveChats() {
-        localStorage.setItem('islamic_chatbot_chats', JSON.stringify(chats));
+        try {
+            localStorage.setItem('islamic_chatbot_chats', JSON.stringify(chats));
+        } catch (error) {
+            console.error('Chat history could not be saved:', error);
+            if (!saveChats.warningShown) {
+                saveChats.warningShown = true;
+                alert('Chat history could not be saved on this device. Your current conversation is still visible, but it may be lost when you close the page.');
+            }
+        }
         renderHistory();
     }
 
@@ -506,7 +528,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const isUrduTitle = isUrduText(chat.title);
             item.innerHTML = `
 
-                <span class="title ${isUrduTitle ? 'font-urdu-ui' : ''}" ${isUrduTitle ? 'lang="ur"' : ''}>${chat.title}</span>
+                <span class="title ${isUrduTitle ? 'font-urdu-ui' : ''}" ${isUrduTitle ? 'lang="ur"' : ''}>${escapeHtml(chat.title)}</span>
                 <div class="history-actions">
                     <button class="action-btn edit-btn"><i class="fas fa-edit"></i></button>
                     <button class="action-btn delete-btn"><i class="fas fa-trash"></i></button>
@@ -649,9 +671,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
         } catch (error) {
             loadingDiv.remove();
-            appendMessageUI('bot',
-                'Sorry, I could not reach the server. Make sure the backend is running ' +
-                '(python app.py) and reachable at ' + BACKEND_URL + '.', false);
+            const message = error instanceof TypeError
+                ? 'Sorry, I could not reach FIQHBOT. Open start_fiqhbot.cmd from the FIQHBOT folder, ' +
+                  'then use the page it opens.'
+                : error.status === 503
+                    ? 'Sorry, FIQHBOT could not connect to Gemini. Check your internet connection and try again.'
+                : error.status
+                    ? `Sorry, the server returned an error (${error.status}). Please try again.`
+                    : 'Sorry, something went wrong while reading the server response. Please try again.';
+            appendMessageUI('bot', message, false);
             console.error(error);
         }
     }
@@ -781,14 +809,14 @@ document.addEventListener('DOMContentLoaded', () => {
     function buildMetaBadges(meta) {
         if (!meta || meta.mode === 'greeting' || meta.out_of_scope) return '';
 
-        const pct = meta.confidence_percent;
-        const label = meta.confidence_label || '';
-        const lvl = label.toLowerCase().replace(/\s+/g, '-');
+        const pct = Number(meta.confidence_percent);
+        const label = typeof meta.confidence_label === 'string' ? meta.confidence_label : '';
+        const lvl = label.toLowerCase().replace(/[^a-z0-9]+/g, '-');
         const hasConsensus = meta.consensus === true || meta.consensus === false;
 
         let html = '<div class="msg-meta">';
 
-        if (pct != null) {
+        if (meta.confidence_percent != null && Number.isFinite(pct)) {
             html += `<span class="conf-badge conf-${lvl}">Confidence: ${pct}% · ${escapeHtml(label)}</span>`;
         }
 
@@ -814,7 +842,7 @@ document.addEventListener('DOMContentLoaded', () => {
             contentDiv.setAttribute('lang', 'ur');
         }
 
-        let formattedText = text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+        let formattedText = escapeHtml(text).replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
         // Make any URL clickable (opens in a new tab). Covers the IslamQA
         // referral link shown on low-confidence answers.
         formattedText = formattedText.replace(
@@ -829,9 +857,9 @@ document.addEventListener('DOMContentLoaded', () => {
         const noSourceModes = ['greeting', 'capability', 'low_confidence', 'reexpress'];
         const s = (meta && meta.sources) || {};
         const realSourceCount =
-            (s.fiqh   || []).filter(Boolean).length +
-            (s.quran  || []).filter(Boolean).length +
-            (s.hadith || []).filter(Boolean).length;
+            (Array.isArray(s.fiqh) ? s.fiqh.filter(Boolean).length : 0) +
+            (Array.isArray(s.quran) ? s.quran.filter(Boolean).length : 0) +
+            (Array.isArray(s.hadith) ? s.hadith.filter(Boolean).length : 0);
         const hasSources = sender === 'bot'
             && !noSourceModes.includes(meta && meta.mode)
             && realSourceCount > 0;
@@ -941,7 +969,9 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!response.ok) {
             let detail = response.status;
             try { const j = await response.json(); detail = j.error || detail; } catch (e) { }
-            throw new Error('Backend error: ' + detail);
+            const error = new Error('Backend error: ' + detail);
+            error.status = response.status;
+            throw error;
         }
         return await response.json();
     }

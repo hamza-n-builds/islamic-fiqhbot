@@ -11,10 +11,13 @@ Endpoints
 Both channels call the same rag_engine.answer_question(), so answers are
 identical across web and WhatsApp.
 """
-import os, threading, tempfile, re, json
-from flask import Flask, request, jsonify, send_file
+import os, threading, tempfile, re, json, hashlib, hmac, io
+from pathlib import Path
+from flask import Flask, request, jsonify, send_file, send_from_directory, Response
 from flask_cors import CORS
 import requests
+import httpx
+from werkzeug.exceptions import BadRequest, RequestEntityTooLarge
 
 # Load environment variables from a .env file in this folder, so keys like
 # GEMINI_API_KEY are picked up automatically without needing to set them in the
@@ -29,10 +32,73 @@ import rag_engine
 import db   # optional MongoDB query logging (fails silently if unavailable)
 
 app = Flask(__name__)
-CORS(app)  # allow the static frontend (file:// or localhost) to call /ask
+app.config["MAX_CONTENT_LENGTH"] = 1024 * 1024
+# The launcher serves the UI from the API origin, so no cross-origin access is
+# needed by default. Explicitly opt in any separately hosted frontend.
+CORS(app, origins=[origin.strip() for origin in
+                  os.environ.get("FIQHBOT_ALLOWED_ORIGINS", "").split(",")
+                  if origin.strip()])
+FRONTEND_DIR = Path(__file__).resolve().parent.parent / "frontend"
+FRONTEND_FILES = {"index.html", "style.css", "modern.css", "script.js", "resize.js"}
+
+
+def _json_fields(limits):
+    data = request.get_json(silent=True)
+    if not isinstance(data, dict):
+        raise BadRequest("Request body must be a JSON object.")
+    for field, limit in limits.items():
+        value = data.get(field)
+        if value is not None and not isinstance(value, str):
+            raise BadRequest(f"{field} must be text.")
+        if isinstance(value, str) and len(value) > limit:
+            raise BadRequest(f"{field} must be {limit} characters or fewer.")
+    return data
+
+
+@app.errorhandler(BadRequest)
+def invalid_request(error):
+    return jsonify({"ok": False, "error": error.description}), 400
+
+
+@app.errorhandler(RequestEntityTooLarge)
+def oversized_request(error):
+    return jsonify({"ok": False, "error": "Request body exceeds the 1 MB limit."}), 413
+
+
+@app.after_request
+def response_policy(response):
+    response.headers["X-Content-Type-Options"] = "nosniff"
+    if request.path in {"/ask", "/speak", "/whatsapp", "/config.js"}:
+        response.headers["Cache-Control"] = "no-store"
+    return response
+
+
+@app.get("/")
+def frontend_index():
+    return send_from_directory(FRONTEND_DIR, "index.html")
+
+
+@app.get("/config.js")
+def frontend_config():
+    # Keep the frontend on this server's actual port, including a local launcher's
+    # automatically chosen port. The Gemini key never enters the browser.
+    number = re.sub(r"\D", "", os.environ.get("WA_PUBLIC_NUMBER", ""))
+    config = {"API_KEY": "", "BACKEND_URL": request.host_url.rstrip("/"),
+              "WHATSAPP_NUMBER": number if 8 <= len(number) <= 15 else ""}
+    response = Response(f"const CONFIG = {json.dumps(config)};", mimetype="application/javascript")
+    response.headers["Cache-Control"] = "no-store"
+    return response
+
+
+@app.get("/<asset>")
+def frontend_asset(asset):
+    if asset not in FRONTEND_FILES:
+        return "Not found", 404
+    return send_from_directory(FRONTEND_DIR, asset)
 
 # WhatsApp Cloud API config (from env)
-WA_VERIFY_TOKEN = os.environ.get("WA_VERIFY_TOKEN", "fiqh-verify")
+WA_VERIFY_TOKEN = os.environ.get("WA_VERIFY_TOKEN", "")
+WA_APP_SECRET   = os.environ.get("WA_APP_SECRET", "")
 WA_TOKEN        = os.environ.get("WA_TOKEN", "")          # permanent/temporary access token
 WA_PHONE_ID     = os.environ.get("WA_PHONE_NUMBER_ID", "")
 WA_API          = "https://graph.facebook.com/v21.0"
@@ -123,7 +189,8 @@ def hadith_text():
 # --------------------------------------------------------------- web /ask
 @app.post("/ask")
 def ask():
-    data = request.get_json(silent=True) or {}
+    data = _json_fields({"question": 4000, "text": 4000, "madhab": 32,
+                         "madhhab": 32, "prev_answer": 20000})
     question = (data.get("question") or data.get("text") or "").strip()
     madhhab  = (data.get("madhab") or data.get("madhhab") or "General").strip()
     prev_answer = (data.get("prev_answer") or "").strip()
@@ -134,11 +201,14 @@ def ask():
     try:
         result = rag_engine.answer_question(
             question, None if madhhab == "General" else madhhab, prev_answer=prev_answer or None)
-        db.log_query(question, madhhab, result, channel="web")
+        db.log_query_async(question, madhhab, result, channel="web")
         return jsonify(result)
+    except httpx.RequestError:
+        app.logger.warning("Gemini connection failed while answering", exc_info=True)
+        return jsonify({"ok": False, "error": "gemini_connection_error"}), 503
     except Exception as e:
         app.logger.exception("answer failed")
-        return jsonify({"ok": False, "error": "internal_error", "detail": str(e)}), 500
+        return jsonify({"ok": False, "error": "internal_error"}), 500
 
 
 # --------------------------------------------------------------- text-to-speech
@@ -157,25 +227,28 @@ def _detect_tts_lang(text):
 def speak():
     """Generate speech audio (mp3) for a piece of text using native edge-tts
     voices (English/Urdu/Arabic). Works on any machine — no OS voice needed."""
-    import voice  # lazy import so the server still starts if edge-tts isn't installed
-    data = request.get_json(silent=True) or {}
+    data = _json_fields({"text": 20000, "lang": 20})
     text = (data.get("text") or "").strip()
     if not text:
         return jsonify({"ok": False, "error": "text is required"}), 400
 
-    # Clean citations/markdown so they aren't read aloud, then pick a voice.
-    clean = voice.strip_citations(text)
-    lang = (data.get("lang") or "").strip().lower() or _detect_tts_lang(clean)
-
     try:
-        tmp = tempfile.NamedTemporaryFile(suffix=".mp3", delete=False)
-        tmp.close()
-        voice.synthesize(clean, tmp.name, lang=lang)
-        return send_file(tmp.name, mimetype="audio/mpeg", as_attachment=False,
+        import voice  # lazy: the API also starts without optional speech packages
+        clean = voice.strip_citations(text)
+        if not clean:
+            return jsonify({"ok": False, "error": "No speakable text was provided."}), 400
+        lang = (data.get("lang") or "").strip().lower() or _detect_tts_lang(clean)
+        # Read before returning so the temporary directory is removed even if
+        # synthesis fails or the client disconnects during audio playback.
+        with tempfile.TemporaryDirectory(prefix="fiqhbot-speech-") as directory:
+            path = Path(directory) / "speech.mp3"
+            voice.synthesize(clean, str(path), lang=lang)
+            audio = io.BytesIO(path.read_bytes())
+        return send_file(audio, mimetype="audio/mpeg", as_attachment=False,
                          download_name="speech.mp3")
     except Exception as e:
         app.logger.exception("tts failed")
-        return jsonify({"ok": False, "error": "tts_error", "detail": str(e)}), 500
+        return jsonify({"ok": False, "error": "tts_error"}), 500
 
 
 # --------------------------------------------------------------- WhatsApp
@@ -185,7 +258,8 @@ def wa_verify():
     mode      = request.args.get("hub.mode")
     token     = request.args.get("hub.verify_token")
     challenge = request.args.get("hub.challenge")
-    if mode == "subscribe" and token == WA_VERIFY_TOKEN:
+    if mode == "subscribe" and WA_VERIFY_TOKEN and token and hmac.compare_digest(
+            token.encode("utf-8"), WA_VERIFY_TOKEN.encode("utf-8")):
         return challenge or "", 200
     return "forbidden", 403
 
@@ -291,7 +365,14 @@ def _format_for_whatsapp(result):
 @app.post("/whatsapp")
 def wa_inbound():
     """Inbound messages from Meta Cloud API."""
-    data = request.get_json(silent=True) or {}
+    if not WA_APP_SECRET:
+        return jsonify({"ok": False, "error": "webhook_not_configured"}), 503
+    signature = request.headers.get("X-Hub-Signature-256", "")
+    expected = "sha256=" + hmac.new(WA_APP_SECRET.encode("utf-8"),
+                                    request.get_data(), hashlib.sha256).hexdigest()
+    if not hmac.compare_digest(signature.encode("utf-8"), expected.encode("ascii")):
+        return jsonify({"ok": False, "error": "invalid_signature"}), 403
+    data = _json_fields({})
     try:
         entry = (data.get("entry") or [{}])[0]
         change = (entry.get("changes") or [{}])[0]
@@ -327,7 +408,7 @@ def wa_inbound():
                 return "ok", 200
             # Answer, reply with text, and (optionally) a spoken voice note back.
             result = rag_engine.answer_question(question, None)
-            db.log_query(question, "General", result, channel="whatsapp",
+            db.log_query_async(question, "General", result, channel="whatsapp",
                          extra={"voice": True, "language": detected})
             reply_text = _format_for_whatsapp(result)
             wa_send_text(sender, reply_text)
@@ -349,7 +430,7 @@ def wa_inbound():
             return "ok", 200
 
         result = rag_engine.answer_question(question, None)  # madhhab selection via web UI; default General on WA
-        db.log_query(question, "General", result, channel="whatsapp")
+        db.log_query_async(question, "General", result, channel="whatsapp")
         wa_send_text(sender, _format_for_whatsapp(result))
     except Exception:
         app.logger.exception("whatsapp inbound failed")
@@ -359,4 +440,4 @@ def wa_inbound():
 if __name__ == "__main__":
     start_warmup()
     port = int(os.environ.get("PORT", "5000"))
-    app.run(host="0.0.0.0", port=port, debug=True, use_reloader=False)
+    app.run(host="127.0.0.1", port=port, debug=False, use_reloader=False)

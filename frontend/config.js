@@ -4,5 +4,6 @@ const CONFIG = {
 
     // Address of your Flask backend (rag_engine + Gemini + Mongo logging).
     // Change this only if you host the backend somewhere other than this machine.
-    BACKEND_URL: "http://localhost:5000"
+    BACKEND_URL: "http://127.0.0.1:5000",
+    WHATSAPP_NUMBER: ""
 };

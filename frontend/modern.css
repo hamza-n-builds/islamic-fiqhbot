@@ -52,7 +52,7 @@
 /* ---------- Global ---------- */
 
 body {
-    background: var(--bg-dark);
+    background: var(--loader-gradient);
     letter-spacing: 0;
     font-size: 16px;
 }
@@ -62,7 +62,7 @@ body::before {
 }
 
 .app-container {
-    background: var(--bg-dark);
+    background: var(--loader-gradient);
 }
 
 
@@ -75,7 +75,7 @@ body::before {
 
     padding: 18px 14px 14px;
 
-    background: var(--bg-sidebar-glass);
+    background: transparent;
     border-right: 1px solid var(--border-color);
 
     backdrop-filter: none;
@@ -278,13 +278,7 @@ body::before {
 /* ---------- Main Workspace ---------- */
 
 .chat-interface {
-    background:
-        radial-gradient(
-            circle at 50% -10%,
-            rgba(233,162,59,0.035),
-            transparent 32%
-        ),
-        var(--bg-dark);
+    background: transparent;
 }
 
 .chat-container {
@@ -394,12 +388,7 @@ body::before {
         clamp(24px, 5vw, 72px)
         24px;
 
-    background:
-        linear-gradient(
-            to bottom,
-            transparent,
-            var(--bg-dark) 38%
-        );
+    background: transparent;
 }
 
 .input-area > * {
@@ -647,9 +636,7 @@ body::before {
 
 /* Keep the attached page composition exactly: no added hero/header shell. */
 .chat-interface {
-    background:
-        radial-gradient(circle at 50% -12%, rgba(233,162,59,0.035), transparent 32%),
-        var(--bg-dark);
+    background: transparent;
 }
 
 /* Assistant stays editorial/plain; only the user's own turn is bubbled. */
@@ -865,6 +852,126 @@ body::before {
     margin: 0;
     line-height: 1;
     letter-spacing: -0.015em;
+}
+
+/* Sidebar actions share one alignment in both expanded and icon-rail modes. */
+.sidebar-action.whatsapp-sidebar-btn {
+    width: 100%;
+    min-width: 0;
+    height: 42px;
+    min-height: 42px;
+    margin: 0 0 4px;
+    padding: 0 11px;
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 11px;
+    border: 1px solid transparent !important;
+    border-radius: 10px;
+    background: transparent !important;
+    box-shadow: none !important;
+    color: var(--text-muted);
+    font-family: var(--font-main);
+    font-size: 0.84rem;
+    font-weight: 550;
+    text-align: left;
+}
+
+.whatsapp-sidebar-btn[hidden] {
+    display: none;
+}
+
+.sidebar-action.whatsapp-sidebar-btn:hover {
+    border-color: var(--border-color) !important;
+    background: var(--history-hover-bg) !important;
+    color: var(--text-light);
+}
+
+.sidebar-action:focus-visible,
+.sidebar-toggle:focus-visible,
+.sidebar-reopen-btn:focus-visible {
+    outline: 2px solid var(--accent-orange);
+    outline-offset: 2px;
+}
+
+.sidebar-action-icon {
+    width: 20px;
+    height: 20px;
+    flex: 0 0 20px;
+    display: grid;
+    place-items: center;
+}
+
+.sidebar-action-icon svg {
+    width: 20px;
+    height: 20px;
+    display: block;
+}
+
+.whatsapp-action .sidebar-action-icon {
+    color: #25d366;
+}
+
+.theme-toggle-btn .sidebar-action-icon {
+    color: var(--accent-orange);
+}
+
+.theme-icon-moon,
+[data-theme="light"] .theme-icon-sun {
+    display: none !important;
+}
+
+[data-theme="light"] .theme-icon-moon {
+    display: block !important;
+}
+
+.sidebar-footer .theme-toggle-btn {
+    margin-bottom: 8px;
+}
+
+.sidebar.collapsed .sidebar-top {
+    padding: 0;
+    margin-bottom: 14px;
+}
+
+.sidebar.collapsed .sidebar-brand {
+    width: 100%;
+    justify-content: center;
+}
+
+.sidebar-expand-icon {
+    display: none;
+}
+
+.sidebar.collapsed .reopen-logo i {
+    display: none;
+}
+
+.sidebar.collapsed .sidebar-expand-icon {
+    display: block;
+    width: 22px;
+    height: 22px;
+}
+
+.sidebar.collapsed .sidebar-action.whatsapp-sidebar-btn,
+.sidebar.collapsed .new-chat-btn {
+    width: 44px;
+    height: 44px;
+    min-height: 44px;
+    margin-left: auto;
+    margin-right: auto;
+    padding: 0;
+    justify-content: center;
+    gap: 0;
+    border-radius: 12px;
+}
+
+.sidebar.collapsed .sidebar-action.whatsapp-sidebar-btn {
+    margin-bottom: 4px;
+}
+
+.sidebar.collapsed .sidebar-footer .theme-toggle-btn {
+    margin-bottom: 8px;
 }
 
 .history-item {

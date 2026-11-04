@@ -110,31 +110,35 @@
 
     if (toggleBtn) {
         const COLLAPSE_KEY = 'fiqhbot_sidebar_collapsed';
-        const panelCloseSvg = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 3v18"/><path d="m14 9-3 3 3 3"/></svg>';
-        const panelOpenSvg = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 3v18"/><path d="m11 9 3 3-3 3"/></svg>';
+        const compactViewport = window.matchMedia('(max-width: 768px)');
+        let preferredCollapsed = localStorage.getItem(COLLAPSE_KEY) === 'true';
 
-        function setToggleIcon(collapsed) {
-            toggleBtn.innerHTML = collapsed ? panelOpenSvg : panelCloseSvg;
+        function syncSidebar() {
+            const collapsed = preferredCollapsed && !compactViewport.matches;
+            sidebar.classList.toggle('collapsed', collapsed);
             toggleBtn.title = collapsed ? 'Expand sidebar' : 'Collapse sidebar';
+            toggleBtn.setAttribute('aria-label', toggleBtn.title);
+            toggleBtn.setAttribute('aria-expanded', String(!collapsed));
+            if (reopenBtn) {
+                reopenBtn.tabIndex = collapsed ? 0 : -1;
+                reopenBtn.setAttribute('aria-hidden', String(!collapsed));
+            }
         }
 
         function expandSidebar() {
-            sidebar.classList.remove('collapsed');
+            preferredCollapsed = false;
             localStorage.setItem(COLLAPSE_KEY, 'false');
-            setToggleIcon(false);
+            syncSidebar();
         }
 
         function collapseSidebar() {
-            sidebar.classList.add('collapsed');
+            preferredCollapsed = true;
             localStorage.setItem(COLLAPSE_KEY, 'true');
-            setToggleIcon(true);
+            syncSidebar();
         }
 
-        // Restore collapsed state
-        if (localStorage.getItem(COLLAPSE_KEY) === 'true') {
-            sidebar.classList.add('collapsed');
-            setToggleIcon(true);
-        }
+        syncSidebar();
+        compactViewport.addEventListener('change', syncSidebar);
 
         toggleBtn.addEventListener('click', () => {
             if (sidebar.classList.contains('collapsed')) {

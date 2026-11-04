@@ -7,7 +7,7 @@ An applied AI, multilingual Islamic guidance assistant engineered around a hybri
 ## 🌟 Overview
 
 * **Hybrid RAG Retrieval**: Combines keyword-level precision (BM25) with semantic embeddings (MiniLM) to retrieve authentic sources with high precision.
-* **School of Thought (Madhab) Specificity**: Answers grounded according to specific schools of jurisprudence (Hanafi, Shafi'i, Maliki, Hanbali) or comparative consensus.
+* **School of Thought (Madhab) Specificity**: Answers grounded according to the three schools currently present in the dataset (Hanafi, Shafi'i, Maliki) or general guidance.
 * **Citation-Only Synthesis**: Strict prompt grounding with confidence scores and source attribution.
 * **Multi-Channel**: Web client and Meta Cloud API WhatsApp webhook integration.
 
@@ -28,7 +28,7 @@ FIQHBOT - Islamic Chatbot/
 └── frontend/
     ├── index.html          # Web chat user interface
     ├── modern.css          # Responsive design styling
-    ├── script.js           # Chat client state & streaming
+    ├── script.js           # Chat client state and message rendering
     └── config.js           # API connection configuration
 ```
 
@@ -36,33 +36,50 @@ FIQHBOT - Islamic Chatbot/
 
 ## 🚀 Quick Start
 
-### 1. Backend Setup
+On Windows, double-click `start_fiqhbot.cmd` in this folder. It starts the local
+backend, waits for the knowledge base to load, and opens the interface in your
+browser. Keep the command window open while using FIQHBOT. The launcher chooses
+an available local port, so an old server on port 5000 cannot intercept requests.
+Later starts reuse cached embeddings and are faster.
+
+On first use, the launcher creates `backend/venv` and installs dependencies if
+needed. Before starting, copy `backend/.env.example` to `backend/.env` and put
+your own `GEMINI_API_KEY` there. Python 3.11 and an internet connection are
+required. The `.env` file stays on this computer and is ignored by Git.
+
+For local use, always open the page launched by `start_fiqhbot.cmd` rather than
+double-clicking `frontend/index.html`.
+
+The WhatsApp sidebar shortcut is shown only if `WA_PUBLIC_NUMBER` is configured
+in `backend/.env`; a placeholder number is never shown.
+
+The fiqh dataset includes topics with pending or unspecified scholar review.
+Treat generated guidance as informational and verify important rulings with a
+qualified scholar.
+
+### Manual setup (optional)
 
 ```bash
 cd backend
 
-# Create & activate virtual environment
+# Create a virtual environment
 python -m venv venv
-.\venv\Scripts\activate   # Linux/macOS: source venv/bin/activate
 
 # Install dependencies
-pip install -r requirements.txt
+venv\Scripts\python.exe -m pip install -r requirements.txt
 
 # Configure environment variables
-cp .env.example .env
+copy .env.example .env
 # Edit .env and supply your GEMINI_API_KEY
 ```
 
-### 2. Run Backend
+### Manual start
 
 ```bash
-python app.py
+venv\Scripts\python.exe app.py
 ```
-Backend starts on `http://localhost:5000`. Test health status at `http://localhost:5000/health`.
-
-### 3. Run Frontend
-
-Open `frontend/index.html` in your browser or serve via any static HTTP server.
+Open `http://127.0.0.1:5000/` in your browser. Test health status at
+`http://127.0.0.1:5000/health`.
 
 ---
 
