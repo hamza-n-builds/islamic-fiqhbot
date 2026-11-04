@@ -8,3 +8,8 @@ F00-06,F00,Verify actual local model warm-up and HTTP readiness,yes,replica/evid
 F00-07,F00,Prepare local NLTK resources and verify before ready,yes,backend/tests/test_local_startup.py and real smoke report
 F01-01,F01,Strict source-backed three-school responses,pending,Separate future change
 F01-02,F01,Mobile-first answer accordions,pending,Separate future change
+F01-03,F01,Reject references outside the actual supplied context,yes,backend/tests/test_citation_integrity.py
+F01-04,F01,No generation without sources and no refusal-to-general bypass,yes,backend/tests/test_citation_integrity.py
+F01-05,F01,Signed exact-answer and source-content provenance for follow-ups,yes,backend/tests/test_citation_guard.py and backend/tests/test_chat_receipts.cjs
+F01-06,F01,Resolve all mapped source records with prompt-language text,partial,replica/evidence/source-record-audit.json
+F01-07,F01,Scholarly approval and claim-to-source support,pending,Qualified review and separate semantic validation required

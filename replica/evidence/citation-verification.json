@@ -1,0 +1,68 @@
+{
+  "date": "2026-11-04",
+  "baseline_commit": "f520ba6",
+  "scope": "Citation context membership, fail-closed responses, signed translation provenance; no semantic/scholarly certification",
+  "before_fix_observation": {
+    "regressions_run": 7,
+    "failures": 6,
+    "valid_path_passed": 1
+  },
+  "python_regressions": {
+    "tests": 74,
+    "failures": 0,
+    "errors": 0
+  },
+  "frontend_vm_tests": {
+    "tests": 4,
+    "failures": 0,
+    "actual_browser_rendering": false
+  },
+  "syntax": {
+    "python_files": 8,
+    "frontend_script": "passed"
+  },
+  "real_local_http_smoke": {
+    "checks": [
+      "Actual datasets/model warm-up and /health readiness",
+      "HTML and four frontend assets served byte-for-byte",
+      "Same-origin dynamic config with blank browser API key",
+      "Invalid question rejected before generation",
+      "Real API rejects unverified history without an external provider call",
+      "Second launch reuses the ready instance without a browser"
+    ],
+    "external_network": "blocked in server processes",
+    "provider_generation_tested": false,
+    "browser_rendering_tested": false,
+    "startup_seconds": 12.25,
+    "status": "passed"
+  },
+  "corpus_audit": {
+    "exit_code": 1,
+    "reference_resolution": "incomplete",
+    "issue_counts": {
+      "missing_quran": 0,
+      "missing_hadith": 2,
+      "referenced_quran_without_english": 0,
+      "referenced_hadith_without_english": 1
+    },
+    "scholar_review_statuses": {
+      "pending": 49,
+      "unspecified": 28
+    }
+  },
+  "limits": [
+    "No live Gemini generation or evaluation",
+    "No claim-to-source entailment or scholarly validation",
+    "Citation-shaped/unbracketed-reference checks are not an exhaustive natural-language fact checker",
+    "Missing/empty corpus mappings remain unresolved and are excluded at runtime",
+    "Existing confidence heuristics need a separate review",
+    "No push or deployment"
+  ],
+  "commands": [
+    "venv\\Scripts\\python.exe -B -m unittest discover -s tests -v",
+    "node --test tests/test_chat_receipts.cjs",
+    "node --check ../frontend/script.js",
+    "venv\\Scripts\\python.exe -B tests/smoke_local_startup.py",
+    "venv\\Scripts\\python.exe -B tests/audit_source_records.py"
+  ]
+}

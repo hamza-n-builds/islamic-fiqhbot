@@ -618,6 +618,7 @@ document.addEventListener('DOMContentLoaded', () => {
         // "explain in urdu" can re-express it instead of starting a new topic.
         const lastBot = [...chat.messages].reverse().find(m => m.sender === 'bot');
         const prevAnswer = lastBot ? lastBot.text : '';
+        const prevReceipt = lastBot?.meta?.answer_receipt || '';
 
         chat.messages.push({ sender: 'user', text: text });
 
@@ -639,7 +640,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
 
         try {
-            const result = await askBackend(text, chat.madhab || 'General', prevAnswer);
+            const result = await askBackend(text, chat.madhab || 'General', prevAnswer, prevReceipt);
             loadingDiv.remove();
 
             if (!result || result.ok === false) {
@@ -656,6 +657,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 confidence_reason: result.confidence_reason,
                 consensus: result.consensus,
                 sources: result.sources,
+                answer_receipt: result.answer_receipt,
                 out_of_scope: result.out_of_scope
             };
 
@@ -813,6 +815,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const label = typeof meta.confidence_label === 'string' ? meta.confidence_label : '';
         const lvl = label.toLowerCase().replace(/[^a-z0-9]+/g, '-');
         const hasConsensus = meta.consensus === true || meta.consensus === false;
+        if (meta.confidence_percent == null && !hasConsensus) return '';
 
         let html = '<div class="msg-meta">';
 
@@ -854,7 +857,7 @@ document.addEventListener('DOMContentLoaded', () => {
         // Show the Sources button only for real answers that actually carry
         // citations. Referral / greeting / capability / low-confidence replies
         // ("ask a scholar", IslamQA link, etc.) have no sources, so hide it.
-        const noSourceModes = ['greeting', 'capability', 'low_confidence', 'reexpress'];
+        const noSourceModes = ['greeting', 'capability', 'low_confidence'];
         const s = (meta && meta.sources) || {};
         const realSourceCount =
             (Array.isArray(s.fiqh) ? s.fiqh.filter(Boolean).length : 0) +
@@ -956,14 +959,15 @@ document.addEventListener('DOMContentLoaded', () => {
     // BACKEND CALL  (RAG pipeline + grounded Gemini, via Flask /ask)
     // ════════════════════════════════════════════════════════════
 
-    async function askBackend(question, madhab, prevAnswer) {
+    async function askBackend(question, madhab, prevAnswer, prevReceipt) {
         const response = await fetch(`${BACKEND_URL}/ask`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
                 question: question,
                 madhab: madhab || 'General',
-                prev_answer: prevAnswer || ''
+                prev_answer: prevAnswer || '',
+                prev_answer_receipt: prevReceipt || ''
             })
         });
         if (!response.ok) {

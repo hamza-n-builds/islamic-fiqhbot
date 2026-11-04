@@ -26,7 +26,35 @@ in `start_local.py`.
 `--check` does not repair/install anything or import application configuration.
 Runtime readiness is distinct from model readiness and answer correctness.
 
-Pending work includes source/citation validation, scholarly review, response
+Pending work includes semantic source validation, scholarly review, response
 contracts, mobile UI, chat reliability, provider budgets/timeouts, dependency
 pinning and production serving. This startup change does not certify production
 readiness or authorize publication.
+
+## Citation integrity batch, 2026-11-04
+
+Flask, Gemini, the current UI and retrieval stack are retained. Candidates are
+re-resolved against local records before entering prompts; textless/missing
+records are excluded. `citation_guard.py` enforces membership in the actual
+generation context. Invalid, missing or malformed citations withhold the entire
+reply. No-source requests do not call the provider, and grounded refusals cannot
+escape into general-knowledge generation. The old generation shortcut now uses
+the same guarded pipeline.
+
+`POST /ask` accepts optional `prev_answer_receipt` text up to 8192 characters.
+Accepted generated responses return `answer_receipt`; the frontend stores it in
+message metadata. HMAC-SHA256 proof binds exact response text, cited identities,
+cited record contents and a seven-day expiry. Rephrasing checks the proof and
+current source fingerprint before calling Gemini, then requires the identical
+set of citations. It returns the cited source metadata as well.
+
+The optional private `FIQHBOT_RESPONSE_SECRET` must be at least 32 bytes and stable
+across workers/restarts when persistent history is required. Otherwise a fresh
+process-local key safely rejects old proofs. A receipt is provenance, not user
+authentication or approval of religious content.
+
+Verification: 74 Python tests, four actual frontend-function VM checks, six real
+startup/HTTP checks. No live Gemini generation or browser rendering evaluation.
+The source-record audit reports two unresolved hadith mappings and one mapped
+hadith without English text. All 77 topics have pending/unspecified scholarly
+review; semantic support, reviewed wording and accurate confidence remain open.

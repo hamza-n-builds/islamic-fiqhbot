@@ -1,6 +1,6 @@
 # Islamic FiqhBot 🕌
 
-An applied AI, multilingual Islamic guidance assistant engineered around a hybrid **BM25 + MiniLM** retrieval-augmented generation (RAG) pipeline with **Gemini synthesis**, local authentic primary sources (Qur'an, Hadith, curated fiqh rulings across schools of thought), and WhatsApp integration.
+An applied AI, multilingual Islamic guidance assistant engineered around a hybrid **BM25 + MiniLM** retrieval-augmented generation (RAG) pipeline with **Gemini synthesis**, locally stored Qur'an/hadith records, curated fiqh rulings across schools of thought, and WhatsApp integration. Source resolution and scholarly review are separate requirements.
 
 ---
 
@@ -8,7 +8,7 @@ An applied AI, multilingual Islamic guidance assistant engineered around a hybri
 
 * **Hybrid RAG Retrieval**: Combines keyword-level precision (BM25) with semantic embeddings (MiniLM) to retrieve authentic sources with high precision.
 * **School of Thought (Madhab) Specificity**: Answers grounded according to the three schools currently present in the dataset (Hanafi, Shafi'i, Maliki) or general guidance.
-* **Citation-Only Synthesis**: Strict prompt grounding with confidence scores and source attribution.
+* **Citation Membership Validation**: Context-constrained prompts and server checks reject generated references outside the supplied source records. This does not establish that a claim follows from a source or certify a ruling.
 * **Multi-Channel**: Web client and Meta Cloud API WhatsApp webhook integration.
 
 ---
@@ -96,6 +96,37 @@ in `backend/.env`; a placeholder number is never shown.
 The fiqh dataset includes topics with pending or unspecified scholar review.
 Treat generated guidance as informational and verify important rulings with a
 qualified scholar.
+
+### Citation and follow-up safeguards
+
+The server re-resolves candidate records against the local corpus and excludes
+missing records or records without the English source text used by the prompts.
+An unsupported/malformed citation or an answer without any supplied reference
+withholds the entire generated reply. Its text is not retained after merely
+removing a bad tag. Without source context, no generation request is made; a
+grounded refusal does not trigger an ungrounded second attempt. The Sources panel
+contains only records actually cited in the accepted response.
+
+Accepted responses include an opaque `answer_receipt`. The frontend saves it and
+sends `prev_answer_receipt` with translation/rephrasing follow-ups. The proof binds
+the exact prior answer, citation identities and cited source contents. Modified,
+expired or missing proof, or changed source text, requires asking the original
+question again. Valid translations retain all original citation identities.
+
+Receipts expire after seven days. Optionally set a private
+`FIQHBOT_RESPONSE_SECRET` of at least 32 bytes in backend configuration to keep
+proofs valid across restarts/workers. With it blank, a random process-local secret
+is used, so earlier answers cannot be rephrased after a restart. Never put this
+secret in frontend config. Existing saved chats without proof remain readable;
+their original question must be asked again before a translation follow-up.
+
+These are reference-membership and provenance checks, not a hallucination-free
+guarantee. Claim-to-source support, retrieval relevance, translation fidelity,
+reviewed wording and scholarly approval remain separate release requirements.
+See [`replica/evidence/source-record-audit.json`](replica/evidence/source-record-audit.json)
+for unresolved dataset mappings/review status and
+[`replica/evidence/citation-verification.json`](replica/evidence/citation-verification.json)
+for the exact tests and limitations.
 
 ### Manual setup (optional)
 

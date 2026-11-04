@@ -190,17 +190,19 @@ def hadith_text():
 @app.post("/ask")
 def ask():
     data = _json_fields({"question": 4000, "text": 4000, "madhab": 32,
-                         "madhhab": 32, "prev_answer": 20000})
+                         "madhhab": 32, "prev_answer": 20000, "prev_answer_receipt": 8192})
     question = (data.get("question") or data.get("text") or "").strip()
     madhhab  = (data.get("madhab") or data.get("madhhab") or "General").strip()
     prev_answer = (data.get("prev_answer") or "").strip()
+    prev_answer_receipt = (data.get("prev_answer_receipt") or "").strip()
     if madhhab not in VALID_MADHHABS:
         madhhab = "General"
     if not question:
         return jsonify({"ok": False, "error": "Question is required."}), 400
     try:
         result = rag_engine.answer_question(
-            question, None if madhhab == "General" else madhhab, prev_answer=prev_answer or None)
+            question, None if madhhab == "General" else madhhab, prev_answer=prev_answer or None,
+            prev_answer_receipt=prev_answer_receipt or None)
         db.log_query_async(question, madhhab, result, channel="web")
         return jsonify(result)
     except httpx.RequestError:

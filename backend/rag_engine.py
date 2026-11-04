@@ -11,6 +11,9 @@ the WhatsApp webhook, so the two channels always behave identically.
 import os, re, time, json, string, hashlib, tempfile
 import yaml
 import numpy as np
+from citation_guard import CitationError, ResponseReceipts, validate_citations
+
+_response_receipts = ResponseReceipts()
 
 # ---------------------------------------------------------------- config
 HERE        = os.path.dirname(os.path.abspath(__file__))
@@ -76,8 +79,8 @@ GENERAL_HADITH_MIN = float(os.environ.get("GENERAL_HADITH_MIN", "0.45"))
 GENERAL_IF_BELOW   = float(os.environ.get("GENERAL_IF_BELOW", "0.65"))
 # In general-knowledge answers, a matched topic's VERIFIED references become
 # citation candidates once its score clears this gate. Lower = more general
-# answers can surface a real citation (the uncited-tag stripper still prevents
-# any fabricated reference, so lowering this never invents a source).
+# answers can offer a locally resolvable citation candidate. Membership validation
+# below does not establish relevance or scholarly correctness.
 GENERAL_CITE_MIN   = float(os.environ.get("GENERAL_CITE_MIN", "0.35"))
 # Below this confidence %, decline and refer to a trusted scholarly resource
 # rather than generating a possibly-wrong ruling (configurable via env).
@@ -512,6 +515,8 @@ STRICT RULES YOU MUST FOLLOW:
 6. Do NOT issue personal fatwas or rulings beyond what the sources state.
 7. If scholars disagree (ikhtilaf), clearly state the different positions with their citations.
 8. Maintain a respectful, neutral, scholarly tone.
+9. Use only the exact citation tags supplied in the context. Do not add URLs,
+   unbracketed reference numbers, or other bracketed labels. Keep the reply under 20,000 characters.
 {madhhab_instruction}
 
 --- KNOWLEDGE BASE CONTEXT ---
@@ -557,38 +562,104 @@ def _is_refusal(text):
 
 
 def general_generate(query, madhhab=None):
-    """Answer a general (non-curated-fiqh) Islamic question from well-established knowledge."""
-    m = f" The user follows the {madhhab} school of thought." if (madhhab and madhhab != "General") else ""
-    prompt = f"""You are a knowledgeable, careful Islamic assistant answering a general question.
-Answer using well-established, mainstream Islamic knowledge, clearly and concisely.{m}
-
-Guidelines:
-- For widely-agreed basics that every school accepts (e.g. the five daily prayers, the pillars of Islam, that fasting is in Ramadan), answer directly and confidently — these are not matters of dispute.
-- If the matter is a genuine point of scholarly disagreement or needs a personalised ruling, give the general view and add that a qualified scholar should be consulted for specifics.
-- Do NOT fabricate Quran or Hadith reference numbers. You may mention a reference only if you are certain it is correct; otherwise describe it without inventing a number.
-- If the question is NOT about Islam, politely reply that you can only help with Islamic questions.
-
-Question: {query}
-Answer:"""
-    return gemini_generate(prompt)
+    """Compatibility wrapper; the old ungrounded generation shortcut is closed."""
+    return answer_question(query, madhhab)["answer"]
 
 
-def _strip_uncited_tags(answer, allowed):
-    """Remove any [Quran ..]/[Source #..] tag the model wrote that we did NOT provide
-    (guards against the model inventing a citation that isn't in our datasets)."""
-    if not answer:
-        return answer
-    def repl(m):
-        tag = m.group(0)
-        # keep only real citation-shaped tags that are in the allowed set
-        is_cite = tag.lower().startswith("[quran") or "#" in tag
-        if not is_cite:
-            return tag                      # not a citation (leave alone)
-        return tag if tag in allowed else ""
-    out = re.sub(r"\[[^\]]+\]", repl, answer)
-    out = re.sub(r"[ \t]{2,}", " ", out)
-    out = re.sub(r"\s+([.,;:!?])", r"\1", out)
-    return out.strip()
+def _validated_context(fiqh, hadith, quran, madhhab=None):
+    """Resolve candidate IDs against local records; require text actually sent to the model.
+
+    Record presence is not a scholarly approval or proof of relevance.
+    """
+    clean_fiqh, clean_hadith, clean_quran = [], [], []
+    def has_text(value):
+        return isinstance(value, str) and bool(value.strip())
+    seen = set()
+    for candidate in fiqh:
+        record = _fiqh_entry_by_id(candidate.get("topic_id"), madhhab, candidate.get("score", 0.0))
+        if (record and record["topic_id"] not in seen and has_text(record.get("topic_name"))
+                and any(isinstance(r, dict) and (has_text(r.get("ruling")) or has_text(r.get("explanation")))
+                        for r in record.get("ruling", {}).values())):
+            seen.add(record["topic_id"])
+            clean_fiqh.append(record)
+    seen = set()
+    for candidate in quran:
+        identity = (candidate.get("chapter"), candidate.get("ayah"))
+        record = (quran_lookup or {}).get(identity)
+        if record and identity not in seen and has_text(record.get("english")):
+            seen.add(identity)
+            clean_quran.append({**record, "type": "quran", "score": candidate.get("score", 0.0)})
+    seen = set()
+    for candidate in hadith:
+        identity = (normalize_hadith_source(candidate.get("source", "")), str(candidate.get("hadith_no", "")))
+        record = (hadith_lookup or {}).get(identity)
+        if record and identity not in seen and has_text(record.get("text_en")):
+            seen.add(identity)
+            clean_hadith.append({**record, "type": "hadith", "score": candidate.get("score", 0.0)})
+    return clean_fiqh, clean_hadith, clean_quran
+
+
+def _context_tags(fiqh, hadith, quran):
+    return ({f'[{r["topic_name"]}]' for r in fiqh}
+            | {f'[{h["source"]} #{h["hadith_no"]}]' for h in hadith}
+            | {f'[Quran {v["chapter"]}:{v["ayah"]}]' for v in quran})
+
+
+def _cited_sources(tags, fiqh, hadith, quran):
+    return {
+        "fiqh": [{"topic_id": r["topic_id"], "topic_name": r["topic_name"],
+                  "consensus": r["consensus"], "scholar_review": r.get("scholar_review"),
+                  "score": round(r["score"], 3)}
+                 for r in fiqh if f'[{r["topic_name"]}]' in tags],
+        "quran": [{"ref": f'{v["chapter"]}:{v["ayah"]}', "surah": v.get("surah_name_en", ""),
+                   "arabic": v.get("arabic", ""), "english": v.get("english", ""), "urdu": v.get("urdu", "")}
+                  for v in quran if f'[Quran {v["chapter"]}:{v["ayah"]}]' in tags],
+        "hadith": [{"ref": f'{h["source"]} #{h["hadith_no"]}', "chapter": h.get("chapter", ""),
+                    "text_ar": h.get("text_ar", ""), "text_en": h.get("text_en", "")}
+                   for h in hadith if f'[{h["source"]} #{h["hadith_no"]}]' in tags],
+    }
+
+
+def _source_validation_failure(query, reason):
+    language = _lang_key(query)
+    if "Roman Urdu" in (_requested_target_language(query) or ""):
+        language = "roman"
+    if reason == "unverified_history":
+        messages = {
+            "en": "I couldn't verify the earlier answer. Please repeat your original question so I can check its sources again.",
+            "roman": "Pehle jawab ki tasdeeq nahi ho saki. Baraye meharbani asal sawal dobara poochhein taake main us ke sources dobara check kar sakoon.",
+        }
+    else:
+        messages = {
+            "en": "I couldn't validate a source-backed answer to this question, so I won't provide a ruling. Please clarify your question or consult a qualified scholar.",
+            "roman": "Is sawal ke liye sources ke saath jawab ki tasdeeq nahi ho saki, is liye main hukm nahi doon ga. Baraye meharbani sawal wazeh karein ya kisi mustanad aalim se rujoo karein.",
+        }
+    return {"ok": True, "mode": "low_confidence", "out_of_scope": False,
+            "answer": messages.get(language) or _msg("referral", query, url=ISLAMQA_URL),
+            "confidence": None, "confidence_percent": None, "confidence_label": None,
+            "consensus": None, "sources": {"fiqh": [], "quran": [], "hadith": []},
+            "citation_validation": {"status": "rejected", "reason": reason}}
+
+
+def _context_fingerprint(tags, fiqh, hadith, quran):
+    material = []
+    groups = ((fiqh, lambda r: f'[{r["topic_name"]}]'),
+              (hadith, lambda h: f'[{h["source"]} #{h["hadith_no"]}]'),
+              (quran, lambda v: f'[Quran {v["chapter"]}:{v["ayah"]}]'))
+    for records, tag_for in groups:
+        for record in records:
+            if tag_for(record) in tags:
+                material.append({key: value for key, value in record.items() if key not in {"score", "type"}})
+    encoded = json.dumps(sorted(material, key=lambda record: json.dumps(record, sort_keys=True)),
+                         sort_keys=True, ensure_ascii=True).encode("utf-8")
+    return hashlib.sha256(encoded).hexdigest()
+
+
+def _with_receipt(result, tags, fiqh, hadith, quran):
+    result["answer_receipt"] = _response_receipts.issue(
+        result["answer"], tags, _context_fingerprint(tags, fiqh, hadith, quran))
+    result["citation_validation"] = {"status": "passed", "scope": "provided_reference_membership"}
+    return result
 
 
 def build_general_prompt(query, madhhab, quran, hadith, target_language=None):
@@ -620,12 +691,11 @@ CITATION RULES (critical):
 - You MAY cite ONLY the references listed in the CONTEXT below, using their exact tags, e.g. [Quran 4:103] or [Sahih Bukhari #8].
 - Where a listed reference supports part of your answer (for example, a verse commanding the establishment of prayer), DO cite it inline.
 - If a listed reference is not relevant, simply don't cite it. NEVER invent or cite anything not in the CONTEXT.
-- If the CONTEXT lists NO references, do NOT cite any Quran verse or Hadith number at all. Speak in general terms instead (e.g. "the Sunnah indicates...", "scholars hold...") WITHOUT any bracketed citation or specific number. Never write a Quran or Hadith number from memory.
-- It is fine if the exact detail (e.g. an exact number) is established by the Sunnah rather than a verse — still answer it confidently and cite whatever listed reference is genuinely relevant.
-- For widely-agreed basics (the five daily prayers, the pillars of Islam, etc.), answer directly and confidently — these are not disputed.
-- When the question asks "how many" of something, NAME each item, not just the count (e.g. list the five daily prayers: Fajr, Dhuhr, Asr, Maghrib, Isha; or name the pillars).
-- Treat questions about whether something is permissible (halal/haram), worship, transactions, money, ethics, food, family, or Muslim daily life as Islamic questions and ANSWER them — applying general Islamic principles (e.g. avoiding gambling/maysir, interest/riba, or harm) where relevant.
-- ONLY if the question is clearly unrelated to Islam or Muslim life (e.g. secular trivia, sports scores, product reviews) should you reply that you can only help with Islamic questions.
+- Answer ONLY from the actual text in CONTEXT. Do not add facts, counts, rulings or principles from memory.
+- A source's existence does not mean it answers the question. If it does not support the requested answer, respond: "This requires consultation with a qualified scholar."
+- Cite each substantive point with the exact supplied bracketed tag. Do not invent URLs, topic tags or unbracketed reference numbers.
+- Do not extrapolate a new ruling from a broadly related passage. If CONTEXT is missing or insufficient, decline instead.
+- Keep the answer under 20,000 characters.
 
 --- CONTEXT (the only references you may cite) ---
 {context}
@@ -636,7 +706,7 @@ Answer:{lang_reminder}"""
 
 
 def _curated_candidates(topic_id):
-    """Verified Quran/Hadith references from a curated topic, as citation candidates."""
+    """Locally resolvable references mapped to a curated topic, as candidates."""
     entry = _fiqh_entry_by_id(topic_id)
     if not entry:
         return [], []
@@ -656,8 +726,8 @@ def _curated_candidates(topic_id):
             hcands.append({"type": "hadith", "source": h["source"], "hadith_no": h["hadith_no"],
                            "chapter": h.get("chapter", ""), "text_en": h.get("text_en", ""),
                            "text_ar": h.get("text_ar", ""), "score": 1.0})
-        # Non-Bukhari/Muslim references (not in the corpus) are intentionally
-        # skipped — we only cite hadith we can show from Sahih Bukhari/Muslim.
+        # Missing references are skipped; present records still need text and
+        # relevance checks. The lookup also includes the supplementary corpus.
     return qcands, hcands
 
 
@@ -712,64 +782,37 @@ def _is_sensitive_question(query):
 
 
 def _general_result(query, madhhab=None, topic_id=None, topic_score=0.0):
-    """General-knowledge answer.
-
-    CITATION INTEGRITY: on this path we do NOT let the model cite blind
-    keyword-search hits — a hadith that merely shares words with the question
-    (e.g. an oaths hadith surfacing for a prayer question) is not a valid proof
-    and produced wrong citations like "Sahih Muslim #1671". So the ONLY citable
-    references here are the *curated, verified* refs attached to a matched topic
-    in the dataset. If no topic is close enough, the answer cites nothing and
-    speaks in general terms instead of showing an unverifiable number.
-    """
+    """Answer only from a matched topic's locally resolvable source records."""
     quran_cands, hadith_cands = [], []
 
-    # Only offer a topic's VERIFIED references (never raw search candidates).
+    # A mapped reference still needs relevance and scholarly review separately.
     if topic_id and topic_score >= GENERAL_CITE_MIN:
         quran_cands, hadith_cands = _curated_candidates(topic_id)
+
+    _, hadith_cands, quran_cands = _validated_context([], hadith_cands, quran_cands)
+    allowed = _context_tags([], hadith_cands, quran_cands)
+    if not allowed:
+        return _source_validation_failure(query, "missing_source_context")
 
     prompt = build_general_prompt(query, madhhab, quran_cands, hadith_cands,
                                   target_language=_detect_language(query))
     answer = gemini_generate(prompt)
 
-    # Only the references we actually provided are valid citations; strip the rest.
-    allowed = set(f'[Quran {v["chapter"]}:{v["ayah"]}]' for v in quran_cands)
-    allowed |= set(f'[{h["source"]} #{h["hadith_no"]}]' for h in hadith_cands)
-    answer = _strip_uncited_tags(answer, allowed)
-    low = answer.lower()
+    try:
+        answer, tags = validate_citations(answer, allowed)
+    except CitationError as error:
+        return _source_validation_failure(query, str(error))
 
-    non_islamic = ("only help with islamic" in low or "only answer islamic" in low) and len(answer) < 240
-
-    # Show ONLY references that survived as inline citations.
-    shown_quran  = [v for v in quran_cands if f'[quran {v["chapter"]}:{v["ayah"]}]' in low]
-    shown_hadith = [h for h in hadith_cands if f'[{h["source"]} #{h["hadith_no"]}]'.lower() in low]
-
-    # SAFETY: a permissibility/ruling question that ended up with NO verified
-    # reference means we'd only be extrapolating a novel ruling (e.g. "is a gold
-    # car haram?"). That is exactly what this project must not do — refer the
-    # user to a qualified scholar / IslamQA instead of inventing a ruling.
-    if (not non_islamic and _is_ruling_request(query)
-            and not shown_quran and not shown_hadith):
-        pct, label = confidence_to_percent(0.30)
-        return _low_confidence_result(query, madhhab, pct, label)
-
-    confidence = 0.30 if non_islamic else 0.62
+    confidence = 0.62
     pct, label = confidence_to_percent(confidence)
-    return {
+    return _with_receipt({
         "ok": True, "mode": "general", "general_knowledge": True,
-        "out_of_scope": non_islamic,
+        "out_of_scope": False,
         "answer": answer,
         "confidence": confidence, "confidence_percent": pct, "confidence_label": label,
-        "consensus": False,
-        "sources": {
-            "fiqh": [],
-            "quran":  [{"ref": f'{v["chapter"]}:{v["ayah"]}', "surah": v.get("surah_name_en", ""),
-                        "arabic": v.get("arabic", ""), "english": v.get("english", ""),
-                        "urdu": v.get("urdu", "")} for v in shown_quran],
-            "hadith": [{"ref": f'{h["source"]} #{h["hadith_no"]}', "chapter": h.get("chapter", ""),
-                        "text_ar": h.get("text_ar", ""), "text_en": h.get("text_en", "")} for h in shown_hadith],
-        },
-    }
+        "consensus": None,
+        "sources": _cited_sources(tags, [], hadith_cands, quran_cands),
+    }, tags, [], hadith_cands, quran_cands)
 
 
 def _lang_key(query):
@@ -1292,12 +1335,35 @@ def _requested_target_language(query):
     return None
 
 
-def _reexpress_result(prev_answer, instruction, madhhab=None):
+def _receipt_context(tags, madhhab=None):
+    """Re-resolve signed source identities; missing/empty records invalidate history."""
+    fiqh, hadith, quran = [], [], []
+    topic_ids = {f'[{topic["topic_name"]}]': topic["topic_id"] for topic in (fiqh_topics or [])}
+    for tag in tags:
+        if tag in topic_ids:
+            fiqh.append({"topic_id": topic_ids[tag], "score": 0.0})
+            continue
+        verse = re.fullmatch(r"\[Quran ([0-9]+):([0-9]+)\]", tag)
+        narration = re.fullmatch(r"\[(.+) #([^\[\]]+)\]", tag)
+        if verse:
+            quran.append({"chapter": int(verse[1]), "ayah": int(verse[2]), "score": 0.0})
+        elif narration:
+            hadith.append({"source": narration[1], "hadith_no": narration[2], "score": 0.0})
+    context = _validated_context(fiqh, hadith, quran, madhhab)
+    return context if _context_tags(*context) == set(tags) else None
+
+
+def _reexpress_result(prev_answer, instruction, madhhab=None, prev_answer_receipt=None):
     """
-    Re-express an EXISTING answer in a requested language (e.g. "explain in urdu"
-    as a follow-up). No retrieval, no classifier — we only translate/rephrase the
-    text we already produced, preserving any [citations] exactly as-is.
+    Re-express only the exact server-issued answer bound to its signed receipt.
+    A receipt proves provenance/citation identity, not semantic or scholarly accuracy.
     """
+    proof = _response_receipts.verify(prev_answer, prev_answer_receipt)
+    tags, fingerprint = proof if proof else ((), None)
+    context = _receipt_context(tags, madhhab) if tags else None
+    if context is None or _context_fingerprint(tags, *context) != fingerprint:
+        return _source_validation_failure(instruction, "unverified_history")
+    fiqh, hadith, quran = context
     target = _requested_target_language(instruction) or "the requested language"
     prompt = f"""Re-express the following Islamic answer in {target}.
 
@@ -1308,22 +1374,32 @@ RULES:
 - If the target is Roman Urdu, write Urdu using Latin letters.
 - Never use Hindi or Devanagari script.
 - Output only the re-expressed answer, nothing else.
+- Keep all supplied citation tags. Add no other citations, URLs or unbracketed reference numbers.
+- Use the supplied source text only. If you cannot preserve the supported meaning, decline.
+- Keep the output under 20,000 characters.
+
+SOURCE CONTEXT:
+{json.dumps({"fiqh": [{"topic_name": r["topic_name"], "ruling": r["ruling"]} for r in fiqh], "hadith": hadith, "quran": quran}, ensure_ascii=False)}
 
 ANSWER TO RE-EXPRESS:
 {prev_answer}
 """
     out = gemini_generate(prompt)
-    return {
+    try:
+        out, cited = validate_citations(out, tags, expected=tags)
+    except CitationError as error:
+        return _source_validation_failure(instruction, str(error))
+    return _with_receipt({
         "ok": True, "mode": "reexpress", "out_of_scope": False,
         "answer": out.strip(),
         # This is the same content as before, just re-expressed — no new scoring.
         "confidence": None, "confidence_percent": None, "confidence_label": None,
-        "consensus": False,
-        "sources": {"fiqh": [], "quran": [], "hadith": []},
-    }
+        "consensus": None,
+        "sources": _cited_sources(cited, fiqh, hadith, quran),
+    }, cited, fiqh, hadith, quran)
 
 
-def answer_question(query, madhhab=None, prev_answer=None):
+def answer_question(query, madhhab=None, prev_answer=None, prev_answer_receipt=None):
     """
     Full pipeline. Returns a JSON-serialisable dict:
       { ok, mode, answer, confidence, confidence_percent, confidence_label,
@@ -1370,7 +1446,7 @@ def answer_question(query, madhhab=None, prev_answer=None):
     # just acknowledge and wait for the actual question.
     if _is_meta_instruction(query):
         if prev_answer and prev_answer.strip():
-            return _reexpress_result(prev_answer, query, madhhab)
+            return _reexpress_result(prev_answer, query, madhhab, prev_answer_receipt)
         return {
             "ok": True, "mode": "greeting", "out_of_scope": False,
             "answer": _msg("ask_lang", query),
@@ -1464,6 +1540,11 @@ def answer_question(query, madhhab=None, prev_answer=None):
         # Opt-in only. Guessed (search) hadith are gated hard and never trusted by default.
         hadith = [h for h in retrieve_hadith(query, top_k=2) if h["score"] >= HADITH_MIN_SCORE]
 
+    fiqh, hadith, quran = _validated_context(fiqh, hadith, quran, madhhab)
+    allowed = _context_tags(fiqh, hadith, quran)
+    if not allowed:
+        return _source_validation_failure(query, "missing_source_context")
+
     topic_gap = (topic_matches[0][1] - topic_matches[1][1]) if len(topic_matches) > 1 else top_topic_score
     confidence = compute_confidence(fiqh, hadith, quran, topic_score=top_topic_score, topic_gap=topic_gap)
     pct, label = confidence_to_percent(confidence)
@@ -1479,38 +1560,25 @@ def answer_question(query, madhhab=None, prev_answer=None):
     prompt = build_rag_prompt(query, madhhab, fiqh, hadith, quran,
                               target_language=_detect_language(query))
     answer = gemini_generate(prompt)
-    answer = _collapse_topic_tags(answer)   # drop repeated fiqh-topic tags
-
-    # If the grounded path couldn't answer (model returned the scholar-referral
-    # line), fall back to a general-knowledge answer instead of showing a refusal.
+    # A grounded refusal must not trigger a less-constrained second generation.
     if _is_refusal(answer):
-        return _general_result(query, madhhab, top_topic_id, top_topic_score)
+        return _source_validation_failure(query, "insufficient_source_context")
+    try:
+        answer, tags = validate_citations(answer, allowed)
+    except CitationError as error:
+        return _source_validation_failure(query, str(error))
+    answer = _collapse_topic_tags(answer)
+    sources = _cited_sources(tags, fiqh, hadith, quran)
 
-    def slim_fiqh(r):
-        return {"topic_id": r["topic_id"], "topic_name": r["topic_name"],
-                "consensus": r["consensus"], "scholar_review": r.get("scholar_review"),
-                "score": round(r["score"], 3)}
-    def slim_quran(v):
-        return {"ref": f'{v["chapter"]}:{v["ayah"]}', "surah": v.get("surah_name_en", ""),
-                "arabic": v.get("arabic", ""), "english": v.get("english", ""),
-                "urdu": v.get("urdu", "")}
-    def slim_hadith(h):
-        return {"ref": f'{h["source"]} #{h["hadith_no"]}', "chapter": h.get("chapter", ""),
-                "text_ar": h.get("text_ar", ""), "text_en": h.get("text_en", "")}
-
-    return {
+    return _with_receipt({
         "ok": True, "mode": "fiqh", "out_of_scope": False,
         "answer": answer,
         "confidence": confidence, "confidence_percent": pct, "confidence_label": label,
         "confidence_reason": _confidence_reason(
             quran, hadith, top_topic_score, bool(fiqh[0].get("consensus")) if fiqh else False),
-        "consensus": bool(fiqh[0].get("consensus")) if fiqh else False,
-        "sources": {
-            "fiqh":   [slim_fiqh(r)  for r in fiqh],
-            "quran":  [slim_quran(v) for v in quran],
-            "hadith": [slim_hadith(h) for h in hadith],
-        },
-    }
+        "consensus": all(r["consensus"] for r in sources["fiqh"]) if sources["fiqh"] else None,
+        "sources": sources,
+    }, tags, fiqh, hadith, quran)
 
 
 if __name__ == "__main__":

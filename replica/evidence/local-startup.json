@@ -4,11 +4,12 @@
     "HTML and four frontend assets served byte-for-byte",
     "Same-origin dynamic config with blank browser API key",
     "Invalid question rejected before generation",
+    "Real API rejects unverified history without an external provider call",
     "Second launch reuses the ready instance without a browser"
   ],
   "external_network": "blocked in server processes",
   "provider_generation_tested": false,
   "browser_rendering_tested": false,
-  "startup_seconds": 11.62,
+  "startup_seconds": 12.25,
   "status": "passed"
 }

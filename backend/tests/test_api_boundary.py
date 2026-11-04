@@ -43,7 +43,8 @@ class ApiBoundaryTests(unittest.TestCase):
 
     def test_invalid_json_shapes_are_rejected_before_generation(self):
         for body in ([], [1], "question", 5, None, {"question": 5}, {"question": {}},
-                     {"question": "hello", "madhab": []}, {"question": "hello", "prev_answer": 7}):
+                     {"question": "hello", "madhab": []}, {"question": "hello", "prev_answer": 7},
+                     {"question": "hello", "prev_answer_receipt": []}):
             with self.subTest(body=body):
                 response = self.client.post("/ask", data=json.dumps(body), content_type="application/json")
                 self.assertEqual(response.status_code, 400)
@@ -52,7 +53,8 @@ class ApiBoundaryTests(unittest.TestCase):
 
     def test_empty_and_oversized_fields_do_not_reach_model(self):
         for body in ({}, {"question": "  "}, {"question": "a" * 4001},
-                     {"question": "hello", "prev_answer": "a" * 20001}):
+                     {"question": "hello", "prev_answer": "a" * 20001},
+                     {"question": "hello", "prev_answer_receipt": "a" * 8193}):
             with self.subTest(keys=list(body)):
                 self.assertEqual(self.client.post("/ask", json=body).status_code, 400)
         self.rag.answer_question.assert_not_called()
@@ -60,13 +62,19 @@ class ApiBoundaryTests(unittest.TestCase):
     def test_aliases_and_school_selection_still_work(self):
         response = self.client.post("/ask", json={"text": " A question ", "madhhab": "Hanafi"})
         self.assertEqual(response.status_code, 200)
-        self.rag.answer_question.assert_called_once_with("A question", "Hanafi", prev_answer=None)
+        self.rag.answer_question.assert_called_once_with("A question", "Hanafi", prev_answer=None, prev_answer_receipt=None)
         self.database.log_query_async.assert_called_once()
         self.assertEqual(response.headers["Cache-Control"], "no-store")
 
     def test_bad_school_falls_back_to_general(self):
         self.client.post("/ask", json={"question": "hello", "madhab": "unsupported"})
-        self.rag.answer_question.assert_called_once_with("hello", None, prev_answer=None)
+        self.rag.answer_question.assert_called_once_with("hello", None, prev_answer=None, prev_answer_receipt=None)
+
+    def test_translation_proof_is_forwarded_without_becoming_a_credential(self):
+        response = self.client.post("/ask", json={"question": "explain in roman urdu", "prev_answer": "earlier text", "prev_answer_receipt": "opaque-proof"})
+        self.assertEqual(response.status_code, 200)
+        self.rag.answer_question.assert_called_once_with("explain in roman urdu", None,
+                                                       prev_answer="earlier text", prev_answer_receipt="opaque-proof")
 
     def test_provider_errors_do_not_disclose_internal_values(self):
         self.rag.answer_question.side_effect = RuntimeError("private-provider-value")

@@ -11,6 +11,7 @@ import queue
 import re
 import subprocess
 import sys
+import tempfile
 import threading
 import time
 import urllib.error
@@ -20,7 +21,8 @@ BACKEND = Path(__file__).resolve().parents[1]
 PROJECT = BACKEND.parent
 EVIDENCE = PROJECT / "replica" / "evidence"
 OFFLINE_SERVER = """
-import runpy,socket,sys
+import importlib.util,socket,sys
+from pathlib import Path
 connect=socket.socket.connect
 def local_connect(self,address):
     if not isinstance(address,tuple) or address[0] not in ('127.0.0.1','::1','localhost'):
@@ -33,14 +35,22 @@ def local_dns(host,*args,**kwargs):
         raise OSError('External DNS disabled for startup smoke check')
     return getaddrinfo(host,*args,**kwargs)
 socket.getaddrinfo=local_dns
-sys.argv=[sys.argv[1],'--no-browser']
-runpy.run_path(sys.argv[0],run_name='__main__')
+script,cache=sys.argv[1:3]
+sys.argv=[script,'--no-browser']
+spec=importlib.util.spec_from_file_location('fiqhbot_smoke_server',script)
+server=importlib.util.module_from_spec(spec)
+spec.loader.exec_module(server)
+server.CACHE_DIR=Path(cache)
+server.STATE_PATH=server.CACHE_DIR/'local_server.json'
+raise SystemExit(server.main())
 """
 
 
 def main():
     EVIDENCE.mkdir(parents=True, exist_ok=True)
-    command = [sys.executable, "-B", "-u", "-c", OFFLINE_SERVER, str(BACKEND / "start_local.py")]
+    (BACKEND / ".cache").mkdir(exist_ok=True)
+    runtime = tempfile.TemporaryDirectory(prefix="startup-smoke-", dir=BACKEND / ".cache")
+    command = [sys.executable, "-B", "-u", "-c", OFFLINE_SERVER, str(BACKEND / "start_local.py"), runtime.name]
     env = dict(os.environ, HF_HUB_OFFLINE="1", TRANSFORMERS_OFFLINE="1", PYTHONIOENCODING="utf-8")
     started = time.monotonic()
     report = {"checks": [], "external_network": "blocked in server processes",
@@ -97,6 +107,18 @@ def main():
         except urllib.error.HTTPError as error:
             assert error.code == 400 and json.load(error)["ok"] is False
         report["checks"].append("Invalid question rejected before generation")
+        history_request = urllib.request.Request(
+            url + "ask", data=json.dumps({"question": "explain in roman urdu",
+                                          "prev_answer": "Untrusted fixture [Quran 1:1].",
+                                          "prev_answer_receipt": "invalid-proof"}).encode(),
+            headers={"Content-Type": "application/json"},
+        )
+        with opener.open(history_request, timeout=5) as response:
+            rejected = json.load(response)
+            assert response.status == 200 and rejected["mode"] == "low_confidence"
+            assert rejected["citation_validation"]["reason"] == "unverified_history"
+            assert "Untrusted fixture" not in rejected["answer"] and "answer_receipt" not in rejected
+        report["checks"].append("Real API rejects unverified history without an external provider call")
         reused = subprocess.run(command, cwd=BACKEND, env=env, capture_output=True,
                                 encoding="utf-8", errors="replace", timeout=45)
         assert reused.returncode == 0 and "Opening the existing FIQHBOT at " + url in reused.stdout, reused.stdout
@@ -111,9 +133,10 @@ def main():
         process.wait(timeout=10)
         reader.join(timeout=5)
         process.stdout.close()
-        state = BACKEND / ".cache" / "local_server.json"
+        state = Path(runtime.name) / "local_server.json"
         if url and state.is_file() and json.loads(state.read_text(encoding="utf-8")).get("url") == url:
             state.unlink()
+        runtime.cleanup()
         (EVIDENCE / "local-startup-server.log").write_text("".join(lines), encoding="utf-8")
         (EVIDENCE / "local-startup.json").write_text(json.dumps(report, indent=2) + "\n", encoding="utf-8")
     print(json.dumps(report, indent=2))

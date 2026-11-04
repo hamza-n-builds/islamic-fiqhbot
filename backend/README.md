@@ -2,7 +2,9 @@
 
 Flask backend that wraps the BM25 + MiniLM hybrid RAG pipeline and serves both
 the web frontend and a WhatsApp channel from one place. Answers are grounded in
-the local datasets and generated with Gemini under a strict, citation-only prompt.
+the local datasets and generated with Gemini under context-constrained prompts.
+Server-side citation membership checks withhold unsupported generated responses;
+this is not semantic or scholarly verification.
 
 ## Layout
 ```
@@ -73,6 +75,17 @@ Voice notes are acknowledged but not yet transcribed — STT (Whisper) and TTS
 (edge-tts) are added in the voice step.
 
 ## Notes
+- Accepted generated answers also carry `answer_receipt` and `citation_validation`.
+  For translation follow-ups, send the exact `prev_answer` and its
+  `prev_answer_receipt` (maximum 8192 characters). The server verifies provenance
+  and unchanged source contents before generation, then checks that the output
+  keeps all original references. Old or edited history is not trusted.
+- `FIQHBOT_RESPONSE_SECRET` is optional, private and at least 32 bytes when set.
+  Keep it stable across workers/restarts, or accept process-local receipts that
+  require asking the original question again after restart. Receipt lifetime: 7 days.
+- Missing/English-textless source records are excluded; invalid references block
+  the whole generated reply. The source-record audit currently reports unresolved
+  mappings and pending/unspecified scholarly review. No data was guessed or replaced.
 - The frontend should POST to `/ask` instead of calling Gemini directly; the
   Gemini key now lives only here, server-side.
 - Topics tagged `scholar_review: pending` are surfaced in `sources.fiqh[].scholar_review`
