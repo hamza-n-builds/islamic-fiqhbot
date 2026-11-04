@@ -12,6 +12,7 @@ import os, re, time, json, string, hashlib, tempfile
 import yaml
 import numpy as np
 from citation_guard import CitationError, ResponseReceipts, validate_citations
+from source_records import load_hadith_records, normalize_hadith_source
 
 _response_receipts = ResponseReceipts()
 
@@ -25,27 +26,7 @@ HADITH_FILE = os.environ.get("HADITH_FILE", os.path.join(DATA_DIR, "sahih_bukhar
 # Nasa'i, Abu Dawud) that aren't in the main Bukhari/Muslim corpus. Verified
 # and added by the team from Sunnah.com. Loaded if present; ignored if absent.
 OTHER_HADITH_FILE = os.environ.get("OTHER_HADITH_FILE", os.path.join(DATA_DIR, "other_hadith.json"))
-
-
-def normalize_hadith_source(source):
-    """Canonicalize hadith collection names so different spellings of the SAME
-    collection match. The dataset and the topic references disagree on spelling
-    ('Sahih Bukhari' vs 'Sahih al-Bukhari'), which silently broke lookups and
-    dropped valid Bukhari/Muslim citations. Everything maps to one canonical
-    form: 'Sahih Bukhari' or 'Sahih Muslim'. Non-Bukhari/Muslim collections are
-    returned normalized but will simply not be found in the dataset (intended:
-    only Bukhari & Muslim are cited)."""
-    s = re.sub(r"\s+", " ", (source or "").strip().lower())
-    s = s.replace("-", " ").replace("'", "").replace("’", "")
-    # strip common prefixes/particles
-    s = s.replace("sahih al ", "sahih ").replace("al bukhari", "bukhari")
-    s = s.replace("sahih al-bukhari", "sahih bukhari")
-    if "bukhar" in s:
-        return "Sahih Bukhari"
-    if "muslim" in s:
-        return "Sahih Muslim"
-    # leave others as title-cased original (won't match the BM-only dataset)
-    return (source or "").strip()
+HADITH_REGISTRY_FILE = os.environ.get("HADITH_REGISTRY_FILE", os.path.join(DATA_DIR, "hadith_identity_registry.json"))
 
 EXAMPLE_FILE= os.environ.get("EXAMPLE_FILE",os.path.join(DATA_DIR, "topic_examples_expanded.yaml"))
 
@@ -159,45 +140,22 @@ def init(verbose=True):
         fiqh_topics = yaml.safe_load(f)
     with open(QURAN_FILE, encoding="utf-8") as f:
         quran_data = json.load(f)
-    with open(HADITH_FILE, encoding="utf-8") as f:
-        hadith_data = json.load(f)
+    source_corpus = load_hadith_records(HADITH_FILE, OTHER_HADITH_FILE, HADITH_REGISTRY_FILE)
+    hadith_data = [record for record in source_corpus.records if record["generation_eligible"]]
     with open(EXAMPLE_FILE, encoding="utf-8") as f:
         topic_examples = yaml.safe_load(f)
 
     quran_lookup  = {(v["chapter"], v["ayah"]): v for v in quran_data}
-    hadith_lookup = {(normalize_hadith_source(h["source"]), str(h["hadith_no"])): h for h in hadith_data}
-
-    # Merge in supplementary hadith from other collections, if the file exists.
-    # These become citable exactly like Bukhari/Muslim entries (same lookup key).
-    try:
-        if os.path.exists(OTHER_HADITH_FILE):
-            with open(OTHER_HADITH_FILE, encoding="utf-8") as f:
-                other = json.load(f)
-            added = 0
-            for h in other:
-                src = (h.get("source") or "").strip()
-                no  = str(h.get("hadith_no", "")).strip()
-                if not src or not no:
-                    continue
-                # keep original source name (Tirmidhi/Nasa'i/Abu Dawud) — do NOT
-                # normalize these to Bukhari/Muslim; just index by exact source.
-                hadith_lookup[(src, no)] = {
-                    "source": src, "hadith_no": h.get("hadith_no"),
-                    "chapter": h.get("chapter", ""),
-                    "text_en": h.get("text_en", ""), "text_ar": h.get("text_ar", ""),
-                }
-                added += 1
-            if added:
-                print(f"[rag] Loaded {added} supplementary hadith from other_hadith.json")
-    except Exception as e:
-        print(f"[rag] other_hadith.json not loaded ({e}) — continuing without it.")
+    hadith_lookup = source_corpus.lookup
+    if verbose:
+        print(f"[rag] Loaded {len(source_corpus.records)} canonical identities ({len(hadith_data)} eligible for generation); legacy corpus remains preserved on disk.")
 
     from rank_bm25 import BM25Okapi
     if verbose: print("Building BM25 indexes...")
     fiqh_texts   = [fiqh_topic_to_text(t) for t in fiqh_topics]
     bm25_fiqh    = BM25Okapi([preprocess(t) for t in fiqh_texts])
     hadith_texts = [h.get("text_en", "") for h in hadith_data]
-    bm25_hadith  = BM25Okapi([preprocess(t) for t in hadith_texts])
+    bm25_hadith  = BM25Okapi([preprocess(t) for t in hadith_texts]) if hadith_texts else None
     quran_texts  = [v.get("english", "") for v in quran_data]
     bm25_quran   = BM25Okapi([preprocess(t) for t in quran_texts])
 
@@ -324,6 +282,8 @@ def _fiqh_entry_by_id(topic_id, madhhab=None, score=0.0):
 
 
 def retrieve_hadith(query, top_k=3, bm25_candidates=50, alpha=ALPHA):
+    if not hadith_data or bm25_hadith is None:
+        return []
     from sentence_transformers import util
     tokens = preprocess(query)
     bm = bm25_hadith.get_scores(tokens)
@@ -593,7 +553,8 @@ def _validated_context(fiqh, hadith, quran, madhhab=None):
     for candidate in hadith:
         identity = (normalize_hadith_source(candidate.get("source", "")), str(candidate.get("hadith_no", "")))
         record = (hadith_lookup or {}).get(identity)
-        if record and identity not in seen and has_text(record.get("text_en")):
+        if (record and identity not in seen and has_text(record.get("text_en"))
+                and record.get("generation_eligible", True)):
             seen.add(identity)
             clean_hadith.append({**record, "type": "hadith", "score": candidate.get("score", 0.0)})
     return clean_fiqh, clean_hadith, clean_quran
@@ -615,7 +576,9 @@ def _cited_sources(tags, fiqh, hadith, quran):
                    "arabic": v.get("arabic", ""), "english": v.get("english", ""), "urdu": v.get("urdu", "")}
                   for v in quran if f'[Quran {v["chapter"]}:{v["ayah"]}]' in tags],
         "hadith": [{"ref": f'{h["source"]} #{h["hadith_no"]}', "chapter": h.get("chapter", ""),
-                    "text_ar": h.get("text_ar", ""), "text_en": h.get("text_en", "")}
+                    "text_ar": h.get("text_ar", ""), "text_en": h.get("text_en", ""),
+                    "reference_url": h.get("reference_url"), "source_identity": h.get("source_identity"),
+                    "reported_grade": h.get("reported_grade")}
                    for h in hadith if f'[{h["source"]} #{h["hadith_no"]}]' in tags],
     }
 

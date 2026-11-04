@@ -30,6 +30,7 @@ except Exception:
 
 import rag_engine
 import db   # optional MongoDB query logging (fails silently if unavailable)
+from source_records import load_hadith_records, normalize_hadith_source
 
 app = Flask(__name__)
 app.config["MAX_CONTENT_LENGTH"] = 1024 * 1024
@@ -168,10 +169,15 @@ _HADITH_LOOKUP = None
 def _ensure_hadith_lookup():
     global _HADITH_LOOKUP
     if _HADITH_LOOKUP is None:
-        path = os.path.join(os.path.dirname(__file__), "data", "sahih_bukhari_muslim.json")
-        with open(path, encoding="utf-8") as f:
-            data = json.load(f)
-        _HADITH_LOOKUP = {(h["source"], str(h["hadith_no"])): h for h in data}
+        if getattr(rag_engine, "hadith_lookup", None) is not None:
+            _HADITH_LOOKUP = rag_engine.hadith_lookup
+        else:
+            data_dir = Path(__file__).resolve().parent / "data"
+            corpus = load_hadith_records(
+                getattr(rag_engine, "HADITH_FILE", data_dir / "sahih_bukhari_muslim.json"),
+                getattr(rag_engine, "OTHER_HADITH_FILE", data_dir / "other_hadith.json"),
+                getattr(rag_engine, "HADITH_REGISTRY_FILE", data_dir / "hadith_identity_registry.json"))
+            _HADITH_LOOKUP = corpus.lookup
 
 @app.get("/hadith-text")
 def hadith_text():
@@ -180,9 +186,11 @@ def hadith_text():
     if not source or not number:
         return jsonify({"found": False, "error": "source and number required"}), 400
     _ensure_hadith_lookup()
-    h = _HADITH_LOOKUP.get((source, number))
+    h = _HADITH_LOOKUP.get((normalize_hadith_source(source), number))
     if h:
-        return jsonify({"found": True, "text_ar": h.get("text_ar", ""), "text_en": h.get("text_en", "")})
+        return jsonify({"found": True, "text_ar": h.get("text_ar", ""), "text_en": h.get("text_en", ""),
+                        "reference_url": h.get("reference_url"), "source_identity": h.get("source_identity"),
+                        "reported_grade": h.get("reported_grade"), "generation_eligible": h.get("generation_eligible")})
     return jsonify({"found": False})
 
 

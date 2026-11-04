@@ -1,6 +1,6 @@
 {
   "date": "2026-11-04",
-  "scope": "Local record resolution/text availability only; no semantic or scholarly certification",
+  "scope": "Pinned canonical identity and text availability; primary-page checks recorded in the registry; no semantic or scholarly certification",
   "topics": 77,
   "quran_records": 6236,
   "main_hadith_records": 14966,
@@ -9,37 +9,39 @@
     "pending": 49,
     "unspecified": 28
   },
-  "reference_resolution": "incomplete",
+  "reference_resolution": "complete",
   "issues": {
     "missing_quran": [],
-    "missing_hadith": [
-      {
-        "topic_id": "zakat_salary",
-        "source": "Sahih Bukhari",
-        "hadith_no": 1395
-      },
-      {
-        "topic_id": "zakat_debt",
-        "source": "Sahih Bukhari",
-        "hadith_no": 1395
-      }
-    ],
+    "missing_hadith": [],
     "referenced_quran_without_english": [],
-    "referenced_hadith_without_english": [
-      {
-        "topic_id": "five_daily_prayers",
-        "source": "Sahih Muslim",
-        "hadith_no": 11
-      }
-    ]
+    "referenced_hadith_without_english": []
   },
-  "runtime_behavior": "Missing/textless records are excluded from generation context; references outside that context reject the whole generated answer.",
+  "canonical_identity_audit": {
+    "raw_main_records": 14966,
+    "raw_supplementary_records": 4,
+    "legacy_duplicate_key_groups": 348,
+    "legacy_duplicate_key_rows": 702,
+    "canonical_registered_records": 38,
+    "generation_eligible_records": 37
+  },
+  "generation_holds": [
+    {
+      "source": "Sunan Abi Dawud",
+      "hadith_no": "2318",
+      "reported_grade": "Shadh (Al-Albani)",
+      "reference_url": "https://sunnah.com/abudawud:2318"
+    }
+  ],
+  "runtime_behavior": "Lookup/search use the pinned canonical registry only. Legacy corpus integer keys never resolve canonical references implicitly. Missing/textless/held sources cannot enter generation context.",
   "dataset_sha256": {
-    "fiqh_topics_complete_expanded.yaml": "cc6995c522a9a30c4009074782c7ed1b97b50742592ebbc500d2d8d67e18b765",
+    "fiqh_topics_complete_expanded.yaml": "3e4fb12c4f3c8c96bffe81dd14ec62aabcebe2a03a75f46647b781cb87436b33",
+    "hadith_identity_registry.json": "d42130038470453c7cca05962d7127f611daaf2f5e7a5dc43ee78fd00bf35f91",
     "other_hadith.json": "65fe555e7461b54567acc37ffdc1385bdb1070e6cf69bfc1b2043b2c95cda8d6",
     "quran_trilingual_clean.json": "f8fb0666033bd787d2073e386ff37ef4a74572640ce2faa837ccb23e23b41134",
     "sahih_bukhari_muslim.json": "a2c6cdd02883595263f0780e6662efb11fc866ff4ea43974befc62076b41380e",
     "topic_examples_expanded.yaml": "2deb1fa1e82f23a88eb01caff4e1ad78173bdef080ecb2914bbb6847a3f3ac04"
   },
-  "religious_accuracy_reviewed": false
+  "religious_accuracy_reviewed": false,
+  "ruling_support_review_complete": false,
+  "production_ready": false
 }

@@ -11,5 +11,9 @@ F01-02,F01,Mobile-first answer accordions,pending,Separate future change
 F01-03,F01,Reject references outside the actual supplied context,yes,backend/tests/test_citation_integrity.py
 F01-04,F01,No generation without sources and no refusal-to-general bypass,yes,backend/tests/test_citation_integrity.py
 F01-05,F01,Signed exact-answer and source-content provenance for follow-ups,yes,backend/tests/test_citation_guard.py and backend/tests/test_chat_receipts.cjs
-F01-06,F01,Resolve all mapped source records with prompt-language text,partial,replica/evidence/source-record-audit.json
+F01-06,F01,Resolve all mapped source records with prompt-language text,yes,replica/evidence/source-record-audit.json
 F01-07,F01,Scholarly approval and claim-to-source support,pending,Qualified review and separate semantic validation required
+F01-08,F01,Canonical published identities without ambiguous legacy key fallback,yes,backend/tests/test_source_records.py and backend/data/hadith_identity_registry.json
+F01-09,F01,Grade-review holds are excluded from generation context,yes,backend/tests/test_citation_integrity.py
+F01-10,F01,All currently mapped hadith identities checked against primary Arabic pages,yes,backend/data/hadith_identity_registry.json
+F01-11,F01,Canonicalize additional unregistered legacy narrations,pending,Original corpus preserved; explicit identity review required before runtime registration

@@ -13,7 +13,7 @@ import yaml
 
 BACKEND = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(BACKEND))
-from rag_engine import normalize_hadith_source
+from source_records import load_hadith_records, normalize_hadith_source
 
 
 def main():
@@ -23,7 +23,9 @@ def main():
     hadith = json.loads((data / "sahih_bukhari_muslim.json").read_text(encoding="utf-8"))
     other = json.loads((data / "other_hadith.json").read_text(encoding="utf-8"))
     quran_lookup = {(v["chapter"], v["ayah"]): v for v in quran}
-    hadith_lookup = {(normalize_hadith_source(h["source"]), str(h["hadith_no"])): h for h in [*hadith, *other]}
+    corpus = load_hadith_records(data / "sahih_bukhari_muslim.json", data / "other_hadith.json",
+                                data / "hadith_identity_registry.json")
+    hadith_lookup = corpus.lookup
     missing_quran, missing_hadith, empty_quran, empty_hadith = [], [], [], []
     for topic in topics:
         refs = topic.get("references", {}) or {}
@@ -45,14 +47,20 @@ def main():
     issues = {"missing_quran": missing_quran, "missing_hadith": missing_hadith,
               "referenced_quran_without_english": empty_quran, "referenced_hadith_without_english": empty_hadith}
     report = {
-        "date": "2026-11-04", "scope": "Local record resolution/text availability only; no semantic or scholarly certification",
+        "date": "2026-11-04", "scope": "Pinned canonical identity and text availability; primary-page checks recorded in the registry; no semantic or scholarly certification",
         "topics": len(topics), "quran_records": len(quran), "main_hadith_records": len(hadith),
         "supplementary_hadith_records": len(other), "scholar_review_statuses": dict(reviews),
         "reference_resolution": "incomplete" if any(issues.values()) else "complete",
         "issues": issues,
-        "runtime_behavior": "Missing/textless records are excluded from generation context; references outside that context reject the whole generated answer.",
+        "canonical_identity_audit": corpus.audit,
+        "generation_holds": [{"source": row["source"], "hadith_no": row["hadith_no"],
+                              "reported_grade": row.get("reported_grade"), "reference_url": row["reference_url"]}
+                             for row in corpus.records if not row["generation_eligible"]],
+        "runtime_behavior": "Lookup/search use the pinned canonical registry only. Legacy corpus integer keys never resolve canonical references implicitly. Missing/textless/held sources cannot enter generation context.",
         "dataset_sha256": {p.name: hashlib.sha256(p.read_bytes()).hexdigest() for p in sorted(data.iterdir()) if p.suffix in {".json", ".yaml"}},
         "religious_accuracy_reviewed": False,
+        "ruling_support_review_complete": False,
+        "production_ready": False,
     }
     target = BACKEND.parent / "replica/evidence/source-record-audit.json"
     target.parent.mkdir(parents=True, exist_ok=True)

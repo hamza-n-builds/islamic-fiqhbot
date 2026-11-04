@@ -40,3 +40,24 @@ incomplete: two missing hadith mappings, one referenced hadith without English,
 49 topics pending review and 28 unspecified. See `evidence/citation-verification.json`.
 Neither stubs nor HMAC receipts verify whether a religious claim is true or
 entailed by the cited text. No live provider quality evaluation was performed.
+
+## Canonical source identity batch
+
+| Case | Expected | Evidence |
+| --- | --- | --- |
+| F01-D2 legacy key collision | Resolve only the pinned row; never select the last duplicate | `test_source_records.py` |
+| F01-D3 Bukhari 1395 / Muslim 11a | Return the checked existing local narration with a published URL | `test_source_identity_regressions.py` and real HTTP smoke |
+| F01-D4 wrong nonempty 5590 hit | Return the canonical narration, not the goat narration under a legacy key | Source route regression |
+| F01-D5 edited corpus/registry | Reject missing/changed fingerprints, duplicate canonical keys and inconsistent variants | Source registry tests |
+| F01-D6 grade hold | Keep identity inspectable; exclude its text from prompt context/search | Source and citation-path tests |
+| F01-D7 preservation | Both raw corpus files and fiqh wording/reviews unchanged; exactly seven reference-number edits | `evidence/source-record-verification.json` |
+
+Four source-route regressions failed against `72384fd` before the fix. Final:
+97 Python tests, four frontend VM tests and eight real startup/HTTP checks passed.
+The structural reference audit now exits 0 with zero missing/textless mapped
+references. The registry contains 38 primary-Arabic-text-matched identities; 37
+are generation-eligible. The original legacy corpus is retained unchanged.
+
+All 77 topics still lack completed scholarly approval. Primary identity matching
+does not validate topic relevance, inferential fiqh support or a translation's
+quality. Priority review observations are in `source-record-review.md`.

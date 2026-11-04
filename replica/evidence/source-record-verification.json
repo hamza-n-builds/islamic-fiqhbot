@@ -1,0 +1,128 @@
+{
+  "date": "2026-11-04",
+  "baseline_commit": "72384fd",
+  "scope": "Canonical narration identity/numbering repair; no independent scholarly or semantic ruling approval",
+  "red_phase": {
+    "source_route_regressions": 4,
+    "failures_before_fix": 4
+  },
+  "python_tests": {
+    "tests": 97,
+    "failures": 0
+  },
+  "frontend_vm_tests": {
+    "tests": 4,
+    "failures": 0
+  },
+  "real_local_http_smoke": {
+    "checks": [
+      "Actual datasets/model warm-up and /health readiness",
+      "HTML and four frontend assets served byte-for-byte",
+      "Same-origin dynamic config with blank browser API key",
+      "Invalid question rejected before generation",
+      "Real API rejects unverified history without an external provider call",
+      "Real API serves canonical Bukhari 1395 and Muslim 11a with pinned source provenance",
+      "Ambiguous legacy Muslim 11 cannot resolve through the canonical API",
+      "Second launch reuses the ready instance without a browser"
+    ],
+    "external_network": "blocked in server processes",
+    "provider_generation_tested": false,
+    "browser_rendering_tested": false,
+    "startup_seconds": 11.48,
+    "status": "passed"
+  },
+  "reference_resolution": "complete",
+  "issue_counts": {
+    "missing_quran": 0,
+    "missing_hadith": 0,
+    "referenced_quran_without_english": 0,
+    "referenced_hadith_without_english": 0
+  },
+  "identity_audit": {
+    "raw_main_records": 14966,
+    "raw_supplementary_records": 4,
+    "legacy_duplicate_key_groups": 348,
+    "legacy_duplicate_key_rows": 702,
+    "canonical_registered_records": 38,
+    "generation_eligible_records": 37
+  },
+  "generation_holds": [
+    {
+      "source": "Sunan Abi Dawud",
+      "hadith_no": "2318",
+      "reported_grade": "Shadh (Al-Albani)",
+      "reference_url": "https://sunnah.com/abudawud:2318"
+    }
+  ],
+  "primary_page_comparison": {
+    "pages": 38,
+    "normalized_arabic_exact_matches": 38,
+    "performed_on": "2026-11-04",
+    "evidence": "backend/data/hadith_identity_registry.json",
+    "normalization": "Unicode NFKD; remove standard salutation, diacritics and non-Arabic-letter characters"
+  },
+  "canonical_reference_updates": [
+    {
+      "topic_id": "five_daily_prayers",
+      "old": "11",
+      "new": "11a"
+    },
+    {
+      "topic_id": "combining_prayers_travel",
+      "old": "1664",
+      "new": "705c"
+    },
+    {
+      "topic_id": "touching_opposite_gender",
+      "old": "368",
+      "new": "368d"
+    },
+    {
+      "topic_id": "beard",
+      "old": "259",
+      "new": "259c"
+    },
+    {
+      "topic_id": "masah_socks",
+      "old": "276",
+      "new": "276c"
+    },
+    {
+      "topic_id": "speaking_prayer",
+      "old": "537",
+      "new": "537a"
+    },
+    {
+      "topic_id": "menstruation_worship",
+      "old": "335",
+      "new": "335c"
+    }
+  ],
+  "original_corpus_sha256_unchanged": {
+    "sahih_bukhari_muslim.json": "a2c6cdd02883595263f0780e6662efb11fc866ff4ea43974befc62076b41380e",
+    "other_hadith.json": "65fe555e7461b54567acc37ffdc1385bdb1070e6cf69bfc1b2043b2c95cda8d6",
+    "quran_trilingual_clean.json": "f8fb0666033bd787d2073e386ff37ef4a74572640ce2faa837ccb23e23b41134",
+    "topic_examples_expanded.yaml": "2deb1fa1e82f23a88eb01caff4e1ad78173bdef080ecb2914bbb6847a3f3ac04"
+  },
+  "fiqh_wording_and_review_states": "unchanged",
+  "external_translations_imported": 0,
+  "new_scholarly_approvals": 0,
+  "scholar_review_statuses": {
+    "pending": 49,
+    "unspecified": 28
+  },
+  "limits": [
+    "Canonical identity is not proof of topic-to-source support",
+    "Known support questions are in replica/source-record-review.md",
+    "No live Gemini generation/translation fidelity evaluation",
+    "No browser rendering/voice verification",
+    "Unregistered legacy hadith records remain excluded from runtime lookup/search",
+    "No push or deployment"
+  ],
+  "commands": [
+    "venv\\Scripts\\python.exe -B -m unittest discover -s tests -v",
+    "node --test tests/test_chat_receipts.cjs",
+    "venv\\Scripts\\python.exe -B tests/audit_source_records.py",
+    "venv\\Scripts\\python.exe -B tests/smoke_local_startup.py"
+  ]
+}

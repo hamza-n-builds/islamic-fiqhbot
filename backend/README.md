@@ -85,7 +85,14 @@ Voice notes are acknowledged but not yet transcribed — STT (Whisper) and TTS
   require asking the original question again after restart. Receipt lifetime: 7 days.
 - Missing/English-textless source records are excluded; invalid references block
   the whole generated reply. The source-record audit currently reports unresolved
-  mappings and pending/unspecified scholarly review. No data was guessed or replaced.
+  scholarly review. The missing mappings/text gaps were resolved through the
+  canonical registry without changing the original corpus translations.
+- `source_records.py` resolves only entries in `data/hadith_identity_registry.json`.
+  It verifies the exact local row fingerprint, published reference variant and
+  normalized Arabic text identity. Retrieval and `/hadith-text` share this resolver;
+  ambiguous legacy keys never choose a last matching row. The registry has 38
+  identities, including one publisher-reported Shadh record excluded from generation.
+  When overriding corpus paths, supply a matching `HADITH_REGISTRY_FILE` as well.
 - The frontend should POST to `/ask` instead of calling Gemini directly; the
   Gemini key now lives only here, server-side.
 - Topics tagged `scholar_review: pending` are surfaced in `sources.fiqh[].scholar_review`

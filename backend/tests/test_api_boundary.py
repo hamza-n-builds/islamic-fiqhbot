@@ -24,7 +24,7 @@ def load_api():
     dotenv.load_dotenv = Mock()
     spec = importlib.util.spec_from_file_location("fiqhbot_test_api", Path(__file__).parents[1] / "app.py")
     module = importlib.util.module_from_spec(spec)
-    with patch.dict(sys.modules, {"rag_engine": rag, "db": database, "dotenv": dotenv}):
+    with patch.object(sys, "path", [str(Path(__file__).parents[1]), *sys.path]), patch.dict(sys.modules, {"rag_engine": rag, "db": database, "dotenv": dotenv}):
         spec.loader.exec_module(module)
     module.app.config["TESTING"] = True
     module.app.logger.disabled = True

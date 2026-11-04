@@ -115,6 +115,17 @@ class CitationPathTests(unittest.TestCase):
         self.provider.assert_not_called()
         self.assertBlocked(result)
 
+    def test_source_on_grade_review_hold_cannot_enter_generation_context(self):
+        self.topic["references"] = {"hadith": [{"source": "Sahih Muslim", "hadith_no": "11a"}]}
+        rag.hadith_lookup[("Sahih Muslim", "11a")] = {"source": "Sahih Muslim", "hadith_no": "11a",
+                                                   "text_en": "Fixture source on hold", "generation_eligible": False}
+        self.assertBlocked(rag._general_result("Describe the fixture topic", topic_id="fixture", topic_score=0.95))
+        self.provider.assert_not_called()
+
+    def test_no_eligible_hadith_search_returns_no_candidates(self):
+        with patch.object(rag, "hadith_data", []), patch.object(rag, "bm25_hadith", None):
+            self.assertEqual(rag.retrieve_hadith("Fixture question"), [])
+
     def test_general_valid_citation_returns_only_used_source_and_receipt(self):
         self.provider.return_value = "Fixture answer [Quran 1:1]."
         result = rag._general_result("Describe the fixture topic", topic_id="fixture", topic_score=0.95)

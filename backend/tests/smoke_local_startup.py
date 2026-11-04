@@ -15,6 +15,7 @@ import tempfile
 import threading
 import time
 import urllib.error
+import urllib.parse
 import urllib.request
 
 BACKEND = Path(__file__).resolve().parents[1]
@@ -119,6 +120,17 @@ def main():
             assert rejected["citation_validation"]["reason"] == "unverified_history"
             assert "Untrusted fixture" not in rejected["answer"] and "answer_receipt" not in rejected
         report["checks"].append("Real API rejects unverified history without an external provider call")
+        for collection, number in (("Sahih Bukhari", "1395"), ("Sahih Muslim", "11a")):
+            query = urllib.parse.urlencode({"source": collection, "number": number})
+            with opener.open(url + "hadith-text?" + query, timeout=5) as response:
+                record = json.load(response)
+                assert record["found"] and record["text_en"].strip()
+                assert record["source_identity"]["status"] == "primary_arabic_text_matched"
+                assert record["reference_url"].startswith("https://sunnah.com/")
+        report["checks"].append("Real API serves canonical Bukhari 1395 and Muslim 11a with pinned source provenance")
+        with opener.open(url + "hadith-text?source=Sahih%20Muslim&number=11", timeout=5) as response:
+            assert json.load(response)["found"] is False
+        report["checks"].append("Ambiguous legacy Muslim 11 cannot resolve through the canonical API")
         reused = subprocess.run(command, cwd=BACKEND, env=env, capture_output=True,
                                 encoding="utf-8", errors="replace", timeout=45)
         assert reused.returncode == 0 and "Opening the existing FIQHBOT at " + url in reused.stdout, reused.stdout

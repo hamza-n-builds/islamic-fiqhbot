@@ -9,7 +9,7 @@
     - source: Sahih Bukhari
       hadith_no: 46
     - source: Sahih Muslim
-      hadith_no: 11
+      hadith_no: 11a
   rulings:
     hanafi:
       ruling: Five obligatory prayers each day and night
@@ -67,7 +67,7 @@
       ayah: 101
     hadith:
     - source: Sahih Muslim
-      hadith_no: 1664
+      hadith_no: 705c
   rulings:
     hanafi:
       ruling: Generally discouraged
@@ -164,7 +164,7 @@
       ayah: 43
     hadith:
     - source: Sahih Muslim
-      hadith_no: 368
+      hadith_no: 368d
   rulings:
     hanafi:
       ruling: Does not invalidate wudu
@@ -212,7 +212,7 @@
       ayah: 30
     hadith:
     - source: Sahih Muslim
-      hadith_no: 259
+      hadith_no: 259c
   rulings:
     hanafi:
       ruling: Obligatory
@@ -308,7 +308,7 @@
       ayah: 6
     hadith:
     - source: Sahih Muslim
-      hadith_no: 276
+      hadith_no: 276c
   rulings:
     hanafi:
       ruling: Allowed with conditions
@@ -380,7 +380,7 @@
       ayah: 238
     hadith:
     - source: Sahih Muslim
-      hadith_no: 537
+      hadith_no: 537a
   rulings:
     hanafi:
       ruling: Invalidates prayer
@@ -960,7 +960,7 @@
       ayah: 222
     hadith:
     - source: Sahih Muslim
-      hadith_no: 335
+      hadith_no: 335c
   rulings:
     hanafi:
       ruling: Prayer dropped, fasting made up

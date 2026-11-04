@@ -1,0 +1,1352 @@
+{
+  "schema_version": 1,
+  "numbering_scheme": "sunnah.com reference identifiers",
+  "text_policy": "Resolve existing owner-provided local text by exact row fingerprint; no external translations copied.",
+  "entries": [
+    {
+      "source": "Sahih Bukhari",
+      "hadith_no": "46",
+      "reference_url": "https://sunnah.com/bukhari:46",
+      "local_file": "sahih_bukhari_muslim.json",
+      "local_row_sha256": "f06c515430ac5099137d3fd1ca7dbc6f5c72801a5686a819f7cc5c3b99a279d7",
+      "legacy_number": "46",
+      "identity_status": "primary_arabic_text_matched",
+      "verification": {
+        "date": "2026-11-04",
+        "methods": [
+          "normalized_arabic_exact",
+          "normalized_english_exact"
+        ],
+        "publisher": "https://github.com/fawazahmed0/hadith-api",
+        "publisher_commit": "df57907be35291c91ad6a6691180e22ca9920784",
+        "publisher_record": 46,
+        "publisher_arabic_number": "46",
+        "in_book": {
+          "book": 2,
+          "hadith": 39
+        },
+        "primary_page_checked": true,
+        "primary_reference": "Sahih al-Bukhari 46",
+        "primary_in_book": {
+          "book": 2,
+          "hadith": 39
+        },
+        "primary_arabic_normalized_sha256": "31a01cc141d430901c48236784fb9f3dbe66b80b83343c9e539091e844c578d1"
+      },
+      "ruling_support_review": "pending",
+      "topics": [
+        "five_daily_prayers"
+      ],
+      "english_text_origin": "existing_owner_provided_local_row_unmodified",
+      "generation_eligible": true
+    },
+    {
+      "source": "Sahih Bukhari",
+      "hadith_no": "1",
+      "reference_url": "https://sunnah.com/bukhari:1",
+      "local_file": "sahih_bukhari_muslim.json",
+      "local_row_sha256": "14871a97970080ef431035d3d03f8cded450d3a1d8a8ffc31748039c45bcae8e",
+      "legacy_number": "1",
+      "identity_status": "primary_arabic_text_matched",
+      "verification": {
+        "date": "2026-11-04",
+        "methods": [
+          "normalized_english_exact"
+        ],
+        "publisher": "https://github.com/fawazahmed0/hadith-api",
+        "publisher_commit": "df57907be35291c91ad6a6691180e22ca9920784",
+        "publisher_record": 1,
+        "publisher_arabic_number": "1",
+        "in_book": {
+          "book": 1,
+          "hadith": 1
+        },
+        "primary_page_checked": true,
+        "primary_reference": "Sahih al-Bukhari 1",
+        "primary_in_book": {
+          "book": 1,
+          "hadith": 1
+        },
+        "primary_arabic_normalized_sha256": "e37eb888646f04b21c15f816e18abe27bc246b803de850b66ac812996a9a8fb4"
+      },
+      "ruling_support_review": "pending",
+      "topics": [
+        "niyyah"
+      ],
+      "english_text_origin": "existing_owner_provided_local_row_unmodified",
+      "generation_eligible": true
+    },
+    {
+      "source": "Sahih Bukhari",
+      "hadith_no": "1089",
+      "reference_url": "https://sunnah.com/bukhari:1089",
+      "local_file": "sahih_bukhari_muslim.json",
+      "local_row_sha256": "f5cbe2dd00f8873d581b6b9de6623597ef79df1a0ac00b93900369d89b231b2e",
+      "legacy_number": "1089",
+      "identity_status": "primary_arabic_text_matched",
+      "verification": {
+        "date": "2026-11-04",
+        "methods": [
+          "normalized_arabic_exact"
+        ],
+        "publisher": "https://github.com/fawazahmed0/hadith-api",
+        "publisher_commit": "df57907be35291c91ad6a6691180e22ca9920784",
+        "publisher_record": 1089,
+        "publisher_arabic_number": "1089",
+        "in_book": {
+          "book": 18,
+          "hadith": 10
+        },
+        "primary_page_checked": true,
+        "primary_reference": "Sahih al-Bukhari 1089",
+        "primary_in_book": {
+          "book": 18,
+          "hadith": 10
+        },
+        "primary_arabic_normalized_sha256": "ef1bb347ab167e2a3f4cc8bbdd66adafa35531b034f36f865866b72af99878f5"
+      },
+      "ruling_support_review": "pending",
+      "topics": [
+        "qasr_prayer"
+      ],
+      "english_text_origin": "existing_owner_provided_local_row_unmodified",
+      "generation_eligible": true
+    },
+    {
+      "source": "Sahih Bukhari",
+      "hadith_no": "1943",
+      "reference_url": "https://sunnah.com/bukhari:1943",
+      "local_file": "sahih_bukhari_muslim.json",
+      "local_row_sha256": "15e395fa13691f87a02b70eb8d39808b96e51c203c98a92283e8f6e555ee1b5c",
+      "legacy_number": "1943",
+      "identity_status": "primary_arabic_text_matched",
+      "verification": {
+        "date": "2026-11-04",
+        "methods": [
+          "normalized_arabic_exact",
+          "normalized_english_exact"
+        ],
+        "publisher": "https://github.com/fawazahmed0/hadith-api",
+        "publisher_commit": "df57907be35291c91ad6a6691180e22ca9920784",
+        "publisher_record": 1943,
+        "publisher_arabic_number": "1943",
+        "in_book": {
+          "book": 30,
+          "hadith": 50
+        },
+        "primary_page_checked": true,
+        "primary_reference": "Sahih al-Bukhari 1943",
+        "primary_in_book": {
+          "book": 30,
+          "hadith": 50
+        },
+        "primary_arabic_normalized_sha256": "b0e7f2bc669077f0aa9811d59047affcd1e5647b8029135a70ae9d9fe1b56933"
+      },
+      "ruling_support_review": "pending",
+      "topics": [
+        "fasting_travel"
+      ],
+      "english_text_origin": "existing_owner_provided_local_row_unmodified",
+      "generation_eligible": true
+    },
+    {
+      "source": "Sahih Bukhari",
+      "hadith_no": "137",
+      "reference_url": "https://sunnah.com/bukhari:137",
+      "local_file": "sahih_bukhari_muslim.json",
+      "local_row_sha256": "9ef4d633ca983c64d723cada8d22769b66c2c33ba2c48c17d864b457bc5b1daa",
+      "legacy_number": "137",
+      "identity_status": "primary_arabic_text_matched",
+      "verification": {
+        "date": "2026-11-04",
+        "methods": [
+          "normalized_arabic_exact"
+        ],
+        "publisher": "https://github.com/fawazahmed0/hadith-api",
+        "publisher_commit": "df57907be35291c91ad6a6691180e22ca9920784",
+        "publisher_record": 137,
+        "publisher_arabic_number": "137",
+        "in_book": {
+          "book": 4,
+          "hadith": 3
+        },
+        "primary_page_checked": true,
+        "primary_reference": "Sahih al-Bukhari 137",
+        "primary_in_book": {
+          "book": 4,
+          "hadith": 3
+        },
+        "primary_arabic_normalized_sha256": "74378a0cec411102f779ae263c2fe03bbbf442f9f2423c741c928e709b6861f0"
+      },
+      "ruling_support_review": "pending",
+      "topics": [
+        "bleeding_wudu",
+        "sleep_wudu",
+        "doubt_wudu"
+      ],
+      "english_text_origin": "existing_owner_provided_local_row_unmodified",
+      "generation_eligible": true
+    },
+    {
+      "source": "Sahih Bukhari",
+      "hadith_no": "5590",
+      "reference_url": "https://sunnah.com/bukhari:5590",
+      "local_file": "sahih_bukhari_muslim.json",
+      "local_row_sha256": "f2658f61facf7c10e638c419c3b44be84da0905d4679620153ebf7ac44d650f4",
+      "legacy_number": "5649",
+      "identity_status": "primary_arabic_text_matched",
+      "verification": {
+        "date": "2026-11-04",
+        "methods": [
+          "normalized_arabic_exact",
+          "normalized_english_exact"
+        ],
+        "publisher": "https://github.com/fawazahmed0/hadith-api",
+        "publisher_commit": "df57907be35291c91ad6a6691180e22ca9920784",
+        "publisher_record": 5590,
+        "publisher_arabic_number": "5590",
+        "in_book": {
+          "book": 74,
+          "hadith": 16
+        },
+        "primary_page_checked": true,
+        "primary_reference": "Sahih al-Bukhari 5590",
+        "primary_in_book": {
+          "book": 74,
+          "hadith": 16
+        },
+        "primary_arabic_normalized_sha256": "47c8e7b9cae25ad7a8c77752ac01d40006616a4c29f2df90c61c7fdd85d2f897"
+      },
+      "ruling_support_review": "pending",
+      "topics": [
+        "music"
+      ],
+      "english_text_origin": "existing_owner_provided_local_row_unmodified",
+      "generation_eligible": true
+    },
+    {
+      "source": "Sahih Bukhari",
+      "hadith_no": "645",
+      "reference_url": "https://sunnah.com/bukhari:645",
+      "local_file": "sahih_bukhari_muslim.json",
+      "local_row_sha256": "50afdffc2dd1644bc79f9ff3a854bebcdfbd8ea7ddba7c1b1428cd479375df1b",
+      "legacy_number": "645",
+      "identity_status": "primary_arabic_text_matched",
+      "verification": {
+        "date": "2026-11-04",
+        "methods": [
+          "normalized_arabic_exact"
+        ],
+        "publisher": "https://github.com/fawazahmed0/hadith-api",
+        "publisher_commit": "df57907be35291c91ad6a6691180e22ca9920784",
+        "publisher_record": 645,
+        "publisher_arabic_number": "645",
+        "in_book": {
+          "book": 10,
+          "hadith": 42
+        },
+        "primary_page_checked": true,
+        "primary_reference": "Sahih al-Bukhari 645",
+        "primary_in_book": {
+          "book": 10,
+          "hadith": 42
+        },
+        "primary_arabic_normalized_sha256": "2416ffa9c37ecd3f5b99337ce8fe7b747113ffad12e0f992d1f4fb2d7f1b5cf2"
+      },
+      "ruling_support_review": "pending",
+      "topics": [
+        "congregational_prayer"
+      ],
+      "english_text_origin": "existing_owner_provided_local_row_unmodified",
+      "generation_eligible": true
+    },
+    {
+      "source": "Sahih Bukhari",
+      "hadith_no": "1067",
+      "reference_url": "https://sunnah.com/bukhari:1067",
+      "local_file": "sahih_bukhari_muslim.json",
+      "local_row_sha256": "b42bb38540853528f0d2b84616b9417cd61099ce50ce9c9a30fb19e948672427",
+      "legacy_number": "1067",
+      "identity_status": "primary_arabic_text_matched",
+      "verification": {
+        "date": "2026-11-04",
+        "methods": [
+          "normalized_arabic_exact"
+        ],
+        "publisher": "https://github.com/fawazahmed0/hadith-api",
+        "publisher_commit": "df57907be35291c91ad6a6691180e22ca9920784",
+        "publisher_record": 1067,
+        "publisher_arabic_number": "1067",
+        "in_book": {
+          "book": 17,
+          "hadith": 1
+        },
+        "primary_page_checked": true,
+        "primary_reference": "Sahih al-Bukhari 1067",
+        "primary_in_book": {
+          "book": 17,
+          "hadith": 1
+        },
+        "primary_arabic_normalized_sha256": "f3192f42e00a8ea94fbd2c9a76432b8cc11015ff75af007c54ef69d1a13e19a5"
+      },
+      "ruling_support_review": "pending",
+      "topics": [
+        "jumuah_traveller"
+      ],
+      "english_text_origin": "existing_owner_provided_local_row_unmodified",
+      "generation_eligible": true
+    },
+    {
+      "source": "Sahih Bukhari",
+      "hadith_no": "597",
+      "reference_url": "https://sunnah.com/bukhari:597",
+      "local_file": "sahih_bukhari_muslim.json",
+      "local_row_sha256": "ce08dfe2bf9e8b35c126b25ad1578ca0efd5216abbeb7277361a6b9c23db46be",
+      "legacy_number": "597",
+      "identity_status": "primary_arabic_text_matched",
+      "verification": {
+        "date": "2026-11-04",
+        "methods": [
+          "normalized_arabic_exact"
+        ],
+        "publisher": "https://github.com/fawazahmed0/hadith-api",
+        "publisher_commit": "df57907be35291c91ad6a6691180e22ca9920784",
+        "publisher_record": 597,
+        "publisher_arabic_number": "597",
+        "in_book": {
+          "book": 9,
+          "hadith": 72
+        },
+        "primary_page_checked": true,
+        "primary_reference": "Sahih al-Bukhari 597",
+        "primary_in_book": {
+          "book": 9,
+          "hadith": 72
+        },
+        "primary_arabic_normalized_sha256": "48f7f6d053e799a31049d5da0e16da10a9e1a67b13184fa01cada5084968126a"
+      },
+      "ruling_support_review": "pending",
+      "topics": [
+        "missed_prayers"
+      ],
+      "english_text_origin": "existing_owner_provided_local_row_unmodified",
+      "generation_eligible": true
+    },
+    {
+      "source": "Sahih Bukhari",
+      "hadith_no": "1424",
+      "reference_url": "https://sunnah.com/bukhari:1424",
+      "local_file": "sahih_bukhari_muslim.json",
+      "local_row_sha256": "dbecf347a3e9c8fe5262ebc530b31e786d3e16cd2303ed223df75da460218019",
+      "legacy_number": "1445",
+      "identity_status": "primary_arabic_text_matched",
+      "verification": {
+        "date": "2026-11-04",
+        "methods": [
+          "normalized_arabic_exact"
+        ],
+        "publisher": "https://github.com/fawazahmed0/hadith-api",
+        "publisher_commit": "df57907be35291c91ad6a6691180e22ca9920784",
+        "publisher_record": 1424,
+        "publisher_arabic_number": "1424",
+        "in_book": {
+          "book": 24,
+          "hadith": 28
+        },
+        "primary_page_checked": true,
+        "primary_reference": "Sahih al-Bukhari 1424",
+        "primary_in_book": {
+          "book": 24,
+          "hadith": 28
+        },
+        "primary_arabic_normalized_sha256": "6a33b7bcf7844ee2e55389031e4ba6f9118fdab51ab3dd655d0cef98603220c5"
+      },
+      "ruling_support_review": "pending",
+      "topics": [
+        "zakat_gold"
+      ],
+      "english_text_origin": "existing_owner_provided_local_row_unmodified",
+      "generation_eligible": true
+    },
+    {
+      "source": "Sahih Bukhari",
+      "hadith_no": "5575",
+      "reference_url": "https://sunnah.com/bukhari:5575",
+      "local_file": "sahih_bukhari_muslim.json",
+      "local_row_sha256": "73b3b4a363ccfcf45b8db211d5645b74ed1960345534d6d78f585d0ba18478db",
+      "legacy_number": "5634",
+      "identity_status": "primary_arabic_text_matched",
+      "verification": {
+        "date": "2026-11-04",
+        "methods": [
+          "normalized_arabic_exact",
+          "normalized_english_exact"
+        ],
+        "publisher": "https://github.com/fawazahmed0/hadith-api",
+        "publisher_commit": "df57907be35291c91ad6a6691180e22ca9920784",
+        "publisher_record": 5575,
+        "publisher_arabic_number": "5575",
+        "in_book": {
+          "book": 74,
+          "hadith": 1
+        },
+        "primary_page_checked": true,
+        "primary_reference": "Sahih al-Bukhari 5575",
+        "primary_in_book": {
+          "book": 74,
+          "hadith": 1
+        },
+        "primary_arabic_normalized_sha256": "225e7b82b1a639de10201b1fd382262ff4da3450ac6ce745e9a63a7ad462fcca"
+      },
+      "ruling_support_review": "pending",
+      "topics": [
+        "intoxicants"
+      ],
+      "english_text_origin": "existing_owner_provided_local_row_unmodified",
+      "generation_eligible": true
+    },
+    {
+      "source": "Sahih Bukhari",
+      "hadith_no": "1216",
+      "reference_url": "https://sunnah.com/bukhari:1216",
+      "local_file": "sahih_bukhari_muslim.json",
+      "local_row_sha256": "961b8c560bcc13c25fc77f03a50700cf533dc4277b664bfd1edd10f29e872f6a",
+      "legacy_number": "1216",
+      "identity_status": "primary_arabic_text_matched",
+      "verification": {
+        "date": "2026-11-04",
+        "methods": [
+          "normalized_arabic_exact",
+          "normalized_english_exact"
+        ],
+        "publisher": "https://github.com/fawazahmed0/hadith-api",
+        "publisher_commit": "df57907be35291c91ad6a6691180e22ca9920784",
+        "publisher_record": 1216,
+        "publisher_arabic_number": "1216",
+        "in_book": {
+          "book": 21,
+          "hadith": 20
+        },
+        "primary_page_checked": true,
+        "primary_reference": "Sahih al-Bukhari 1216",
+        "primary_in_book": {
+          "book": 21,
+          "hadith": 20
+        },
+        "primary_arabic_normalized_sha256": "ab093ee6fc60aa0826770c2cfa4e9250570a5ae5f659c62df76d995b0151b51c"
+      },
+      "ruling_support_review": "pending",
+      "topics": [
+        "laughing_prayer"
+      ],
+      "english_text_origin": "existing_owner_provided_local_row_unmodified",
+      "generation_eligible": true
+    },
+    {
+      "source": "Sahih Bukhari",
+      "hadith_no": "227",
+      "reference_url": "https://sunnah.com/bukhari:227",
+      "local_file": "sahih_bukhari_muslim.json",
+      "local_row_sha256": "452287fae2a84e7e11e053470ea36014938cbb9bc09696c0e2ee03062a197040",
+      "legacy_number": "227",
+      "identity_status": "primary_arabic_text_matched",
+      "verification": {
+        "date": "2026-11-04",
+        "methods": [
+          "normalized_arabic_exact",
+          "normalized_english_exact"
+        ],
+        "publisher": "https://github.com/fawazahmed0/hadith-api",
+        "publisher_commit": "df57907be35291c91ad6a6691180e22ca9920784",
+        "publisher_record": 227,
+        "publisher_arabic_number": "227",
+        "in_book": {
+          "book": 4,
+          "hadith": 93
+        },
+        "primary_page_checked": true,
+        "primary_reference": "Sahih al-Bukhari 227",
+        "primary_in_book": {
+          "book": 4,
+          "hadith": 93
+        },
+        "primary_arabic_normalized_sha256": "46ed26c6f10f4576024788e8e09e595b5de6ed8b97fb5cb2792fac0dda50f722"
+      },
+      "ruling_support_review": "pending",
+      "topics": [
+        "impurity_clothes"
+      ],
+      "english_text_origin": "existing_owner_provided_local_row_unmodified",
+      "generation_eligible": true
+    },
+    {
+      "source": "Sahih Bukhari",
+      "hadith_no": "636",
+      "reference_url": "https://sunnah.com/bukhari:636",
+      "local_file": "sahih_bukhari_muslim.json",
+      "local_row_sha256": "181f4b3d50c0818fce5aa99b9ca2bf127cb1a2232dd6ff4895aac4b47d165279",
+      "legacy_number": "636",
+      "identity_status": "primary_arabic_text_matched",
+      "verification": {
+        "date": "2026-11-04",
+        "methods": [
+          "normalized_arabic_exact",
+          "normalized_english_exact"
+        ],
+        "publisher": "https://github.com/fawazahmed0/hadith-api",
+        "publisher_commit": "df57907be35291c91ad6a6691180e22ca9920784",
+        "publisher_record": 636,
+        "publisher_arabic_number": "636",
+        "in_book": {
+          "book": 10,
+          "hadith": 33
+        },
+        "primary_page_checked": true,
+        "primary_reference": "Sahih al-Bukhari 636",
+        "primary_in_book": {
+          "book": 10,
+          "hadith": 33
+        },
+        "primary_arabic_normalized_sha256": "3bdc010618558a5ab1534f52e2918da3ebfd833728eb6cfa4faa969efffe35d8"
+      },
+      "ruling_support_review": "pending",
+      "topics": [
+        "missed_rakah"
+      ],
+      "english_text_origin": "existing_owner_provided_local_row_unmodified",
+      "generation_eligible": true
+    },
+    {
+      "source": "Sahih Bukhari",
+      "hadith_no": "527",
+      "reference_url": "https://sunnah.com/bukhari:527",
+      "local_file": "sahih_bukhari_muslim.json",
+      "local_row_sha256": "8f47956e3208f3a23840a371f50210e58628e4b74c4569f8c46eddce1ee3b795",
+      "legacy_number": "527",
+      "identity_status": "primary_arabic_text_matched",
+      "verification": {
+        "date": "2026-11-04",
+        "methods": [
+          "normalized_arabic_exact",
+          "normalized_english_exact"
+        ],
+        "publisher": "https://github.com/fawazahmed0/hadith-api",
+        "publisher_commit": "df57907be35291c91ad6a6691180e22ca9920784",
+        "publisher_record": 527,
+        "publisher_arabic_number": "527",
+        "in_book": {
+          "book": 9,
+          "hadith": 6
+        },
+        "primary_page_checked": true,
+        "primary_reference": "Sahih al-Bukhari 527",
+        "primary_in_book": {
+          "book": 9,
+          "hadith": 6
+        },
+        "primary_arabic_normalized_sha256": "8052993fab0b6b9e87f77bee0d380d4630b8c2fabe5882f959b8a1f77baee003"
+      },
+      "ruling_support_review": "pending",
+      "topics": [
+        "late_prayer"
+      ],
+      "english_text_origin": "existing_owner_provided_local_row_unmodified",
+      "generation_eligible": true
+    },
+    {
+      "source": "Sahih Bukhari",
+      "hadith_no": "1224",
+      "reference_url": "https://sunnah.com/bukhari:1224",
+      "local_file": "sahih_bukhari_muslim.json",
+      "local_row_sha256": "8e8e21648c927e42b65c18d5052f4670841a6ac7aab052badade4bd8f4cde1cb",
+      "legacy_number": "1224",
+      "identity_status": "primary_arabic_text_matched",
+      "verification": {
+        "date": "2026-11-04",
+        "methods": [
+          "normalized_arabic_exact",
+          "normalized_english_exact"
+        ],
+        "publisher": "https://github.com/fawazahmed0/hadith-api",
+        "publisher_commit": "df57907be35291c91ad6a6691180e22ca9920784",
+        "publisher_record": 1224,
+        "publisher_arabic_number": "1224",
+        "in_book": {
+          "book": 22,
+          "hadith": 1
+        },
+        "primary_page_checked": true,
+        "primary_reference": "Sahih al-Bukhari 1224",
+        "primary_in_book": {
+          "book": 22,
+          "hadith": 1
+        },
+        "primary_arabic_normalized_sha256": "f37abb4b7735d92f81e50411a6c7465320ce019279f98f8971db2100e1bb2552"
+      },
+      "ruling_support_review": "pending",
+      "topics": [
+        "sajda_sahw",
+        "imam_mistake"
+      ],
+      "english_text_origin": "existing_owner_provided_local_row_unmodified",
+      "generation_eligible": true
+    },
+    {
+      "source": "Sahih Bukhari",
+      "hadith_no": "1933",
+      "reference_url": "https://sunnah.com/bukhari:1933",
+      "local_file": "sahih_bukhari_muslim.json",
+      "local_row_sha256": "50610ef12ebf67860c8607615cddd013f3b76dedaa9da6067548f8eab87fef22",
+      "legacy_number": "1933",
+      "identity_status": "primary_arabic_text_matched",
+      "verification": {
+        "date": "2026-11-04",
+        "methods": [
+          "normalized_arabic_exact",
+          "normalized_english_exact"
+        ],
+        "publisher": "https://github.com/fawazahmed0/hadith-api",
+        "publisher_commit": "df57907be35291c91ad6a6691180e22ca9920784",
+        "publisher_record": 1933,
+        "publisher_arabic_number": "1933",
+        "in_book": {
+          "book": 30,
+          "hadith": 40
+        },
+        "primary_page_checked": true,
+        "primary_reference": "Sahih al-Bukhari 1933",
+        "primary_in_book": {
+          "book": 30,
+          "hadith": 40
+        },
+        "primary_arabic_normalized_sha256": "fdfb4e53eda6ae9d8ecaa984c91aebdc0accd42abcf8c6cda158e8605a89ce36"
+      },
+      "ruling_support_review": "pending",
+      "topics": [
+        "forgetful_eating_fast"
+      ],
+      "english_text_origin": "existing_owner_provided_local_row_unmodified",
+      "generation_eligible": true
+    },
+    {
+      "source": "Sahih Bukhari",
+      "hadith_no": "1894",
+      "reference_url": "https://sunnah.com/bukhari:1894",
+      "local_file": "sahih_bukhari_muslim.json",
+      "local_row_sha256": "f00bb18b382a9500bc2aa60743bcbad6c418cdbbe25dee3ee5ec965460ba78ce",
+      "legacy_number": "1894",
+      "identity_status": "primary_arabic_text_matched",
+      "verification": {
+        "date": "2026-11-04",
+        "methods": [
+          "normalized_arabic_exact",
+          "normalized_english_exact"
+        ],
+        "publisher": "https://github.com/fawazahmed0/hadith-api",
+        "publisher_commit": "df57907be35291c91ad6a6691180e22ca9920784",
+        "publisher_record": 1894,
+        "publisher_arabic_number": "1894",
+        "in_book": {
+          "book": 30,
+          "hadith": 4
+        },
+        "primary_page_checked": true,
+        "primary_reference": "Sahih al-Bukhari 1894",
+        "primary_in_book": {
+          "book": 30,
+          "hadith": 4
+        },
+        "primary_arabic_normalized_sha256": "6cdb351ec6cac420215dff4c2faeebae296de99d981c036df31cda4979a64518"
+      },
+      "ruling_support_review": "pending",
+      "topics": [
+        "injections_fasting"
+      ],
+      "english_text_origin": "existing_owner_provided_local_row_unmodified",
+      "generation_eligible": true
+    },
+    {
+      "source": "Sahih Bukhari",
+      "hadith_no": "1938",
+      "reference_url": "https://sunnah.com/bukhari:1938",
+      "local_file": "sahih_bukhari_muslim.json",
+      "local_row_sha256": "e2c145698ca34c814f3c749e8a9f14ef89b7074742cc3b2586093289eae4ccc1",
+      "legacy_number": "1938",
+      "identity_status": "primary_arabic_text_matched",
+      "verification": {
+        "date": "2026-11-04",
+        "methods": [
+          "normalized_arabic_exact"
+        ],
+        "publisher": "https://github.com/fawazahmed0/hadith-api",
+        "publisher_commit": "df57907be35291c91ad6a6691180e22ca9920784",
+        "publisher_record": 1938,
+        "publisher_arabic_number": "1938",
+        "in_book": {
+          "book": 30,
+          "hadith": 45
+        },
+        "primary_page_checked": true,
+        "primary_reference": "Sahih al-Bukhari 1938",
+        "primary_in_book": {
+          "book": 30,
+          "hadith": 45
+        },
+        "primary_arabic_normalized_sha256": "98d0116076f7806b857d1d699afcaaca47ee5e2e910683e68057e38d30efd8a0"
+      },
+      "ruling_support_review": "pending",
+      "topics": [
+        "vomiting_fasting"
+      ],
+      "english_text_origin": "existing_owner_provided_local_row_unmodified",
+      "generation_eligible": true
+    },
+    {
+      "source": "Sahih Bukhari",
+      "hadith_no": "1395",
+      "reference_url": "https://sunnah.com/bukhari:1395",
+      "local_file": "sahih_bukhari_muslim.json",
+      "local_row_sha256": "79af6257c60ab03335ec8132d0fbe9f2a23bfff2795828127391776463d34d26",
+      "legacy_number": "1413",
+      "identity_status": "primary_arabic_text_matched",
+      "verification": {
+        "date": "2026-11-04",
+        "methods": [
+          "normalized_arabic_exact",
+          "normalized_english_exact"
+        ],
+        "publisher": "https://github.com/fawazahmed0/hadith-api",
+        "publisher_commit": "df57907be35291c91ad6a6691180e22ca9920784",
+        "publisher_record": 1395,
+        "publisher_arabic_number": "1395",
+        "in_book": {
+          "book": 24,
+          "hadith": 1
+        },
+        "primary_page_checked": true,
+        "primary_reference": "Sahih al-Bukhari 1395",
+        "primary_in_book": {
+          "book": 24,
+          "hadith": 1
+        },
+        "primary_arabic_normalized_sha256": "68897914cae44df36d055c53c3e7c37b51b0cacf89a07e8d825935c8dd0c4d12"
+      },
+      "ruling_support_review": "pending",
+      "topics": [
+        "zakat_salary",
+        "zakat_debt"
+      ],
+      "english_text_origin": "existing_owner_provided_local_row_unmodified",
+      "generation_eligible": true
+    },
+    {
+      "source": "Sahih Bukhari",
+      "hadith_no": "438",
+      "reference_url": "https://sunnah.com/bukhari:438",
+      "local_file": "sahih_bukhari_muslim.json",
+      "local_row_sha256": "67d6f9682e7da28591d52ba6853c33aea41f7205859c20a6982dfb98bd8b5493",
+      "legacy_number": "438",
+      "identity_status": "primary_arabic_text_matched",
+      "verification": {
+        "date": "2026-11-04",
+        "methods": [
+          "normalized_arabic_exact",
+          "normalized_english_exact"
+        ],
+        "publisher": "https://github.com/fawazahmed0/hadith-api",
+        "publisher_commit": "df57907be35291c91ad6a6691180e22ca9920784",
+        "publisher_record": 438,
+        "publisher_arabic_number": "438",
+        "in_book": {
+          "book": 8,
+          "hadith": 87
+        },
+        "primary_page_checked": true,
+        "primary_reference": "Sahih al-Bukhari 438",
+        "primary_in_book": {
+          "book": 8,
+          "hadith": 87
+        },
+        "primary_arabic_normalized_sha256": "c8f76e6323a61b93f3d418016ceb0de4219288b018cfe7bf8211b701398b4f01"
+      },
+      "ruling_support_review": "pending",
+      "topics": [
+        "prayer_workplace",
+        "tayammum"
+      ],
+      "english_text_origin": "existing_owner_provided_local_row_unmodified",
+      "generation_eligible": true
+    },
+    {
+      "source": "Sahih Bukhari",
+      "hadith_no": "5951",
+      "reference_url": "https://sunnah.com/bukhari:5951",
+      "local_file": "sahih_bukhari_muslim.json",
+      "local_row_sha256": "0446a8b1b8f87045a76304ef14c816f7789a3539b884d592f3d8930bd94fcfaa",
+      "legacy_number": "6016",
+      "identity_status": "primary_arabic_text_matched",
+      "verification": {
+        "date": "2026-11-04",
+        "methods": [
+          "normalized_arabic_exact",
+          "normalized_english_exact"
+        ],
+        "publisher": "https://github.com/fawazahmed0/hadith-api",
+        "publisher_commit": "df57907be35291c91ad6a6691180e22ca9920784",
+        "publisher_record": 5951,
+        "publisher_arabic_number": "5951",
+        "in_book": {
+          "book": 77,
+          "hadith": 167
+        },
+        "primary_page_checked": true,
+        "primary_reference": "Sahih al-Bukhari 5951",
+        "primary_in_book": {
+          "book": 77,
+          "hadith": 167
+        },
+        "primary_arabic_normalized_sha256": "fa8f1db53fb4642b6f7389e06d45d6d7cf1446d2e5cd958a146b59855b1d1b8a"
+      },
+      "ruling_support_review": "pending",
+      "topics": [
+        "pictures_living_beings"
+      ],
+      "english_text_origin": "existing_owner_provided_local_row_unmodified",
+      "generation_eligible": true
+    },
+    {
+      "source": "Sahih Bukhari",
+      "hadith_no": "2322",
+      "reference_url": "https://sunnah.com/bukhari:2322",
+      "local_file": "sahih_bukhari_muslim.json",
+      "local_row_sha256": "c41479c4d97dd63c0504d3dd62e9049ab26468df512194a4b4cb8f3f92e65c5b",
+      "legacy_number": "2322",
+      "identity_status": "primary_arabic_text_matched",
+      "verification": {
+        "date": "2026-11-04",
+        "methods": [
+          "normalized_arabic_exact",
+          "normalized_english_exact"
+        ],
+        "publisher": "https://github.com/fawazahmed0/hadith-api",
+        "publisher_commit": "df57907be35291c91ad6a6691180e22ca9920784",
+        "publisher_record": 2322,
+        "publisher_arabic_number": "2322",
+        "in_book": {
+          "book": 41,
+          "hadith": 3
+        },
+        "primary_page_checked": true,
+        "primary_reference": "Sahih al-Bukhari 2322",
+        "primary_in_book": {
+          "book": 41,
+          "hadith": 3
+        },
+        "primary_arabic_normalized_sha256": "080d4c27af7a4b80b86fe6933605f8a10bc7ab8160be9bc991e2e13fd1e77a71"
+      },
+      "ruling_support_review": "pending",
+      "topics": [
+        "keeping_dogs"
+      ],
+      "english_text_origin": "existing_owner_provided_local_row_unmodified",
+      "generation_eligible": true
+    },
+    {
+      "source": "Sahih Bukhari",
+      "hadith_no": "5931",
+      "reference_url": "https://sunnah.com/bukhari:5931",
+      "local_file": "sahih_bukhari_muslim.json",
+      "local_row_sha256": "0ca234904db8321f7793842195f7ef34648d1bbf529b323da515e58a8191ed7b",
+      "legacy_number": "5994",
+      "identity_status": "primary_arabic_text_matched",
+      "verification": {
+        "date": "2026-11-04",
+        "methods": [
+          "normalized_arabic_exact"
+        ],
+        "publisher": "https://github.com/fawazahmed0/hadith-api",
+        "publisher_commit": "df57907be35291c91ad6a6691180e22ca9920784",
+        "publisher_record": 5931,
+        "publisher_arabic_number": "5931",
+        "in_book": {
+          "book": 77,
+          "hadith": 146
+        },
+        "primary_page_checked": true,
+        "primary_reference": "Sahih al-Bukhari 5931",
+        "primary_in_book": {
+          "book": 77,
+          "hadith": 146
+        },
+        "primary_arabic_normalized_sha256": "af554c6f42bba24afb165d32b0142516a4691faf6eed251d8a57b41e06f6ee8c"
+      },
+      "ruling_support_review": "pending",
+      "topics": [
+        "tattoos"
+      ],
+      "english_text_origin": "existing_owner_provided_local_row_unmodified",
+      "generation_eligible": true
+    },
+    {
+      "source": "Sahih Bukhari",
+      "hadith_no": "2013",
+      "reference_url": "https://sunnah.com/bukhari:2013",
+      "local_file": "sahih_bukhari_muslim.json",
+      "local_row_sha256": "1fdf649843c1df09f2daee43acc7765820903a2246d82a66b679f20d0b8decdf",
+      "legacy_number": "2013",
+      "identity_status": "primary_arabic_text_matched",
+      "verification": {
+        "date": "2026-11-04",
+        "methods": [
+          "normalized_arabic_exact",
+          "normalized_english_exact"
+        ],
+        "publisher": "https://github.com/fawazahmed0/hadith-api",
+        "publisher_commit": "df57907be35291c91ad6a6691180e22ca9920784",
+        "publisher_record": 2013,
+        "publisher_arabic_number": "2013",
+        "in_book": {
+          "book": 31,
+          "hadith": 6
+        },
+        "primary_page_checked": true,
+        "primary_reference": "Sahih al-Bukhari 2013",
+        "primary_in_book": {
+          "book": 31,
+          "hadith": 6
+        },
+        "primary_arabic_normalized_sha256": "609f38353e45414d445cc09c37ba7e1fe7c85716f361c08127471d91fd2a4e01"
+      },
+      "ruling_support_review": "pending",
+      "topics": [
+        "tarawih_rakats"
+      ],
+      "english_text_origin": "existing_owner_provided_local_row_unmodified",
+      "generation_eligible": true
+    },
+    {
+      "source": "Sahih Bukhari",
+      "hadith_no": "8",
+      "reference_url": "https://sunnah.com/bukhari:8",
+      "local_file": "sahih_bukhari_muslim.json",
+      "local_row_sha256": "1d1bb455e032d64f82d4bc9994d4f645dfcc0d2c89ba59f2abc14d957e2b14d8",
+      "legacy_number": "8",
+      "identity_status": "primary_arabic_text_matched",
+      "verification": {
+        "date": "2026-11-04",
+        "methods": [
+          "normalized_arabic_exact",
+          "normalized_english_exact"
+        ],
+        "publisher": "https://github.com/fawazahmed0/hadith-api",
+        "publisher_commit": "df57907be35291c91ad6a6691180e22ca9920784",
+        "publisher_record": 8,
+        "publisher_arabic_number": "8",
+        "in_book": {
+          "book": 2,
+          "hadith": 1
+        },
+        "primary_page_checked": true,
+        "primary_reference": "Sahih al-Bukhari 8",
+        "primary_in_book": {
+          "book": 2,
+          "hadith": 1
+        },
+        "primary_arabic_normalized_sha256": "9dc80a59322f032a86585be288a3a14d67f54e6a049843959058a14c960b3b9d"
+      },
+      "ruling_support_review": "pending",
+      "topics": [
+        "hajj_obligation"
+      ],
+      "english_text_origin": "existing_owner_provided_local_row_unmodified",
+      "generation_eligible": true
+    },
+    {
+      "source": "Sahih Muslim",
+      "hadith_no": "11a",
+      "reference_url": "https://sunnah.com/muslim:11a",
+      "local_file": "sahih_bukhari_muslim.json",
+      "local_row_sha256": "4a87138b7d5053d9252db1dc97b940a6052b595e25c68b0442d6597bd10a4dee",
+      "legacy_number": "109",
+      "identity_status": "primary_arabic_text_matched",
+      "verification": {
+        "date": "2026-11-04",
+        "methods": [
+          "normalized_arabic_exact",
+          "normalized_english_exact"
+        ],
+        "publisher": "https://github.com/fawazahmed0/hadith-api",
+        "publisher_commit": "df57907be35291c91ad6a6691180e22ca9920784",
+        "publisher_record": 100,
+        "publisher_arabic_number": "11.01",
+        "in_book": {
+          "book": 1,
+          "hadith": 8
+        },
+        "primary_page_checked": true,
+        "primary_reference": "Sahih Muslim 11a",
+        "primary_in_book": {
+          "book": 1,
+          "hadith": 8
+        },
+        "primary_arabic_normalized_sha256": "b911fae1a05af562a1a2f04186bfd9aa3fae629c830c263f5ca807531afa13b5"
+      },
+      "ruling_support_review": "pending",
+      "topics": [
+        "five_daily_prayers"
+      ],
+      "english_text_origin": "existing_owner_provided_local_row_unmodified",
+      "generation_eligible": true
+    },
+    {
+      "source": "Sahih Muslim",
+      "hadith_no": "705c",
+      "reference_url": "https://sunnah.com/muslim:705c",
+      "local_file": "sahih_bukhari_muslim.json",
+      "local_row_sha256": "51380f5d60e76ecc685aa0343595f1dec7872fc98e8676a55caf1470e73819b0",
+      "legacy_number": "1664",
+      "identity_status": "primary_arabic_text_matched",
+      "verification": {
+        "date": "2026-11-04",
+        "methods": [
+          "normalized_arabic_exact",
+          "normalized_english_exact"
+        ],
+        "publisher": "https://github.com/fawazahmed0/hadith-api",
+        "publisher_commit": "df57907be35291c91ad6a6691180e22ca9920784",
+        "publisher_record": 1630,
+        "publisher_arabic_number": "705.03",
+        "in_book": {
+          "book": 6,
+          "hadith": 61
+        },
+        "primary_page_checked": true,
+        "primary_reference": "Sahih Muslim 705c",
+        "primary_in_book": {
+          "book": 6,
+          "hadith": 61
+        },
+        "primary_arabic_normalized_sha256": "65c4795f8fb5d1ff77d0f1badd6a5b5c2aef982129d2c86bcac0c533954c1af1"
+      },
+      "ruling_support_review": "pending",
+      "topics": [
+        "combining_prayers_travel"
+      ],
+      "english_text_origin": "existing_owner_provided_local_row_unmodified",
+      "generation_eligible": true
+    },
+    {
+      "source": "Sahih Muslim",
+      "hadith_no": "368d",
+      "reference_url": "https://sunnah.com/muslim:368d",
+      "local_file": "sahih_bukhari_muslim.json",
+      "local_row_sha256": "ae7a016a613cfb5f9a5e56b74e53318752a4689b546caa5b0afda1a6e6161953",
+      "legacy_number": "368",
+      "identity_status": "primary_arabic_text_matched",
+      "verification": {
+        "date": "2026-11-04",
+        "methods": [
+          "normalized_arabic_exact",
+          "normalized_english_exact"
+        ],
+        "publisher": "https://github.com/fawazahmed0/hadith-api",
+        "publisher_commit": "df57907be35291c91ad6a6691180e22ca9920784",
+        "publisher_record": 821,
+        "publisher_arabic_number": "368.04",
+        "in_book": {
+          "book": 3,
+          "hadith": 142
+        },
+        "primary_page_checked": true,
+        "primary_reference": "Sahih Muslim 368d",
+        "primary_in_book": {
+          "book": 3,
+          "hadith": 142
+        },
+        "primary_arabic_normalized_sha256": "e7a801186bca1770a39c7b4967e239770834fb280a8562bd4ff3330474c06d53"
+      },
+      "ruling_support_review": "pending",
+      "topics": [
+        "touching_opposite_gender"
+      ],
+      "english_text_origin": "existing_owner_provided_local_row_unmodified",
+      "generation_eligible": true
+    },
+    {
+      "source": "Sahih Muslim",
+      "hadith_no": "259c",
+      "reference_url": "https://sunnah.com/muslim:259c",
+      "local_file": "sahih_bukhari_muslim.json",
+      "local_row_sha256": "55c5dc488a5a0c1fd776e23b252f5a357ef68b08a933ce8fdd703e2df69acff3",
+      "legacy_number": "259",
+      "identity_status": "primary_arabic_text_matched",
+      "verification": {
+        "date": "2026-11-04",
+        "methods": [
+          "normalized_arabic_exact",
+          "normalized_english_exact"
+        ],
+        "publisher": "https://github.com/fawazahmed0/hadith-api",
+        "publisher_commit": "df57907be35291c91ad6a6691180e22ca9920784",
+        "publisher_record": 602,
+        "publisher_arabic_number": "259.03",
+        "in_book": {
+          "book": 2,
+          "hadith": 69
+        },
+        "primary_page_checked": true,
+        "primary_reference": "Sahih Muslim 259c",
+        "primary_in_book": {
+          "book": 2,
+          "hadith": 69
+        },
+        "primary_arabic_normalized_sha256": "19d916d648f63126c461008816a20afaa9efee614509af84b37c10df3536612a"
+      },
+      "ruling_support_review": "pending",
+      "topics": [
+        "beard"
+      ],
+      "english_text_origin": "existing_owner_provided_local_row_unmodified",
+      "generation_eligible": true
+    },
+    {
+      "source": "Sahih Muslim",
+      "hadith_no": "276c",
+      "reference_url": "https://sunnah.com/muslim:276c",
+      "local_file": "sahih_bukhari_muslim.json",
+      "local_row_sha256": "55f2b55c9b2937db3b4e6dbe9fee8106446dd4a959e9b0be5d66986cd3ce0e41",
+      "legacy_number": "276",
+      "identity_status": "primary_arabic_text_matched",
+      "verification": {
+        "date": "2026-11-04",
+        "methods": [
+          "normalized_arabic_exact",
+          "normalized_english_exact"
+        ],
+        "publisher": "https://github.com/fawazahmed0/hadith-api",
+        "publisher_commit": "df57907be35291c91ad6a6691180e22ca9920784",
+        "publisher_record": 641,
+        "publisher_arabic_number": "276.03",
+        "in_book": {
+          "book": 2,
+          "hadith": 107
+        },
+        "primary_page_checked": true,
+        "primary_reference": "Sahih Muslim 276c",
+        "primary_in_book": {
+          "book": 2,
+          "hadith": 107
+        },
+        "primary_arabic_normalized_sha256": "ef6caee622fce76610a97f0f65b93da2da245b59af523087a621087c8fdd78f8"
+      },
+      "ruling_support_review": "pending",
+      "topics": [
+        "masah_socks"
+      ],
+      "english_text_origin": "existing_owner_provided_local_row_unmodified",
+      "generation_eligible": true
+    },
+    {
+      "source": "Sahih Muslim",
+      "hadith_no": "537a",
+      "reference_url": "https://sunnah.com/muslim:537a",
+      "local_file": "sahih_bukhari_muslim.json",
+      "local_row_sha256": "238e9132e475c590e1dbc0c4cb00becc6664b0c0171e9b132111c9e65ecdcfe1",
+      "legacy_number": "1227",
+      "identity_status": "primary_arabic_text_matched",
+      "verification": {
+        "date": "2026-11-04",
+        "methods": [
+          "normalized_arabic_exact",
+          "normalized_english_exact"
+        ],
+        "publisher": "https://github.com/fawazahmed0/hadith-api",
+        "publisher_commit": "df57907be35291c91ad6a6691180e22ca9920784",
+        "publisher_record": 1199,
+        "publisher_arabic_number": "537.01",
+        "in_book": {
+          "book": 5,
+          "hadith": 39
+        },
+        "primary_page_checked": true,
+        "primary_reference": "Sahih Muslim 537a",
+        "primary_in_book": {
+          "book": 5,
+          "hadith": 39
+        },
+        "primary_arabic_normalized_sha256": "a1956f08ff730865b1073a18e6e4610dd6171a0545b57e7cf1747f7fa6bac0a7"
+      },
+      "ruling_support_review": "pending",
+      "topics": [
+        "speaking_prayer"
+      ],
+      "english_text_origin": "existing_owner_provided_local_row_unmodified",
+      "generation_eligible": true
+    },
+    {
+      "source": "Sahih Muslim",
+      "hadith_no": "349",
+      "reference_url": "https://sunnah.com/muslim:349",
+      "local_file": "sahih_bukhari_muslim.json",
+      "local_row_sha256": "cb6b75042f5b7fe76a50cb1bf5b21ad2dec6759ca6fd1f278ef6b898852d652c",
+      "legacy_number": "349",
+      "identity_status": "primary_arabic_text_matched",
+      "verification": {
+        "date": "2026-11-04",
+        "methods": [
+          "normalized_arabic_exact",
+          "normalized_english_exact"
+        ],
+        "publisher": "https://github.com/fawazahmed0/hadith-api",
+        "publisher_commit": "df57907be35291c91ad6a6691180e22ca9920784",
+        "publisher_record": 785,
+        "publisher_arabic_number": "349",
+        "in_book": {
+          "book": 3,
+          "hadith": 107
+        },
+        "primary_page_checked": true,
+        "primary_reference": "Sahih Muslim 349",
+        "primary_in_book": {
+          "book": 3,
+          "hadith": 107
+        },
+        "primary_arabic_normalized_sha256": "b9f5598a84c1f617898bca9c0c1b97fb788326639bb061b10e36d10437d69a4d"
+      },
+      "ruling_support_review": "pending",
+      "topics": [
+        "ghusl_obligation"
+      ],
+      "english_text_origin": "existing_owner_provided_local_row_unmodified",
+      "generation_eligible": true
+    },
+    {
+      "source": "Sahih Muslim",
+      "hadith_no": "335c",
+      "reference_url": "https://sunnah.com/muslim:335c",
+      "local_file": "sahih_bukhari_muslim.json",
+      "local_row_sha256": "43f69d901e31218bc1331718005c099852de46e6839f406236b913109636818b",
+      "legacy_number": "335",
+      "identity_status": "primary_arabic_text_matched",
+      "verification": {
+        "date": "2026-11-04",
+        "methods": [
+          "normalized_arabic_exact",
+          "normalized_english_exact"
+        ],
+        "publisher": "https://github.com/fawazahmed0/hadith-api",
+        "publisher_commit": "df57907be35291c91ad6a6691180e22ca9920784",
+        "publisher_record": 763,
+        "publisher_arabic_number": "335.03",
+        "in_book": {
+          "book": 3,
+          "hadith": 85
+        },
+        "primary_page_checked": true,
+        "primary_reference": "Sahih Muslim 335c",
+        "primary_in_book": {
+          "book": 3,
+          "hadith": 85
+        },
+        "primary_arabic_normalized_sha256": "cd5b29fe98f12d1f35edd27d37e652f87f6632c147637a1d9296d78b37448a4d"
+      },
+      "ruling_support_review": "pending",
+      "topics": [
+        "menstruation_worship"
+      ],
+      "english_text_origin": "existing_owner_provided_local_row_unmodified",
+      "generation_eligible": true
+    },
+    {
+      "source": "Jami at-Tirmidhi",
+      "hadith_no": "87",
+      "reference_url": "https://sunnah.com/tirmidhi:87",
+      "local_file": "other_hadith.json",
+      "local_row_sha256": "73f9588aa5f40996529f28026dc740f6b1d6aa266cb4e0b5d787195b1e1e206d",
+      "legacy_number": 87,
+      "identity_status": "primary_arabic_text_matched",
+      "verification": {
+        "date": "2026-11-04",
+        "primary_page_checked": true,
+        "primary_reference": "Jami` at-Tirmidhi 87",
+        "primary_in_book": {
+          "book": 1,
+          "hadith": 87
+        },
+        "primary_arabic_normalized_sha256": "1dd76c0dcdb568a6a0ba32c4c4701e6618dfd5b4d571943fcdc245c868b2e554"
+      },
+      "ruling_support_review": "pending",
+      "english_text_origin": "existing_owner_provided_local_row_unmodified",
+      "generation_eligible": true
+    },
+    {
+      "source": "Sunan an-Nasa'i",
+      "hadith_no": "5148",
+      "reference_url": "https://sunnah.com/nasai:5148",
+      "local_file": "other_hadith.json",
+      "local_row_sha256": "cbf15709668604e82178ef860e6f52a4b583f70b10f5558dce6c7459e52e6387",
+      "legacy_number": 5148,
+      "identity_status": "primary_arabic_text_matched",
+      "verification": {
+        "date": "2026-11-04",
+        "primary_page_checked": true,
+        "primary_reference": "Sunan an-Nasa'i 5148",
+        "primary_in_book": {
+          "book": 48,
+          "hadith": 109
+        },
+        "primary_arabic_normalized_sha256": "37c1769006fa863f1c5b755dd706abe20551d7b437e3f041b924d2c73e8c7d35"
+      },
+      "ruling_support_review": "pending",
+      "english_text_origin": "existing_owner_provided_local_row_unmodified",
+      "generation_eligible": true
+    },
+    {
+      "source": "Sunan Abi Dawud",
+      "hadith_no": "2085",
+      "reference_url": "https://sunnah.com/abudawud:2085",
+      "local_file": "other_hadith.json",
+      "local_row_sha256": "e1033ae8f3a4b64216766f127c1d7591e8de020bb33f80331af19fb8a2d83923",
+      "legacy_number": 2085,
+      "identity_status": "primary_arabic_text_matched",
+      "verification": {
+        "date": "2026-11-04",
+        "primary_page_checked": true,
+        "primary_reference": "Sunan Abi Dawud 2085",
+        "primary_in_book": {
+          "book": 12,
+          "hadith": 40
+        },
+        "primary_arabic_normalized_sha256": "24ef87d54a0e2c3107abdab25565f22a11a295195c7a760567f44f1fd4ad820a"
+      },
+      "ruling_support_review": "pending",
+      "english_text_origin": "existing_owner_provided_local_row_unmodified",
+      "generation_eligible": true
+    },
+    {
+      "source": "Sunan Abi Dawud",
+      "hadith_no": "2318",
+      "reference_url": "https://sunnah.com/abudawud:2318",
+      "local_file": "other_hadith.json",
+      "local_row_sha256": "bf0c37fd28d35c6e16ff4fbfc481eae11193246959d96b1464375f424c5f4dee",
+      "legacy_number": 2318,
+      "identity_status": "primary_arabic_text_matched",
+      "verification": {
+        "date": "2026-11-04",
+        "primary_page_checked": true,
+        "primary_reference": "Sunan Abi Dawud 2318",
+        "primary_in_book": {
+          "book": 14,
+          "hadith": 6
+        },
+        "primary_arabic_normalized_sha256": "83fc55320a432e454acd9f74acd9884f879c8f4de2941b9bff40bfacf1f35668"
+      },
+      "ruling_support_review": "pending",
+      "english_text_origin": "existing_owner_provided_local_row_unmodified",
+      "generation_eligible": false,
+      "reported_grade": "Shadh (Al-Albani)",
+      "grade_source_url": "https://sunnah.com/abudawud:2318"
+    }
+  ],
+  "primary_comparison": "Exact normalized Arabic text for all 38 entries; no external translation text imported."
+}

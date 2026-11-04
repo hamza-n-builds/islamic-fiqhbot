@@ -66,17 +66,42 @@ this startup fix. Their implementation has not been completed by this batch.
 
 ### DATA-001: Two topic mappings point to a missing local hadith record
 
-- Severity: S2 for corpus completeness; open.
+- Severity: S2 for corpus identity; fixed in the canonical source record batch.
 - Topics: `zakat_salary`, `zakat_debt`; mapped Sahih Bukhari #1395 is not in the
   local lookup. Do not guess replacement numbers or infer religious correctness.
-- Runtime mitigation: absent records cannot enter citation context.
-- Evidence: `evidence/source-record-audit.json`; audit command currently exits 1.
+- Resolution: existing local row labeled 1413 exactly matches published Bukhari
+  1395. The canonical resolver pins that row; no translation was generated/imported.
+- Evidence: `evidence/source-record-audit.json`; structural audit now passes.
 
 ### DATA-002: A referenced hadith lacks the English text used by prompts
 
-- Severity: S2 for corpus completeness; open.
+- Severity: S2 for corpus identity; fixed in the canonical source record batch.
 - Topic: `five_daily_prayers`; mapped Sahih Muslim #11 has no English text locally.
-- Runtime mitigation: textless prompt records are excluded even when an ID exists.
+- Resolution: old local 11 is an Introduction record. The mapped narration is
+  canonical Muslim 11a, matching the complete existing local row labeled 109.
+  The topic now names 11a and resolves its pinned original text.
 - Evidence: same source audit. All 77 topics additionally have pending (49) or
   unspecified (28) scholar review. Membership checks and HMAC proof do not approve
   these rulings or validate claim-to-source entailment.
+
+### DATA-003: Nonempty legacy key hits can be the wrong published narration
+
+- Severity: S1 for source identity; fixed in the canonical source record batch.
+- Reproduced: `/hadith-text?source=Sahih%20Bukhari&number=5590` returned a goat
+  narration from a legacy key, not published Bukhari 5590. Four source-route
+  regressions failed against `72384fd` before this fix.
+- Cause: mixed numbering and 348 duplicate legacy-key groups, silently overwritten
+  by dictionary construction. Thirteen registered identities differ from legacy labels.
+- Fix: pin existing row fingerprints, require checked published variant/URL and
+  complete normalized Arabic text identity; use the same resolver in RAG/API.
+  Both original corpus files remain unchanged. No unregistered legacy key fallback.
+- Evidence: source identity tests, registry and `source-record-review.md`.
+
+### DATA-004: A publisher-reported Shadh source was generation-eligible
+
+- Severity: S2 for source review; mitigated by an explicit generation hold.
+- Source: Sunan Abi Dawud 2318; reported grade `Shadh (Al-Albani)` on its
+  published page. This batch does not assign an independent grade.
+- The identity remains inspectable but its text is excluded from generation/search.
+  Qualified grade/fiqh support review remains open. The broader support-review
+  queue is documented separately; no existing fiqh wording was approved.

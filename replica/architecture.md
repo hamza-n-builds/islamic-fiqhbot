@@ -58,3 +58,28 @@ startup/HTTP checks. No live Gemini generation or browser rendering evaluation.
 The source-record audit reports two unresolved hadith mappings and one mapped
 hadith without English text. All 77 topics have pending/unspecified scholarly
 review; semantic support, reviewed wording and accurate confidence remain open.
+
+## Canonical source records batch, 2026-11-04
+
+The legacy corpus mixes local/published numbering and has 348 duplicate key
+groups (702 additional rows). Its raw `(collection, integer)` keys cannot identify
+published narrations safely. The previous membership guard needed a trustworthy
+source-identity layer underneath it.
+
+`source_records.py` now resolves 38 primary-page text-matched identities from
+`data/hadith_identity_registry.json`. Each entry pins the exact existing local
+row, canonical label/variant, published URL and normalized full Arabic text hash.
+Both RAG and the hadith text API share it. Edited/missing pinned rows, unchecked
+entries, ambiguous variants and duplicate canonical keys fail closed. No external
+translation was imported and neither original corpus file was edited.
+
+Seven topic hadith numbers now name explicit canonical Muslim references; fiqh
+wording and all review states are unchanged. Search indexes only the 37 currently
+generation-eligible canonical records. The 38th record, publisher-reported Shadh,
+remains inspectable but is excluded from prompt context/search pending review.
+Unregistered legacy rows remain on disk without implicit canonical aliases.
+
+The structural audit now resolves every mapped reference with nonempty English.
+This is not a release approval: 49 topic reviews are pending and 28 unspecified;
+known topic/source support questions are listed in `source-record-review.md`.
+Confidence calibration and semantic/scholarly support remain separate work.

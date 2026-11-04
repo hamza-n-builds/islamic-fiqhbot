@@ -128,6 +128,22 @@ for unresolved dataset mappings/review status and
 [`replica/evidence/citation-verification.json`](replica/evidence/citation-verification.json)
 for the exact tests and limitations.
 
+Hadith references now resolve through a pinned canonical identity registry,
+shared by retrieval and `/hadith-text`. The legacy corpus mixes numbering schemes
+and has colliding integer keys, so an integer-only dictionary is not trusted.
+All 38 currently mapped identities were matched against published Arabic text;
+the original corpus and English translations are unchanged. Thirty-seven records
+are eligible for generation; the publisher-reported Shadh narration is held for
+qualified review. Unregistered legacy records are preserved but excluded from
+lookup and optional hadith search until explicitly checked.
+
+The former Bukhari 1395 mappings and Muslim 11 text gap are resolved through the
+correct existing local narrations (Muslim **11a**, not Introduction record 11).
+Seven Muslim references now identify explicit published variants. This repairs
+source identity, not the religious support for every existing topic. See
+[`replica/source-record-review.md`](replica/source-record-review.md) for evidence,
+preservation checks and the outstanding scholarly review queue.
+
 ### Manual setup (optional)
 
 ```bash

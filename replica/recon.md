@@ -17,3 +17,9 @@ launch. Browser rendering is not part of the startup runtime claim.
 F01 follow-ups: message text plus server-issued proof -> proof/source-content
 validation -> context-bound rephrasing -> same-citation check. Unverified history
 asks the user to repeat the original question. Existing chats remain readable.
+
+F01 source identity now resolves checked canonical registry rows, not ambiguous
+legacy integer keys. All current mapped references resolve; supplementary grade
+holds are omitted from generation. Original corpus/rulings/review states remain
+preserved. Additional raw narrations need explicit canonical registration, while
+all topic-to-source religious support still needs qualified review.
