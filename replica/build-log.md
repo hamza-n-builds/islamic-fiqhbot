@@ -59,3 +59,18 @@
   pass AA. Dataset bytes and all review states are unchanged. Browser host
   unavailable; mobile/desktop visual/keyboard checks, live provider fidelity and
   scholarly/semantic validation remain pending. No push or deployment.
+
+- 2026-11-09, F01 prototype response presentation: inspected the owner's FireShot
+  reference and sampled its actual PNG palette. Replaced three answer dropdowns
+  with one warm Montserrat response card and always-visible school rows; mobile
+  stacks labels above full answers. Outline Listen/Copy utilities and a single
+  source disclosure retain exact response text and school reference ownership.
+  Missing/withheld notices and review limits remain; no demo percentage is copied.
+  Source records now use native keyboard-operable disclosures with lazy content.
+  Six frontend failures were recorded before implementation. Final: 18 frontend
+  checks, 138 Python regressions, nine actual startup/HTTP checks and 44 specified
+  contrast pairs passed. Backend runtime and all dataset byte hashes match the
+  previous commit. A local renderer-based synthetic preview is available in
+  workspace `.audit/fiqhbot-response-ui-2026-11-09/`. Browser host unavailable:
+  visual/device/font/keyboard QA remains pending; no screenshot parity or religious
+  accuracy claim. No live provider call, push or deployment.

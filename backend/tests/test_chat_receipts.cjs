@@ -97,15 +97,16 @@ function comparisonContext() {
   return context;
 }
 
-test('three answer accordions show all school names and open the first available answer', () => {
+test('comparison displays all three full answers as compact rows without answer dropdowns', () => {
   const sections = ['hanafi', 'shafi', 'maliki'].map(school => ({ school, status: 'available', answer: 'Fixture answer' }));
   const html = comparisonContext().buildSchoolSections(sections);
   assert.equal((html.match(/class="school-answer"/g) || []).length, 3);
-  assert.equal((html.match(/class="school-answer" open/g) || []).length, 1);
+  assert.doesNotMatch(html, /<details|<summary|hidden/);
+  assert.equal((html.match(/Fixture answer/g) || []).length, 3);
   assert.match(html, /Hanafi/);
   assert.match(html, /Shafi‘i/);
   assert.match(html, /Maliki/);
-  assert.equal((html.match(/<summary>Sources<\/summary>/g) || []).length, 3);
+  assert.doesNotMatch(html, /Sources|References matched|Answer<\/span>/);
 });
 
 test('unavailable or withheld schools keep their own message without a sources panel', () => {
@@ -117,8 +118,9 @@ test('unavailable or withheld schools keep their own message without a sources p
   const html = comparisonContext().buildSchoolSections(sections);
   assert.match(html, /Not available/);
   assert.match(html, /Withheld/);
-  assert.equal((html.match(/<summary>Sources<\/summary>/g) || []).length, 1);
-  assert.match(html, /data-school-sources="shafi"/);
+  assert.match(html, /Missing material/);
+  assert.match(html, /Answer withheld/);
+  assert.doesNotMatch(html, /<details|<summary|data-school-sources/);
 });
 
 test('provider text is escaped and malformed stored school metadata is not rendered as a comparison', () => {
@@ -175,12 +177,12 @@ test('in-flight replies stay in the original chat and duplicate sends are blocke
   assert.equal(context.pendingChats.size, 0);
 });
 
-test('actual message renderer mounts answer accordions and each schools own source panel', () => {
+test('actual message renderer mounts a single response card with school-scoped reference groups', () => {
   function element() {
     return {
       children: [], selectors: {}, innerHTML: '',
       classList: { values: new Set(), add(...names) { names.forEach(name => this.values.add(name)); } },
-      appendChild(child) { this.children.push(child); }, addEventListener() {},
+      appendChild(child) { this.children.push(child); }, addEventListener() {}, setAttribute() {},
       querySelector(selector) {
         if (selector.startsWith('[data-school-sources=') || selector === '.speak-btn' || selector === '.copy-btn') {
           return this.selectors[selector] ||= element();
@@ -194,7 +196,7 @@ test('actual message renderer mounts answer accordions and each schools own sour
   const context = { document: { createElement: element }, chatContainer: container,
     chatIntro: { parentNode: container }, requestAnimationFrame(f) { f(); } };
   vm.createContext(context);
-  for (const name of ['escapeHtml', 'isUrduText', 'buildSchoolSections', 'buildMetaBadges', 'buildSourcesAccordion', 'appendMessageUI']) {
+  for (const name of ['escapeHtml', 'isUrduText', 'buildSchoolSections', 'buildSchoolSources', 'responseActionContent', 'buildMetaBadges', 'buildSourcesAccordion', 'appendMessageUI']) {
     vm.runInContext(extract(name), context);
   }
   const sections = ['hanafi', 'shafi', 'maliki'].map(school => ({ school, status: 'available', answer: school + ' fixture',
@@ -205,11 +207,111 @@ test('actual message renderer mounts answer accordions and each schools own sour
   assert.ok(mounted[0].classList.values.has('comparison-message'));
   const content = mounted[0].children[0];
   assert.doesNotMatch(content.innerHTML, /FLAT COPY-ONLY RESPONSE/);
+  assert.match(content.innerHTML, /response-header/);
+  assert.match(content.innerHTML, /Fiqhbot/);
+  assert.equal((content.innerHTML.match(/class="response-sources"/g) || []).length, 1);
+  assert.match(content.innerHTML, /<span>Listen<\/span>/);
+  assert.match(content.innerHTML, /<span>Copy<\/span>/);
+  assert.doesNotMatch(content.innerHTML, /class="school-sources"|sample confidence|92%/);
   for (const section of sections) {
     const holder = content.selectors[`[data-school-sources="${section.school}"]`];
     assert.equal(holder.children.length, 1);
     assert.match(holder.children[0].children[0].innerHTML, new RegExp(section.school + ' topic'));
   }
+});
+
+test('reference groups omit unavailable and withheld school sources even if stale metadata includes them', () => {
+  const context = comparisonContext();
+  vm.runInContext(extract('buildSchoolSources'), context);
+  const sections = ['hanafi', 'shafi', 'maliki'].map((school, i) => ({ school,
+    status: ['unavailable', 'available', 'withheld'][i], answer: 'Fixture',
+    sources: { fiqh: [{ topic_name: 'Synthetic topic' }], quran: [], hadith: [] } }));
+  const html = context.buildSchoolSources(sections);
+  assert.match(html, /data-school-sources="shafi"/);
+  assert.doesNotMatch(html, /data-school-sources="hanafi"|data-school-sources="maliki"/);
+  assert.equal(context.buildSchoolSources(sections.map(s => ({ ...s, sources: {} }))), '');
+});
+
+test('comparison keeps multilingual answer direction and paragraph breaks local to each school', () => {
+  const sections = ['hanafi', 'shafi', 'maliki'].map(school => ({ school, status: 'available',
+    answer: school === 'shafi' ? '\u0627\u062c\u0627\u0628\u06c1 [fiqh:fixture]' : '**First paragraph.**\n\nSecond paragraph. [fiqh:fixture]' }));
+  const html = comparisonContext().buildSchoolSections(sections);
+  assert.equal((html.match(/font-urdu/g) || []).length, 1);
+  assert.equal((html.match(/dir="auto"/g) || []).length, 5);
+  assert.match(html, /<strong>First paragraph\.<\/strong><\/p><p/);
+  assert.match(html, /Second paragraph\. \[fiqh:fixture\]/);
+  assert.doesNotMatch(html, /School comparison.*font-urdu/);
+});
+
+test('individual source records use native keyboard-operable disclosures and build text only once', () => {
+  function element(tag) {
+    return { tag, children: [], handlers: {}, classList: { add() {} },
+      appendChild(child) { this.children.push(child); }, addEventListener(type, fn) { this.handlers[type] = fn; },
+      hasChildNodes() { return this.children.length > 0; } };
+  }
+  let builds = 0;
+  const context = { document: { createElement: element },
+    buildTrilingualContent() { builds++; return element('div'); }, responseActionContent() { return '<svg></svg>'; } };
+  vm.createContext(context);
+  vm.runInContext(extract('buildClickableLine'), context);
+  const row = context.buildClickableLine('Synthetic reference', 'quran', {});
+  assert.equal(row.tag, 'details');
+  assert.equal(row.children[0].tag, 'summary');
+  row.open = true;
+  row.handlers.toggle();
+  row.open = false;
+  row.handlers.toggle();
+  row.open = true;
+  row.handlers.toggle();
+  assert.equal(builds, 1);
+  assert.equal(row.children[1].children.length, 1);
+});
+
+test('response card Copy and Listen keep the exact school-labeled answer and accessible action states', async () => {
+  function element() {
+    return { children: [], selectors: {}, attrs: {}, handlers: {}, innerHTML: '',
+      classList: { add() {}, remove() {} },
+      setAttribute(key, value) { this.attrs[key] = value; },
+      appendChild(child) { this.children.push(child); },
+      addEventListener(type, callback) { this.handlers[type] = callback; },
+      querySelector(selector) {
+        if (selector.startsWith('[data-school-sources=')) return null;
+        return this.selectors[selector] ||= element();
+      } };
+  }
+  const mounted = [];
+  const copied = [];
+  const spoken = [];
+  const timers = [];
+  let readEnd;
+  const container = { insertBefore(child) { mounted.push(child); }, scrollHeight: 100 };
+  const context = { document: { createElement: element }, chatContainer: container,
+    chatIntro: { parentNode: container }, requestAnimationFrame(f) { f(); },
+    navigator: { clipboard: { async writeText(text) { copied.push(text); } } },
+    setTimeout(f) { timers.push(f); }, stopSpeech() {},
+    async speakText(text, callback) { spoken.push(text); readEnd = callback; } };
+  vm.createContext(context);
+  for (const name of ['escapeHtml', 'isUrduText', 'buildSchoolSections', 'buildSchoolSources', 'responseActionContent', 'buildMetaBadges', 'appendMessageUI']) {
+    vm.runInContext(extract(name), context);
+  }
+  const sections = ['hanafi', 'shafi', 'maliki'].map(school => ({ school, status: 'available', answer: 'Fixture' }));
+  const exactAnswer = '## Hanafi\nFixture [fiqh:test]\n\n## Shafi\'i\nFixture [fiqh:test]\n\n## Maliki\nFixture [fiqh:test]';
+  context.appendMessageUI('bot', exactAnswer, false,
+    { mode: 'fiqh_comparison', response_schema: 'school_comparison_v1', answer_sections: sections });
+  const controls = mounted[0].children[0].selectors;
+  await controls['.copy-btn'].handlers.click();
+  assert.deepEqual(copied, [exactAnswer]);
+  assert.match(controls['.copy-btn'].innerHTML, /Copied/);
+  timers[0]();
+  assert.match(controls['.copy-btn'].innerHTML, /<span>Copy<\/span>/);
+  controls['.speak-btn'].handlers.click();
+  await Promise.resolve();
+  assert.deepEqual(spoken, [exactAnswer]);
+  assert.equal(controls['.speak-btn'].attrs['aria-pressed'], 'true');
+  assert.match(controls['.speak-btn'].innerHTML, /<span>Stop<\/span>/);
+  readEnd();
+  assert.equal(controls['.speak-btn'].attrs['aria-pressed'], 'false');
+  assert.match(controls['.speak-btn'].innerHTML, /<span>Listen<\/span>/);
 });
 
 test('legacy saved confidence and consensus never reappear as badges', () => {

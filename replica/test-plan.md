@@ -107,3 +107,21 @@ rephrasing and pre-provider edited-history rejection. No live provider or religi
 accuracy/translation quality is evaluated. Existing startup/canonical checks and
 all prior regressions remain required. See `school-comparison.md` for commands and
 `evidence/school-comparison-verification.json` for exact results/preservation.
+
+## Prototype response presentation, 2026-11-09
+
+| Case | Expected | Evidence |
+| --- | --- | --- |
+| F01-U1 full comparison | Three full, safely escaped school rows; no answer dropdowns | Actual renderer/function tests |
+| F01-U2 missing/withheld + stale sources | Fixed explanation remains; no stale school source group | Frontend regression |
+| F01-U3 mixed language/long paragraphs | Per-paragraph direction/font; breaks and citation text retained | Frontend regression; visual wrapping pending |
+| F01-U4 Copy/Listen | Exact server text; visible success/loading/reset labels and read-aloud state | Actual callback tests |
+| F01-U5 sources keyboard semantics | Native disclosures; record text lazily mounted once | Native-markup/function test; actual keyboard QA pending |
+| F01-U6 contrast | 44 specified intro/card/row/hover/source pairs pass AA | `evidence/response-ui-contrast.json` |
+| F01-U7 actual app serving | Latest HTML/JS/CSS served byte-for-byte; startup/API safeguards intact | Nine real local startup/HTTP checks |
+| F01-U8 mobile/desktop visuals | Compare 390px/1440px; dark/light; long English/RTL; sources/actions | Pending: browser access host unavailable; local synthetic preview provided |
+
+No live generation, scholarly approval, pixel-parity score or browser rendering
+claim. Six pre-implementation frontend failures and the current results are
+recorded in `evidence/response-ui-verification.json`; detailed local logs/preview
+are outside the application in `.audit/fiqhbot-response-ui-2026-11-09/`.

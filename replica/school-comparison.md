@@ -64,10 +64,14 @@ It has no browser accordion. No live WhatsApp send was made by this batch.
 
 ## Web presentation
 
-Direct chat replaces the initial selection cards. Three native answer disclosures
-share the existing theme/font/SVG approach. First available answer starts open;
-the user can open multiple schools. Sources are separate disclosures within each
-answer; shared-reference scope is visible. Copy/read-aloud retain all school labels.
+Direct chat replaces the initial selection cards. The 2026-11-09 presentation
+update replaces the first version's answer disclosures with three always-visible,
+compact school rows inside one warm response card. Montserrat, measured reference
+colors and outline utilities follow the owner's portfolio prototype. Mobile puts
+school labels above their answers; a secondary native Sources disclosure groups
+references by school, with the shared-reference limitation visible. Copy/read-aloud
+retain the exact server text and all school labels. Native per-record disclosures
+also replace click-only source rows so they are keyboard-operable without custom keys.
 New history stores structured sections and the proof; old plain history remains
 readable. Every new question in an old selected-school chat requests all schools.
 
@@ -95,9 +99,10 @@ ownership. A real loopback HTTP request verifies default comparison, signed
 rephrasing and pre-provider tamper rejection. It blocks external networking and
 Mongo logging. It does not evaluate real Gemini answers or language quality.
 
-See `evidence/school-comparison-verification.json`. Browser host unavailable:
+The original backend batch is recorded in `evidence/school-comparison-verification.json`;
+the current UI checks are in `evidence/response-ui-verification.json`. Browser host unavailable:
 390px/1440px rendering, native keyboard interaction and real-device layout remain
-pending. The new component's 12 specified text-color pairs pass the Replica
+pending. The current component/intro's 44 specified text-color pairs pass the Replica
 contrast checker; that is not a full accessibility/browser certification. All
 dataset bytes/review states remain unchanged; all 77 topics still need completed
 qualified review. Provider timeouts/budgets and broader readiness work are separate.

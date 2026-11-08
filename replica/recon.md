@@ -37,3 +37,11 @@ empty/missing/withheld sections, bounded JSON parsing, school-bound receipts,
 rephrasing, old history, duplicate submits and pending chat switches are covered.
 Browser visual/keyboard checks remain pending. This is a functional response/UI
 change, not a full mobile visual redesign or scholarly approval.
+
+F01 response presentation (2026-11-09): owner-provided portfolio screenshot replaces
+the simple answer accordions with one warm response surface, three immediately
+visible school rows, outline Listen/Copy controls and a secondary Sources panel.
+Small screens stack each school label above its answer. Missing/withheld notices,
+school source ownership and reference/review limits remain. RAG, source data,
+receipts and the separate static portfolio are unchanged. Browser host remains
+unavailable, so visual matching is implemented but not browser-verified.

@@ -572,10 +572,10 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function buildClickableLine(label, type, data) {
-        const wrapper = document.createElement('div');
+        const wrapper = document.createElement('details');
         wrapper.className = 'src-clickable-row';
 
-        const header = document.createElement('div');
+        const header = document.createElement('summary');
         header.className = 'src-row-header';
 
         const text = document.createElement('span');
@@ -590,13 +590,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const panel = document.createElement('div');
         panel.className = 'src-row-panel';
-        panel.style.display = 'none';
 
-        header.addEventListener('click', () => {
-            const isOpen = panel.style.display !== 'none';
-            panel.style.display = isOpen ? 'none' : 'block';
-            header.classList.toggle('open', !isOpen);
-            if (!isOpen && !panel.hasChildNodes()) {
+        wrapper.addEventListener('toggle', () => {
+            if (wrapper.open && !panel.hasChildNodes()) {
                 panel.appendChild(buildTrilingualContent(data, type));
             }
         });
@@ -673,20 +669,42 @@ document.addEventListener('DOMContentLoaded', () => {
         const statuses = { available: 'Answer', unavailable: 'Not available', withheld: 'Withheld' };
         if (!Array.isArray(sections) || sections.length !== schools.length || sections.some((s, i) =>
             !s || s.school !== schools[i][0] || !Object.hasOwn(statuses, s.status) || typeof s.answer !== 'string')) return '';
-        const firstAvailable = sections.findIndex(s => s.status === 'available');
-        return '<div class="school-responses">' + sections.map((section, i) => {
+        return '<section class="school-responses" aria-label="School responses">' + sections.map((section, i) => {
             const available = section.status === 'available';
-            const body = escapeHtml(section.answer).replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>').replace(/\n/g, '<br>');
-            const font = isUrduText(section.answer) ? ' font-urdu' : '';
-            return `<details class="school-answer" ${i === firstAvailable ? 'open' : ''}>
-                <summary class="school-answer-summary"><span class="school-answer-title">${schools[i][1]}</span>
-                    <span class="school-answer-state">${statuses[section.status]}</span>
-                    <svg class="school-chevron" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="m6 9 6 6 6-6"/></svg></summary>
-                <div class="school-answer-body"><p class="${font}" dir="auto">${body}</p>
-                ${available ? `<details class="school-sources"><summary>Sources</summary>
-                    <p class="school-reference-note">References mapped to this topic; school-specific support has not been independently reviewed.</p>
-                    <div data-school-sources="${section.school}"></div></details>` : ''}</div></details>`;
-        }).join('') + '</div>';
+            const body = section.answer.split(/\n\s*\n/).map(paragraph => {
+                const font = isUrduText(paragraph) ? ' class="font-urdu"' : '';
+                const safe = escapeHtml(paragraph).replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>').replace(/\n/g, '<br>');
+                return `<p${font} dir="auto">${safe}</p>`;
+            }).join('');
+            return `<div class="school-answer" data-state="${section.status}">
+                <div class="school-answer-heading"><h3 class="school-answer-title">${schools[i][1]}</h3>
+                    ${available ? '' : `<span class="school-answer-state">${statuses[section.status]}</span>`}</div>
+                <div class="school-answer-body">${body}</div></div>`;
+        }).join('') + '</section>';
+    }
+
+    function buildSchoolSources(sections) {
+        if (!buildSchoolSections(sections)) return '';
+        const titles = { hanafi: 'Hanafi', shafi: 'Shafi‘i', maliki: 'Maliki' };
+        return sections.filter(section => section.status === 'available' && ['fiqh', 'quran', 'hadith']
+            .some(kind => Array.isArray(section.sources?.[kind]) && section.sources[kind].some(item => item && typeof item === 'object')))
+            .map(section => `<section class="school-source-group" aria-label="${titles[section.school]} references">
+                <h4>${titles[section.school]}</h4><div data-school-sources="${section.school}"></div></section>`).join('');
+    }
+
+    function responseActionContent(icon, label) {
+        // Small, consistent outline icons; the label remains visible on mobile.
+        const paths = {
+            listen: '<path d="m11 5-6 4H2v6h3l6 4V5Z"/><path d="M15 8a6 6 0 0 1 0 8m3-11a10 10 0 0 1 0 14"/>',
+            copy: '<rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V4a1 1 0 0 0-1-1H4a1 1 0 0 0-1 1v11a1 1 0 0 0 1 1h4"/>',
+            sources: '<path d="M12 6c-3-2-6-2-9-1v15c3-1 6-1 9 1 3-2 6-2 9-1V5c-3-1-6-1-9 1Z"/><path d="M12 6v15"/>',
+            chevron: '<path d="m6 9 6 6 6-6"/>',
+            stop: '<rect x="5" y="5" width="14" height="14" rx="2"/>',
+            loading: '<path d="M20 12a8 8 0 1 1-8-8"/>',
+            check: '<path d="m5 12 4 4L19 6"/>',
+            error: '<path d="m6 6 12 12M6 18 18 6"/>',
+        };
+        return `<svg class="response-icon${icon === 'loading' ? ' response-icon-loading' : ''}" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">${paths[icon] || paths.sources}</svg>${label ? `<span>${escapeHtml(label)}</span>` : ''}`;
     }
 
     function appendMessageUI(sender, text, animate, meta) {
@@ -695,11 +713,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const contentDiv = document.createElement('div');
         contentDiv.classList.add('message-content');
-
-        if (isUrduText(text)) {
-            contentDiv.classList.add('font-urdu');
-            contentDiv.setAttribute('lang', 'ur');
-        }
 
         let formattedText = escapeHtml(text).replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
         // Make any URL clickable (opens in a new tab). Covers the IslamQA
@@ -722,23 +735,34 @@ document.addEventListener('DOMContentLoaded', () => {
         const schoolHtml = sender === 'bot' && meta?.response_schema === 'school_comparison_v1'
             ? buildSchoolSections(meta.answer_sections) : '';
         if (schoolHtml) msgDiv.classList.add('comparison-message');
+        if (!schoolHtml && isUrduText(text)) {
+            contentDiv.classList.add('font-urdu');
+            contentDiv.setAttribute('lang', 'ur');
+        }
         const hasSources = !schoolHtml && sender === 'bot'
             && !noSourceModes.includes(meta && meta.mode)
             && realSourceCount > 0;
         const metaBadges = buildMetaBadges(meta);
         const speakButton = sender === 'bot'
-            ? `<button class="speak-btn" title="Read aloud"><i class="fas fa-volume-up"></i></button>`
+            ? `<button type="button" class="speak-btn" title="Read aloud" aria-label="Read answer aloud" aria-pressed="false">${responseActionContent('listen', 'Listen')}</button>`
             : '';
         const copyButton = sender === 'bot'
-            ? `<button class="copy-btn" title="Copy message"><i class="fas fa-copy"></i></button>`
+            ? `<button type="button" class="copy-btn" title="Copy message">${responseActionContent('copy', 'Copy')}</button>`
             : '';
         const sourcesButton = hasSources
             ? `<button class="sources-btn" title="View sources"><i class="fas fa-book-open"></i> Sources</button>`
             : '';
 
-        contentDiv.innerHTML = `${schoolHtml || `<p>${formattedText}</p>`}${metaBadges}${speakButton}${copyButton}${sourcesButton}`;
+        const schoolSources = schoolHtml ? buildSchoolSources(meta.answer_sections) : '';
+        contentDiv.innerHTML = schoolHtml
+            ? `<header class="response-header"><span class="response-dot" aria-hidden="true"></span><strong>Fiqhbot</strong><span class="response-header-divider" aria-hidden="true">·</span><span class="response-context">School comparison</span></header>
+                ${schoolHtml}${metaBadges}<div class="response-actions">${speakButton}${copyButton}</div>
+                ${schoolSources ? `<details class="response-sources"><summary>${responseActionContent('sources', 'Sources')}${responseActionContent('chevron', '')}</summary>
+                    <div class="response-sources-body"><p class="school-reference-note">References mapped to this topic; school-specific support has not been independently reviewed.</p>${schoolSources}</div></details>` : ''}`
+            : `<p>${formattedText}</p>${metaBadges}${speakButton}${copyButton}${sourcesButton}`;
         if (schoolHtml) {
             meta.answer_sections.forEach(section => {
+                if (section.status !== 'available') return;
                 const holder = contentDiv.querySelector(`[data-school-sources="${section.school}"]`);
                 if (holder) holder.appendChild(buildSourcesAccordion(section.sources || {}));
             });
@@ -769,7 +793,9 @@ document.addEventListener('DOMContentLoaded', () => {
             let isSpeaking = false;
 
             const resetIcon = () => {
-                speakBtn.innerHTML = '<i class="fas fa-volume-up"></i>';
+                speakBtn.innerHTML = responseActionContent('listen', 'Listen');
+                speakBtn.setAttribute('aria-label', 'Read answer aloud');
+                speakBtn.setAttribute('aria-pressed', 'false');
                 isSpeaking = false;
             };
 
@@ -779,10 +805,12 @@ document.addEventListener('DOMContentLoaded', () => {
                     resetIcon();
                 } else {
                     stopSpeech();
-                    speakBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+                    speakBtn.innerHTML = responseActionContent('loading', 'Loading');
+                    speakBtn.setAttribute('aria-label', 'Stop reading');
+                    speakBtn.setAttribute('aria-pressed', 'true');
                     isSpeaking = true;
                     speakText(text, resetIcon).then(() => {
-                        if (isSpeaking) speakBtn.innerHTML = '<i class="fas fa-stop"></i>';
+                        if (isSpeaking) speakBtn.innerHTML = responseActionContent('stop', 'Stop');
                     });
                 }
             });
@@ -792,15 +820,15 @@ document.addEventListener('DOMContentLoaded', () => {
                 try {
                     await navigator.clipboard.writeText(text);
                     copyBtn.classList.add('copied');
-                    copyBtn.innerHTML = '<i class="fas fa-check"></i> Copied';
+                    copyBtn.innerHTML = responseActionContent('check', 'Copied');
                     setTimeout(() => {
                         copyBtn.classList.remove('copied');
-                        copyBtn.innerHTML = '<i class="fas fa-copy"></i>';
+                        copyBtn.innerHTML = responseActionContent('copy', 'Copy');
                     }, 2000);
                 } catch {
-                    copyBtn.innerHTML = '<i class="fas fa-times"></i> Failed';
+                    copyBtn.innerHTML = responseActionContent('error', 'Failed');
                     setTimeout(() => {
-                        copyBtn.innerHTML = '<i class="fas fa-copy"></i>';
+                        copyBtn.innerHTML = responseActionContent('copy', 'Copy');
                     }, 1500);
                 }
             });

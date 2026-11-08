@@ -1,0 +1,30 @@
+{
+  "date": "2026-11-09",
+  "reference_file": "FireShot Capture 010 - FIQHBOT - Hamza Nadeem - .png",
+  "sha256": "efc57caeb733b4b49dcee0a130d208ff4f8990edd0cc611e051abf2fa975e9fa",
+  "width": 2477,
+  "height": 3949,
+  "observation": "Read provided image with view_image; sampled original PNG rows 0..2399 using Replica imgdiff.read_png (no image edits)",
+  "sampled_colors": {
+    "surface": "#3b2317",
+    "source_surface": "#2c180f",
+    "border": "#765334",
+    "body_text": "#ccbbae",
+    "strong_text": "#ecf0f1",
+    "accent": "#f3af42"
+  },
+  "patterns": [
+    "One warm assistant response surface",
+    "Three concise inline school rows",
+    "Outline Listen/Copy utilities",
+    "Secondary source disclosure beneath the answer"
+  ],
+  "intentional_differences": [
+    "All schools shown equally; no selected-school emphasis",
+    "No fabricated intro, sample accuracy percentage or synthetic ruling badge",
+    "Current full school answers, receipt text and validation/review limits preserved",
+    "Source records remain grouped by school ownership, not silently pooled"
+  ],
+  "browser_comparison_performed": false,
+  "reason": "Browser access host is unavailable; no alternate browser automation used"
+}

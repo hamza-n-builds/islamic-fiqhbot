@@ -7,7 +7,7 @@ F00-05,F00,Read-only runtime check and setup-only mode,yes,backend/tests/test_lo
 F00-06,F00,Verify actual local model warm-up and HTTP readiness,yes,replica/evidence/local-startup.json
 F00-07,F00,Prepare local NLTK resources and verify before ready,yes,backend/tests/test_local_startup.py and real smoke report
 F01-01,F01,Strict source-backed three-school responses,partial,School-scoped RAG and citation/provenance checks implemented; semantic and scholarly support pending
-F01-02,F01,Mobile-first answer accordions,partial,Native answer disclosures implemented and VM-tested; browser rendering/keyboard QA pending
+F01-02,F01,Mobile-first prototype response card,partial,Always-visible school rows and native source disclosures VM-tested; browser rendering/keyboard QA pending
 F01-03,F01,Reject references outside the actual supplied context,yes,backend/tests/test_citation_integrity.py
 F01-04,F01,No generation without sources and no refusal-to-general bypass,yes,backend/tests/test_citation_integrity.py
 F01-05,F01,Signed exact-answer and source-content provenance for follow-ups,yes,backend/tests/test_citation_guard.py and backend/tests/test_chat_receipts.cjs
@@ -26,3 +26,4 @@ F01-17,F01,One organizer request with independent school-context validation,yes,
 F01-18,F01,Missing school material cannot fall back to another school,yes,School lookup and missing/blank/extra-key regressions
 F01-19,F01,Signed school-preserving rephrasing and legacy history compatibility,yes,School comparison receipt tests and loopback HTTP smoke
 F01-20,F01,Pending replies remain scoped to their chat and duplicate submits are blocked,yes,backend/tests/test_chat_receipts.cjs
+F01-21,F01,School-owned sources and exact-text copy/read-aloud in prototype card,yes,backend/tests/test_chat_receipts.cjs and replica/evidence/response-ui-verification.json

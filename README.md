@@ -145,11 +145,16 @@ Default `/ask` requests and WhatsApp use this flow. The web response has
 invalid output in one section is replaced by a fixed explanation. Malformed or
 unexpected JSON fails closed. No accepted sections means no passed check/receipt.
 
-The first available answer opens by default; all three response headings remain
-visible as independent native disclosure controls. Sources stay secondary within
-each answer. References in the current dataset are largely topic-level mappings,
-so the response explicitly reports `reference_scope: topic_level_shared`; they are
-not represented as independently reviewed school-specific evidence.
+All three answers appear in compact school-labeled rows inside one warm response
+card, following the owner's portfolio prototype. At narrow widths, each school
+name sits above its full answer. No answer is hidden behind a dropdown. Listen
+and Copy retain the exact school-labeled text; a secondary Sources disclosure
+keeps each available school's reference group separate. Missing/withheld answers
+retain their notices and receive no source group. References in the current
+dataset are largely topic-level mappings, so the response explicitly reports
+`reference_scope: topic_level_shared`; they are not represented as independently
+reviewed school-specific evidence. See the current component specification in
+[`replica/design/school-responses.md`](replica/design/school-responses.md).
 
 Signed rephrasing preserves school identity and each section's citation set.
 Edited answers, changed ruling/source text and invalid proof are rejected before

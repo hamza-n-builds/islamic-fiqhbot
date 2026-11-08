@@ -1,0 +1,66 @@
+{
+  "date": "2026-11-09",
+  "baseline_commit": "826065b",
+  "scope": "Prototype-inspired three-school response UI only; no RAG/prompt/data changes",
+  "replica_modules": [
+    "design",
+    "build",
+    "test"
+  ],
+  "red_frontend": {
+    "tests": 17,
+    "passed": 11,
+    "failed": 6,
+    "evidence": "workspace .audit/fiqhbot-response-ui-2026-11-09/red-frontend.log"
+  },
+  "frontend_function_checks": {
+    "tests": 18,
+    "failed": 0,
+    "browser_rendering": false
+  },
+  "python_regressions": {
+    "tests": 138,
+    "passed": true
+  },
+  "local_startup_http": {
+    "checks": [
+      "Actual datasets/model warm-up and /health readiness",
+      "HTML and four frontend assets served byte-for-byte",
+      "Same-origin dynamic config with blank browser API key",
+      "Invalid question rejected before generation",
+      "Real API rejects unverified history without an external provider call",
+      "Real API greetings/capabilities/clarifications have no accuracy or consensus claims",
+      "Real API serves canonical Bukhari 1395 and Muslim 11a with pinned source provenance",
+      "Ambiguous legacy Muslim 11 cannot resolve through the canonical API",
+      "Second launch reuses the ready instance without a browser"
+    ],
+    "external_network": "blocked in server processes",
+    "provider_generation_tested": false,
+    "browser_rendering_tested": false,
+    "startup_seconds": 21.48,
+    "status": "passed"
+  },
+  "specified_component_contrast": {
+    "pairs": 44,
+    "aa_failures": 0
+  },
+  "preservation": {
+    "backend_runtime_unchanged": true,
+    "dataset_bytes_unchanged": true,
+    "api_contract_and_receipts_unchanged": true,
+    "new_scholarly_approvals": 0
+  },
+  "limits": [
+    "Browser access host unavailable: 390px/1440px rendering, fonts, keyboard and device QA pending",
+    "Local preview uses synthetic records; it is not a browser verification result",
+    "No live Gemini generation or real WhatsApp send; no semantic/scholarly accuracy certification",
+    "No push or deployment"
+  ],
+  "ui_sha256": {
+    "frontend/script.js": "6e03ea24045782a0142117a329d48e151377479a4af1dda60310c28b9a0e3553",
+    "frontend/modern.css": "fe7192202bf82a5abe1c159804fd4232db298ad6196dc242843a63faf4a104fe",
+    "frontend/index.html": "7484a5fe1c7cfe29671dfa06d423b50c3ba1df660a782064de2d5852ac569d6e"
+  },
+  "syntax_whitespace_known_secret_patterns": "passed; pattern scan is not exhaustive",
+  "local_preview_script_syntax": "passed; browser rendering remains unverified"
+}

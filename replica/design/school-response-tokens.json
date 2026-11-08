@@ -1,5 +1,5 @@
 {
-  "scope": "New school-answer panels and direct-chat intro; existing app chrome is outside this color check",
+  "scope": "Prototype response card, rows, utilities, source panels, and prior direct-chat intro; not full app accessibility QA",
   "colors": {
     "dark-text": "#f5f1eb",
     "dark-muted": "#a9a19a",
@@ -10,28 +10,214 @@
     "light-muted": "#665f59",
     "light-accent": "#855018",
     "light-surface": "#fbfaf7",
-    "light-intro-worst-bg": "#efe9df"
+    "light-intro-worst-bg": "#efe9df",
+    "dark-response-text": "#ccbbae",
+    "dark-response-strong": "#ecf0f1",
+    "dark-response-muted": "#c4b19f",
+    "dark-response-accent": "#f3af42",
+    "dark-response-surface": "#3b2317",
+    "dark-response-row": "#3b2317",
+    "dark-response-row-hover": "#452c14",
+    "dark-response-source-surface": "#2c180f",
+    "light-response-text": "#514131",
+    "light-response-strong": "#302318",
+    "light-response-muted": "#6e5a45",
+    "light-response-accent": "#88520f",
+    "light-response-surface": "#fffaf3",
+    "light-response-row": "#faf1e5",
+    "light-response-row-hover": "#f5e8d6",
+    "light-response-source-surface": "#f5e9d9"
   },
   "pairs": [
-    ["dark-text", "dark-surface"],
-    ["dark-muted", "dark-surface"],
-    ["dark-accent", "dark-surface"],
-    ["dark-text", "dark-intro-worst-bg"],
-    ["dark-muted", "dark-intro-worst-bg"],
-    ["dark-accent", "dark-intro-worst-bg"],
-    ["light-text", "light-surface"],
-    ["light-muted", "light-surface"],
-    ["light-accent", "light-surface"],
-    ["light-text", "light-intro-worst-bg"],
-    ["light-muted", "light-intro-worst-bg"],
-    ["light-accent", "light-intro-worst-bg"]
+    [
+      "dark-text",
+      "dark-surface"
+    ],
+    [
+      "dark-muted",
+      "dark-surface"
+    ],
+    [
+      "dark-accent",
+      "dark-surface"
+    ],
+    [
+      "dark-text",
+      "dark-intro-worst-bg"
+    ],
+    [
+      "dark-muted",
+      "dark-intro-worst-bg"
+    ],
+    [
+      "dark-accent",
+      "dark-intro-worst-bg"
+    ],
+    [
+      "light-text",
+      "light-surface"
+    ],
+    [
+      "light-muted",
+      "light-surface"
+    ],
+    [
+      "light-accent",
+      "light-surface"
+    ],
+    [
+      "light-text",
+      "light-intro-worst-bg"
+    ],
+    [
+      "light-muted",
+      "light-intro-worst-bg"
+    ],
+    [
+      "light-accent",
+      "light-intro-worst-bg"
+    ],
+    [
+      "dark-response-text",
+      "dark-response-surface"
+    ],
+    [
+      "dark-response-text",
+      "dark-response-row"
+    ],
+    [
+      "dark-response-text",
+      "dark-response-row-hover"
+    ],
+    [
+      "dark-response-text",
+      "dark-response-source-surface"
+    ],
+    [
+      "dark-response-strong",
+      "dark-response-surface"
+    ],
+    [
+      "dark-response-strong",
+      "dark-response-row"
+    ],
+    [
+      "dark-response-strong",
+      "dark-response-row-hover"
+    ],
+    [
+      "dark-response-strong",
+      "dark-response-source-surface"
+    ],
+    [
+      "dark-response-muted",
+      "dark-response-surface"
+    ],
+    [
+      "dark-response-muted",
+      "dark-response-row"
+    ],
+    [
+      "dark-response-muted",
+      "dark-response-row-hover"
+    ],
+    [
+      "dark-response-muted",
+      "dark-response-source-surface"
+    ],
+    [
+      "dark-response-accent",
+      "dark-response-surface"
+    ],
+    [
+      "dark-response-accent",
+      "dark-response-row"
+    ],
+    [
+      "dark-response-accent",
+      "dark-response-row-hover"
+    ],
+    [
+      "dark-response-accent",
+      "dark-response-source-surface"
+    ],
+    [
+      "light-response-text",
+      "light-response-surface"
+    ],
+    [
+      "light-response-text",
+      "light-response-row"
+    ],
+    [
+      "light-response-text",
+      "light-response-row-hover"
+    ],
+    [
+      "light-response-text",
+      "light-response-source-surface"
+    ],
+    [
+      "light-response-strong",
+      "light-response-surface"
+    ],
+    [
+      "light-response-strong",
+      "light-response-row"
+    ],
+    [
+      "light-response-strong",
+      "light-response-row-hover"
+    ],
+    [
+      "light-response-strong",
+      "light-response-source-surface"
+    ],
+    [
+      "light-response-muted",
+      "light-response-surface"
+    ],
+    [
+      "light-response-muted",
+      "light-response-row"
+    ],
+    [
+      "light-response-muted",
+      "light-response-row-hover"
+    ],
+    [
+      "light-response-muted",
+      "light-response-source-surface"
+    ],
+    [
+      "light-response-accent",
+      "light-response-surface"
+    ],
+    [
+      "light-response-accent",
+      "light-response-row"
+    ],
+    [
+      "light-response-accent",
+      "light-response-row-hover"
+    ],
+    [
+      "light-response-accent",
+      "light-response-source-surface"
+    ]
   ],
   "layout": {
     "columns": 1,
-    "summary_min_height_rem": 2.75,
+    "school_row_columns_above_600px": "5.5rem minmax(0, 1fr)",
+    "school_row_columns_up_to_600px": 1,
     "body_font_rem": 1,
-    "label_font_rem": 0.8125,
-    "gap_rem": 0.625,
-    "padding_rem": 1
+    "body_line_height": 1.75,
+    "action_min_height_rem": 2.75,
+    "padding_desktop_rem": 1.25,
+    "padding_mobile_rem": 1,
+    "label_font_rem": 0.9375,
+    "utility_font_rem": 0.8125,
+    "response_font": "Montserrat with existing Inter/system fallback",
+    "answers_visible_without_interaction": 3
   }
 }
