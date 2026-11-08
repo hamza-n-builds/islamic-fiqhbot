@@ -45,3 +45,12 @@ Small screens stack each school label above its answer. Missing/withheld notices
 school source ownership and reference/review limits remain. RAG, source data,
 receipts and the separate static portfolio are unchanged. Browser host remains
 unavailable, so visual matching is implemented but not browser-verified.
+
+F01 conversation presentation (2026-11-09): the owner's subsequent direction is
+a ChatGPT-like reading experience in the same brown/gold palette. The response is
+now unboxed with clear school headings and safe paragraph/list typography. Scoped
+inline citation controls open a native source inspector (desktop side panel/mobile
+bottom sheet). Quiet actions, visible review limits, a multiline composer, honest
+pending state and one-time reply reveal replace the card presentation. Raw answer
+storage, receipts, RAG and school ownership are preserved. No proprietary ChatGPT
+logo/font/source was imported and no live product parity claim is made.

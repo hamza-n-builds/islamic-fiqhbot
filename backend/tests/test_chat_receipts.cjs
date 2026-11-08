@@ -78,6 +78,7 @@ test('sendMessage reads the last bot proof and saves the newly issued one', asyn
     console,
   };
   vm.createContext(context);
+  vm.runInContext(extract('resizeComposer'), context);
   vm.runInContext(extract('sendMessage'), context);
   await context.sendMessage();
   assert.deepEqual(args, ['translate', 'General', 'Exact old answer', 'old-proof']);
@@ -93,7 +94,7 @@ test('sendMessage reads the last bot proof and saves the newly issued one', asyn
 function comparisonContext() {
   const context = {};
   vm.createContext(context);
-  for (const name of ['escapeHtml', 'isUrduText', 'buildSchoolSections']) vm.runInContext(extract(name), context);
+  for (const name of ['escapeHtml', 'isUrduText', 'sourceEntries', 'formatAnswerInline', 'formatAnswerContent', 'buildSchoolSections']) vm.runInContext(extract(name), context);
   return context;
 }
 
@@ -144,6 +145,7 @@ test('requests from an old selected-school chat still ask for all schools', asyn
     askBackend: async (...received) => { args = received; return { ok: true, answer: 'Fixture' }; }, console,
   };
   vm.createContext(context);
+  vm.runInContext(extract('resizeComposer'), context);
   vm.runInContext(extract('sendMessage'), context);
   await context.sendMessage();
   assert.equal(args[1], 'General');
@@ -163,6 +165,7 @@ test('in-flight replies stay in the original chat and duplicate sends are blocke
     askBackend: () => { requests++; return new Promise(resolve => { finish = resolve; }); }, console,
   };
   vm.createContext(context);
+  vm.runInContext(extract('resizeComposer'), context);
   vm.runInContext(extract('sendMessage'), context);
   const pending = context.sendMessage();
   context.userInput.value = 'Duplicate question';
@@ -196,7 +199,7 @@ test('actual message renderer mounts a single response card with school-scoped r
   const context = { document: { createElement: element }, chatContainer: container,
     chatIntro: { parentNode: container }, requestAnimationFrame(f) { f(); } };
   vm.createContext(context);
-  for (const name of ['escapeHtml', 'isUrduText', 'buildSchoolSections', 'buildSchoolSources', 'responseActionContent', 'buildMetaBadges', 'buildSourcesAccordion', 'appendMessageUI']) {
+  for (const name of ['escapeHtml', 'isUrduText', 'sourceEntries', 'formatAnswerInline', 'formatAnswerContent', 'buildSchoolSections', 'buildSchoolSources', 'bindResponseSources', 'responseActionContent', 'buildMetaBadges', 'buildSourcesAccordion', 'appendMessageUI']) {
     vm.runInContext(extract(name), context);
   }
   const sections = ['hanafi', 'shafi', 'maliki'].map(school => ({ school, status: 'available', answer: school + ' fixture',
@@ -209,7 +212,8 @@ test('actual message renderer mounts a single response card with school-scoped r
   assert.doesNotMatch(content.innerHTML, /FLAT COPY-ONLY RESPONSE/);
   assert.match(content.innerHTML, /response-header/);
   assert.match(content.innerHTML, /Fiqhbot/);
-  assert.equal((content.innerHTML.match(/class="response-sources"/g) || []).length, 1);
+  assert.equal((content.innerHTML.match(/class="response-source-dialog"/g) || []).length, 1);
+  assert.match(content.innerHTML, /data-open-sources aria-haspopup="dialog"/);
   assert.match(content.innerHTML, /<span>Listen<\/span>/);
   assert.match(content.innerHTML, /<span>Copy<\/span>/);
   assert.doesNotMatch(content.innerHTML, /class="school-sources"|sample confidence|92%/);
@@ -267,15 +271,16 @@ test('individual source records use native keyboard-operable disclosures and bui
   assert.equal(row.children[1].children.length, 1);
 });
 
-test('response card Copy and Listen keep the exact school-labeled answer and accessible action states', async () => {
+test('response actions preserve exact text and reply scrolling respects the viewers reading position', async () => {
   function element() {
     return { children: [], selectors: {}, attrs: {}, handlers: {}, innerHTML: '',
       classList: { add() {}, remove() {} },
       setAttribute(key, value) { this.attrs[key] = value; },
       appendChild(child) { this.children.push(child); },
+      scrollIntoView() { this.scrolledToStart = true; },
       addEventListener(type, callback) { this.handlers[type] = callback; },
       querySelector(selector) {
-        if (selector.startsWith('[data-school-sources=')) return null;
+        if (selector.startsWith('[data-school-sources=') || selector === '.response-source-dialog') return null;
         return this.selectors[selector] ||= element();
       } };
   }
@@ -284,21 +289,23 @@ test('response card Copy and Listen keep the exact school-labeled answer and acc
   const spoken = [];
   const timers = [];
   let readEnd;
-  const container = { insertBefore(child) { mounted.push(child); }, scrollHeight: 100 };
+  const container = { insertBefore(child) { mounted.push(child); }, scrollHeight: 2000, scrollTop: 0, clientHeight: 500 };
   const context = { document: { createElement: element }, chatContainer: container,
     chatIntro: { parentNode: container }, requestAnimationFrame(f) { f(); },
     navigator: { clipboard: { async writeText(text) { copied.push(text); } } },
     setTimeout(f) { timers.push(f); }, stopSpeech() {},
     async speakText(text, callback) { spoken.push(text); readEnd = callback; } };
   vm.createContext(context);
-  for (const name of ['escapeHtml', 'isUrduText', 'buildSchoolSections', 'buildSchoolSources', 'responseActionContent', 'buildMetaBadges', 'appendMessageUI']) {
+  for (const name of ['escapeHtml', 'isUrduText', 'sourceEntries', 'formatAnswerInline', 'formatAnswerContent', 'buildSchoolSections', 'buildSchoolSources', 'bindResponseSources', 'responseActionContent', 'buildMetaBadges', 'appendMessageUI']) {
     vm.runInContext(extract(name), context);
   }
   const sections = ['hanafi', 'shafi', 'maliki'].map(school => ({ school, status: 'available', answer: 'Fixture' }));
   const exactAnswer = '## Hanafi\nFixture [fiqh:test]\n\n## Shafi\'i\nFixture [fiqh:test]\n\n## Maliki\nFixture [fiqh:test]';
-  context.appendMessageUI('bot', exactAnswer, false,
+  context.appendMessageUI('bot', exactAnswer, true,
     { mode: 'fiqh_comparison', response_schema: 'school_comparison_v1', answer_sections: sections });
   const controls = mounted[0].children[0].selectors;
+  assert.equal(container.scrollTop, 0);
+  assert.equal(mounted[0].scrolledToStart, undefined);
   await controls['.copy-btn'].handlers.click();
   assert.deepEqual(copied, [exactAnswer]);
   assert.match(controls['.copy-btn'].innerHTML, /Copied/);
@@ -312,6 +319,10 @@ test('response card Copy and Listen keep the exact school-labeled answer and acc
   readEnd();
   assert.equal(controls['.speak-btn'].attrs['aria-pressed'], 'false');
   assert.match(controls['.speak-btn'].innerHTML, /<span>Listen<\/span>/);
+  container.scrollTop = 1500;
+  context.appendMessageUI('bot', exactAnswer, true,
+    { mode: 'fiqh_comparison', response_schema: 'school_comparison_v1', answer_sections: sections });
+  assert.equal(mounted[1].scrolledToStart, true);
 });
 
 test('legacy saved confidence and consensus never reappear as badges', () => {
@@ -352,11 +363,12 @@ test('unknown or rejected status does not acquire a passed badge', () => {
 
 test('sources in old saved chats do not turn false consensus into disagreement', () => {
   function element() {
-    return { innerHTML: '', children: [], classList: { add() {} },
+    return { innerHTML: '', children: [], classList: { add() {} }, setAttribute() {},
       appendChild(child) { this.children.push(child); } };
   }
   const context = { document: { createElement: element }, escapeHtml: text => text };
   vm.createContext(context);
+  vm.runInContext(extract('sourceEntries'), context);
   vm.runInContext(extract('buildSourcesAccordion'), context);
   const result = context.buildSourcesAccordion({ fiqh: [{ topic_name: 'Fixture', consensus: false }] });
   assert.equal(result.children.length, 1);

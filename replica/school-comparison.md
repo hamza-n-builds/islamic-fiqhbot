@@ -64,14 +64,15 @@ It has no browser accordion. No live WhatsApp send was made by this batch.
 
 ## Web presentation
 
-Direct chat replaces the initial selection cards. The 2026-11-09 presentation
-update replaces the first version's answer disclosures with three always-visible,
-compact school rows inside one warm response card. Montserrat, measured reference
-colors and outline utilities follow the owner's portfolio prototype. Mobile puts
-school labels above their answers; a secondary native Sources disclosure groups
-references by school, with the shared-reference limitation visible. Copy/read-aloud
-retain the exact server text and all school labels. Native per-record disclosures
-also replace click-only source rows so they are keyboard-operable without custom keys.
+Direct chat replaces the initial selection cards. The current presentation uses
+an Inter reading column with three always-visible school sections, original
+brown/gold colors, quiet icon actions and safe paragraph/list formatting. Inline
+reference controls bind only to that section's supplied records. A native source
+inspector groups records by school; desktop uses a right panel and mobile uses a
+bottom sheet. Browsers without modal-dialog support receive a nonmodal inline
+panel. The shared-reference limitation stays visible. Copy/read-aloud, history
+and receipts retain the exact server text; no additional model call or inferred
+summary is introduced. Native record disclosures retain keyboard semantics.
 New history stores structured sections and the proof; old plain history remains
 readable. Every new question in an old selected-school chat requests all schools.
 
@@ -87,7 +88,7 @@ From `backend`, with the project environment:
 
 ```powershell
 .\venv\Scripts\python.exe -X utf8 -B -m unittest discover -s tests -v
-node --test tests/test_chat_receipts.cjs
+node --test tests/test_chat_receipts.cjs tests/test_response_presentation.cjs
 .\venv\Scripts\python.exe -X utf8 -B tests/smoke_local_startup.py
 .\venv\Scripts\python.exe -X utf8 -B tests/smoke_school_comparison.py
 .\venv\Scripts\python.exe -X utf8 -B tests/audit_source_records.py --date 2026-11-08
@@ -100,9 +101,10 @@ rephrasing and pre-provider tamper rejection. It blocks external networking and
 Mongo logging. It does not evaluate real Gemini answers or language quality.
 
 The original backend batch is recorded in `evidence/school-comparison-verification.json`;
-the current UI checks are in `evidence/response-ui-verification.json`. Browser host unavailable:
+the earlier prototype UI checks are in `evidence/response-ui-verification.json`,
+and current checks are in `evidence/conversation-ui-verification.json`. Browser host unavailable:
 390px/1440px rendering, native keyboard interaction and real-device layout remain
-pending. The current component/intro's 44 specified text-color pairs pass the Replica
+pending. The current component/intro's 42 specified text/UI-color pairs pass the Replica
 contrast checker; that is not a full accessibility/browser certification. All
 dataset bytes/review states remain unchanged; all 77 topics still need completed
 qualified review. Provider timeouts/budgets and broader readiness work are separate.

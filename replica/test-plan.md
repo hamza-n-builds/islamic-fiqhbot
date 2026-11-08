@@ -125,3 +125,32 @@ No live generation, scholarly approval, pixel-parity score or browser rendering
 claim. Six pre-implementation frontend failures and the current results are
 recorded in `evidence/response-ui-verification.json`; detailed local logs/preview
 are outside the application in `.audit/fiqhbot-response-ui-2026-11-09/`.
+
+## Conversation UI, 2026-11-09
+
+| Case | Expected | Evidence |
+| --- | --- | --- |
+| F01-V1 rich response | Existing paragraphs/headings/lists/bold/code render safely; no provider HTML/links | `test_response_presentation.cjs` |
+| F01-V2 inline sources | Known tags become controls for that school's records only; unknown tags stay text | Same suite; malformed/hostile metadata fixtures |
+| F01-V3 exact content | Rendering does not mutate section records; Copy/speech retain exact server text | Both frontend suites |
+| F01-V4 source inspector | Open matching group/record; close restores focus and chat position; nonmodal fallback | Actual handler fixtures; native browser behavior pending |
+| F01-V5 composer keys | Desktop Enter sends; Shift+Enter/touch/IME keep editing | Key-handler regressions; real keyboard/viewport QA pending |
+| F01-V6 reading position | Do not interrupt earlier reading; follow a new reply from its start | Actual message-renderer regression |
+| F01-V7 colors/serving | 42 specified pairs pass; latest assets served and existing APIs/startup intact | Contrast artifact and nine loopback HTTP checks |
+| F01-V8 visual states | 390px/1440px dark/light; long/RTL; native dialog/Escape/focus; growing textarea and mobile keyboard | Pending: browser access host unavailable |
+
+The eight new tests failed before their functions were implemented. Final counts:
+26 frontend checks, 138 Python tests, nine actual local HTTP checks. See
+`evidence/conversation-ui-verification.json`. The local preview under
+`.audit/fiqhbot-conversation-ui-2026-11-09/preview.html` uses the actual renderer
+and clearly labeled synthetic data. It is not browser QA, a live provider test,
+religious guidance or a pixel-parity result. No push/deployment.
+
+Reproduce from `backend`:
+
+```powershell
+node --test tests/test_chat_receipts.cjs tests/test_response_presentation.cjs
+.\venv\Scripts\python.exe -X utf8 -B -m unittest discover -s tests -v
+.\venv\Scripts\python.exe -X utf8 -B tests/smoke_local_startup.py
+.\venv\Scripts\python.exe -X utf8 -B ..\..\replica-skill-main\replica-skill-main\replica-design\contrast.py ..\replica\design\school-response-tokens.json
+```

@@ -145,15 +145,19 @@ Default `/ask` requests and WhatsApp use this flow. The web response has
 invalid output in one section is replaced by a fixed explanation. Malformed or
 unexpected JSON fails closed. No accepted sections means no passed check/receipt.
 
-All three answers appear in compact school-labeled rows inside one warm response
-card, following the owner's portfolio prototype. At narrow widths, each school
-name sits above its full answer. No answer is hidden behind a dropdown. Listen
-and Copy retain the exact school-labeled text; a secondary Sources disclosure
-keeps each available school's reference group separate. Missing/withheld answers
-retain their notices and receive no source group. References in the current
-dataset are largely topic-level mappings, so the response explicitly reports
-`reference_scope: topic_level_shared`; they are not represented as independently
-reviewed school-specific evidence. See the current component specification in
+All three full answers appear as unboxed sections in a centered conversation
+column, with school headings, readable paragraphs/lists and the existing brown/gold
+identity. Supplied citation tags become readable source controls only within the
+owning school's source scope. Sources open in a native reference inspector: a
+side panel on desktop, a bottom sheet on mobile, with a nonmodal inline fallback.
+Missing/withheld answers retain their notices and receive no source group. Copy,
+read-aloud, storage and translation receipts retain the exact server answer;
+formatting adds no generated summary or inferred ruling. The growing composer
+supports desktop Enter to send, Shift+Enter for a line break and touch Enter to
+continue writing. References in the current dataset are largely topic-level
+mappings, so the response explicitly reports `reference_scope: topic_level_shared`;
+they are not represented as independently reviewed school-specific evidence.
+See the current component specification in
 [`replica/design/school-responses.md`](replica/design/school-responses.md).
 
 Signed rephrasing preserves school identity and each section's citation set.

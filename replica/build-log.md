@@ -74,3 +74,18 @@
   workspace `.audit/fiqhbot-response-ui-2026-11-09/`. Browser host unavailable:
   visual/device/font/keyboard QA remains pending; no screenshot parity or religious
   accuracy claim. No live provider call, push or deployment.
+
+- 2026-11-09, F01 conversational presentation: replaced the prototype card with
+  a centered Inter reading column, unboxed school sections, safe Markdown subset,
+  scoped inline references and quiet SVG actions in the same brown/gold identity.
+  Sources open in a native right-side inspector/mobile bottom sheet with a
+  nonmodal fallback; source ownership, focus and reading position are preserved.
+  Growing textarea handles desktop/touch/IME editing, pending copy is honest,
+  saved history does not reanimate and new replies do not interrupt old-message
+  reading. Eight new contract checks failed at baseline; final 26 frontend,
+  138 Python, nine actual HTTP and 42 specified contrast checks passed. Backend
+  runtime and dataset hashes are unchanged. Browser host unavailable: real
+  dialog/focus, fonts, wrapping, mobile keyboard and device QA remain pending.
+  A synthetic actual-renderer preview is outside the app in workspace `.audit/`.
+  No OpenAI branding/code/font was imported, no model/source/ruling change,
+  live provider call, religious accuracy claim, push or deployment.

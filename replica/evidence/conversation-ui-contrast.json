@@ -1,0 +1,422 @@
+[
+  {
+    "fg": "dark-text",
+    "bg": "dark-surface",
+    "size": "normal",
+    "ratio": 16.41,
+    "aa": true,
+    "aaa": true,
+    "fg_hex": "#f5f1eb",
+    "bg_hex": "#171310"
+  },
+  {
+    "fg": "dark-muted",
+    "bg": "dark-surface",
+    "size": "normal",
+    "ratio": 7.26,
+    "aa": true,
+    "aaa": true,
+    "fg_hex": "#a9a19a",
+    "bg_hex": "#171310"
+  },
+  {
+    "fg": "dark-accent",
+    "bg": "dark-surface",
+    "size": "normal",
+    "ratio": 8.53,
+    "aa": true,
+    "aaa": true,
+    "fg_hex": "#e9a23b",
+    "bg_hex": "#171310"
+  },
+  {
+    "fg": "dark-text",
+    "bg": "dark-intro-worst-bg",
+    "size": "normal",
+    "ratio": 12.97,
+    "aa": true,
+    "aaa": true,
+    "fg_hex": "#f5f1eb",
+    "bg_hex": "#3b2317"
+  },
+  {
+    "fg": "dark-muted",
+    "bg": "dark-intro-worst-bg",
+    "size": "normal",
+    "ratio": 5.74,
+    "aa": true,
+    "aaa": false,
+    "fg_hex": "#a9a19a",
+    "bg_hex": "#3b2317"
+  },
+  {
+    "fg": "dark-accent",
+    "bg": "dark-intro-worst-bg",
+    "size": "normal",
+    "ratio": 6.74,
+    "aa": true,
+    "aaa": false,
+    "fg_hex": "#e9a23b",
+    "bg_hex": "#3b2317"
+  },
+  {
+    "fg": "light-text",
+    "bg": "light-surface",
+    "size": "normal",
+    "ratio": 16.35,
+    "aa": true,
+    "aaa": true,
+    "fg_hex": "#201b17",
+    "bg_hex": "#fbfaf7"
+  },
+  {
+    "fg": "light-muted",
+    "bg": "light-surface",
+    "size": "normal",
+    "ratio": 6.01,
+    "aa": true,
+    "aaa": false,
+    "fg_hex": "#665f59",
+    "bg_hex": "#fbfaf7"
+  },
+  {
+    "fg": "light-accent",
+    "bg": "light-surface",
+    "size": "normal",
+    "ratio": 6.37,
+    "aa": true,
+    "aaa": false,
+    "fg_hex": "#855018",
+    "bg_hex": "#fbfaf7"
+  },
+  {
+    "fg": "light-text",
+    "bg": "light-intro-worst-bg",
+    "size": "normal",
+    "ratio": 14.13,
+    "aa": true,
+    "aaa": true,
+    "fg_hex": "#201b17",
+    "bg_hex": "#efe9df"
+  },
+  {
+    "fg": "light-muted",
+    "bg": "light-intro-worst-bg",
+    "size": "normal",
+    "ratio": 5.2,
+    "aa": true,
+    "aaa": false,
+    "fg_hex": "#665f59",
+    "bg_hex": "#efe9df"
+  },
+  {
+    "fg": "light-accent",
+    "bg": "light-intro-worst-bg",
+    "size": "normal",
+    "ratio": 5.51,
+    "aa": true,
+    "aaa": false,
+    "fg_hex": "#855018",
+    "bg_hex": "#efe9df"
+  },
+  {
+    "fg": "dark-chat-text",
+    "bg": "dark-chat-canvas",
+    "size": "normal",
+    "ratio": 16.56,
+    "aa": true,
+    "aaa": true,
+    "fg_hex": "#ecf0f1",
+    "bg_hex": "#1a0d08"
+  },
+  {
+    "fg": "dark-chat-text",
+    "bg": "dark-chat-control-bg",
+    "size": "normal",
+    "ratio": 12.72,
+    "aa": true,
+    "aaa": true,
+    "fg_hex": "#ecf0f1",
+    "bg_hex": "#3b2317"
+  },
+  {
+    "fg": "dark-chat-text",
+    "bg": "dark-chat-input-bg",
+    "size": "normal",
+    "ratio": 14.7,
+    "aa": true,
+    "aaa": true,
+    "fg_hex": "#ecf0f1",
+    "bg_hex": "#2c180f"
+  },
+  {
+    "fg": "dark-chat-text",
+    "bg": "dark-response-source-surface",
+    "size": "normal",
+    "ratio": 14.7,
+    "aa": true,
+    "aaa": true,
+    "fg_hex": "#ecf0f1",
+    "bg_hex": "#2c180f"
+  },
+  {
+    "fg": "dark-chat-muted",
+    "bg": "dark-chat-canvas",
+    "size": "normal",
+    "ratio": 8.36,
+    "aa": true,
+    "aaa": true,
+    "fg_hex": "#baa99b",
+    "bg_hex": "#1a0d08"
+  },
+  {
+    "fg": "dark-chat-muted",
+    "bg": "dark-chat-control-bg",
+    "size": "normal",
+    "ratio": 6.42,
+    "aa": true,
+    "aaa": false,
+    "fg_hex": "#baa99b",
+    "bg_hex": "#3b2317"
+  },
+  {
+    "fg": "dark-chat-muted",
+    "bg": "dark-chat-input-bg",
+    "size": "normal",
+    "ratio": 7.42,
+    "aa": true,
+    "aaa": true,
+    "fg_hex": "#baa99b",
+    "bg_hex": "#2c180f"
+  },
+  {
+    "fg": "dark-chat-muted",
+    "bg": "dark-response-source-surface",
+    "size": "normal",
+    "ratio": 7.42,
+    "aa": true,
+    "aaa": true,
+    "fg_hex": "#baa99b",
+    "bg_hex": "#2c180f"
+  },
+  {
+    "fg": "dark-response-accent",
+    "bg": "dark-chat-canvas",
+    "size": "normal",
+    "ratio": 9.97,
+    "aa": true,
+    "aaa": true,
+    "fg_hex": "#f3af42",
+    "bg_hex": "#1a0d08"
+  },
+  {
+    "fg": "dark-response-accent",
+    "bg": "dark-chat-control-bg",
+    "size": "normal",
+    "ratio": 7.66,
+    "aa": true,
+    "aaa": true,
+    "fg_hex": "#f3af42",
+    "bg_hex": "#3b2317"
+  },
+  {
+    "fg": "dark-response-accent",
+    "bg": "dark-chat-input-bg",
+    "size": "normal",
+    "ratio": 8.86,
+    "aa": true,
+    "aaa": true,
+    "fg_hex": "#f3af42",
+    "bg_hex": "#2c180f"
+  },
+  {
+    "fg": "dark-response-accent",
+    "bg": "dark-response-source-surface",
+    "size": "normal",
+    "ratio": 8.86,
+    "aa": true,
+    "aaa": true,
+    "fg_hex": "#f3af42",
+    "bg_hex": "#2c180f"
+  },
+  {
+    "fg": "dark-chat-input-border",
+    "bg": "dark-chat-input-bg",
+    "size": "ui",
+    "ratio": 3.3,
+    "aa": true,
+    "aaa": true,
+    "fg_hex": "#8a6744",
+    "bg_hex": "#2c180f"
+  },
+  {
+    "fg": "dark-chat-input-border",
+    "bg": "dark-chat-canvas",
+    "size": "ui",
+    "ratio": 3.71,
+    "aa": true,
+    "aaa": true,
+    "fg_hex": "#8a6744",
+    "bg_hex": "#1a0d08"
+  },
+  {
+    "fg": "dark-chat-on-accent",
+    "bg": "dark-response-accent",
+    "size": "ui",
+    "ratio": 9.97,
+    "aa": true,
+    "aaa": true,
+    "fg_hex": "#1a0d08",
+    "bg_hex": "#f3af42"
+  },
+  {
+    "fg": "light-chat-text",
+    "bg": "light-chat-canvas",
+    "size": "normal",
+    "ratio": 14.59,
+    "aa": true,
+    "aaa": true,
+    "fg_hex": "#302318",
+    "bg_hex": "#fbfaf7"
+  },
+  {
+    "fg": "light-chat-text",
+    "bg": "light-chat-control-bg",
+    "size": "normal",
+    "ratio": 12.61,
+    "aa": true,
+    "aaa": true,
+    "fg_hex": "#302318",
+    "bg_hex": "#f5e8d6"
+  },
+  {
+    "fg": "light-chat-text",
+    "bg": "light-chat-input-bg",
+    "size": "normal",
+    "ratio": 14.66,
+    "aa": true,
+    "aaa": true,
+    "fg_hex": "#302318",
+    "bg_hex": "#fffaf3"
+  },
+  {
+    "fg": "light-chat-text",
+    "bg": "light-response-source-surface",
+    "size": "normal",
+    "ratio": 12.72,
+    "aa": true,
+    "aaa": true,
+    "fg_hex": "#302318",
+    "bg_hex": "#f5e9d9"
+  },
+  {
+    "fg": "light-chat-muted",
+    "bg": "light-chat-canvas",
+    "size": "normal",
+    "ratio": 6.26,
+    "aa": true,
+    "aaa": false,
+    "fg_hex": "#6e5a45",
+    "bg_hex": "#fbfaf7"
+  },
+  {
+    "fg": "light-chat-muted",
+    "bg": "light-chat-control-bg",
+    "size": "normal",
+    "ratio": 5.42,
+    "aa": true,
+    "aaa": false,
+    "fg_hex": "#6e5a45",
+    "bg_hex": "#f5e8d6"
+  },
+  {
+    "fg": "light-chat-muted",
+    "bg": "light-chat-input-bg",
+    "size": "normal",
+    "ratio": 6.3,
+    "aa": true,
+    "aaa": false,
+    "fg_hex": "#6e5a45",
+    "bg_hex": "#fffaf3"
+  },
+  {
+    "fg": "light-chat-muted",
+    "bg": "light-response-source-surface",
+    "size": "normal",
+    "ratio": 5.46,
+    "aa": true,
+    "aaa": false,
+    "fg_hex": "#6e5a45",
+    "bg_hex": "#f5e9d9"
+  },
+  {
+    "fg": "light-response-accent",
+    "bg": "light-chat-canvas",
+    "size": "normal",
+    "ratio": 6.17,
+    "aa": true,
+    "aaa": false,
+    "fg_hex": "#88520f",
+    "bg_hex": "#fbfaf7"
+  },
+  {
+    "fg": "light-response-accent",
+    "bg": "light-chat-control-bg",
+    "size": "normal",
+    "ratio": 5.34,
+    "aa": true,
+    "aaa": false,
+    "fg_hex": "#88520f",
+    "bg_hex": "#f5e8d6"
+  },
+  {
+    "fg": "light-response-accent",
+    "bg": "light-chat-input-bg",
+    "size": "normal",
+    "ratio": 6.2,
+    "aa": true,
+    "aaa": false,
+    "fg_hex": "#88520f",
+    "bg_hex": "#fffaf3"
+  },
+  {
+    "fg": "light-response-accent",
+    "bg": "light-response-source-surface",
+    "size": "normal",
+    "ratio": 5.38,
+    "aa": true,
+    "aaa": false,
+    "fg_hex": "#88520f",
+    "bg_hex": "#f5e9d9"
+  },
+  {
+    "fg": "light-chat-input-border",
+    "bg": "light-chat-input-bg",
+    "size": "ui",
+    "ratio": 4.23,
+    "aa": true,
+    "aaa": true,
+    "fg_hex": "#94724f",
+    "bg_hex": "#fffaf3"
+  },
+  {
+    "fg": "light-chat-input-border",
+    "bg": "light-chat-canvas",
+    "size": "ui",
+    "ratio": 4.21,
+    "aa": true,
+    "aaa": true,
+    "fg_hex": "#94724f",
+    "bg_hex": "#fbfaf7"
+  },
+  {
+    "fg": "light-chat-on-accent",
+    "bg": "light-response-accent",
+    "size": "ui",
+    "ratio": 6.2,
+    "aa": true,
+    "aaa": true,
+    "fg_hex": "#fffaf3",
+    "bg_hex": "#88520f"
+  }
+]

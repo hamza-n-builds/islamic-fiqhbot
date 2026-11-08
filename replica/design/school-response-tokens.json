@@ -1,31 +1,33 @@
 {
-  "scope": "Prototype response card, rows, utilities, source panels, and prior direct-chat intro; not full app accessibility QA",
+  "scope": "Conversation reading area, inline references, actions, source inspector, composer and earlier intro bounds; not full app accessibility QA",
   "colors": {
     "dark-text": "#f5f1eb",
+    "dark-surface": "#171310",
     "dark-muted": "#a9a19a",
     "dark-accent": "#e9a23b",
-    "dark-surface": "#171310",
     "dark-intro-worst-bg": "#3b2317",
     "light-text": "#201b17",
+    "light-surface": "#fbfaf7",
     "light-muted": "#665f59",
     "light-accent": "#855018",
-    "light-surface": "#fbfaf7",
     "light-intro-worst-bg": "#efe9df",
-    "dark-response-text": "#ccbbae",
-    "dark-response-strong": "#ecf0f1",
-    "dark-response-muted": "#c4b19f",
+    "dark-chat-canvas": "#1a0d08",
+    "dark-chat-text": "#ecf0f1",
+    "dark-chat-muted": "#baa99b",
+    "dark-chat-control-bg": "#3b2317",
+    "dark-chat-input-bg": "#2c180f",
+    "dark-chat-input-border": "#8a6744",
+    "dark-chat-on-accent": "#1a0d08",
     "dark-response-accent": "#f3af42",
-    "dark-response-surface": "#3b2317",
-    "dark-response-row": "#3b2317",
-    "dark-response-row-hover": "#452c14",
     "dark-response-source-surface": "#2c180f",
-    "light-response-text": "#514131",
-    "light-response-strong": "#302318",
-    "light-response-muted": "#6e5a45",
+    "light-chat-canvas": "#fbfaf7",
+    "light-chat-text": "#302318",
+    "light-chat-muted": "#6e5a45",
+    "light-chat-control-bg": "#f5e8d6",
+    "light-chat-input-bg": "#fffaf3",
+    "light-chat-input-border": "#94724f",
+    "light-chat-on-accent": "#fffaf3",
     "light-response-accent": "#88520f",
-    "light-response-surface": "#fffaf3",
-    "light-response-row": "#faf1e5",
-    "light-response-row-hover": "#f5e8d6",
     "light-response-source-surface": "#f5e9d9"
   },
   "pairs": [
@@ -78,146 +80,144 @@
       "light-intro-worst-bg"
     ],
     [
-      "dark-response-text",
-      "dark-response-surface"
+      "dark-chat-text",
+      "dark-chat-canvas"
     ],
     [
-      "dark-response-text",
-      "dark-response-row"
+      "dark-chat-text",
+      "dark-chat-control-bg"
     ],
     [
-      "dark-response-text",
-      "dark-response-row-hover"
+      "dark-chat-text",
+      "dark-chat-input-bg"
     ],
     [
-      "dark-response-text",
+      "dark-chat-text",
       "dark-response-source-surface"
     ],
     [
-      "dark-response-strong",
-      "dark-response-surface"
+      "dark-chat-muted",
+      "dark-chat-canvas"
     ],
     [
-      "dark-response-strong",
-      "dark-response-row"
+      "dark-chat-muted",
+      "dark-chat-control-bg"
     ],
     [
-      "dark-response-strong",
-      "dark-response-row-hover"
+      "dark-chat-muted",
+      "dark-chat-input-bg"
     ],
     [
-      "dark-response-strong",
-      "dark-response-source-surface"
-    ],
-    [
-      "dark-response-muted",
-      "dark-response-surface"
-    ],
-    [
-      "dark-response-muted",
-      "dark-response-row"
-    ],
-    [
-      "dark-response-muted",
-      "dark-response-row-hover"
-    ],
-    [
-      "dark-response-muted",
+      "dark-chat-muted",
       "dark-response-source-surface"
     ],
     [
       "dark-response-accent",
-      "dark-response-surface"
+      "dark-chat-canvas"
     ],
     [
       "dark-response-accent",
-      "dark-response-row"
+      "dark-chat-control-bg"
     ],
     [
       "dark-response-accent",
-      "dark-response-row-hover"
+      "dark-chat-input-bg"
     ],
     [
       "dark-response-accent",
       "dark-response-source-surface"
     ],
     [
-      "light-response-text",
-      "light-response-surface"
+      "dark-chat-input-border",
+      "dark-chat-input-bg",
+      "ui"
     ],
     [
-      "light-response-text",
-      "light-response-row"
+      "dark-chat-input-border",
+      "dark-chat-canvas",
+      "ui"
     ],
     [
-      "light-response-text",
-      "light-response-row-hover"
+      "dark-chat-on-accent",
+      "dark-response-accent",
+      "ui"
     ],
     [
-      "light-response-text",
+      "light-chat-text",
+      "light-chat-canvas"
+    ],
+    [
+      "light-chat-text",
+      "light-chat-control-bg"
+    ],
+    [
+      "light-chat-text",
+      "light-chat-input-bg"
+    ],
+    [
+      "light-chat-text",
       "light-response-source-surface"
     ],
     [
-      "light-response-strong",
-      "light-response-surface"
+      "light-chat-muted",
+      "light-chat-canvas"
     ],
     [
-      "light-response-strong",
-      "light-response-row"
+      "light-chat-muted",
+      "light-chat-control-bg"
     ],
     [
-      "light-response-strong",
-      "light-response-row-hover"
+      "light-chat-muted",
+      "light-chat-input-bg"
     ],
     [
-      "light-response-strong",
-      "light-response-source-surface"
-    ],
-    [
-      "light-response-muted",
-      "light-response-surface"
-    ],
-    [
-      "light-response-muted",
-      "light-response-row"
-    ],
-    [
-      "light-response-muted",
-      "light-response-row-hover"
-    ],
-    [
-      "light-response-muted",
+      "light-chat-muted",
       "light-response-source-surface"
     ],
     [
       "light-response-accent",
-      "light-response-surface"
+      "light-chat-canvas"
     ],
     [
       "light-response-accent",
-      "light-response-row"
+      "light-chat-control-bg"
     ],
     [
       "light-response-accent",
-      "light-response-row-hover"
+      "light-chat-input-bg"
     ],
     [
       "light-response-accent",
       "light-response-source-surface"
+    ],
+    [
+      "light-chat-input-border",
+      "light-chat-input-bg",
+      "ui"
+    ],
+    [
+      "light-chat-input-border",
+      "light-chat-canvas",
+      "ui"
+    ],
+    [
+      "light-chat-on-accent",
+      "light-response-accent",
+      "ui"
     ]
   ],
   "layout": {
-    "columns": 1,
-    "school_row_columns_above_600px": "5.5rem minmax(0, 1fr)",
-    "school_row_columns_up_to_600px": 1,
-    "body_font_rem": 1,
-    "body_line_height": 1.75,
+    "reading_width_rem": 48,
+    "desktop_body_rem": 1.0625,
+    "mobile_body_rem": 1,
+    "line_height": 1.8,
+    "section_gap_rem": 1.5,
+    "mobile_gutter_rem": 1.125,
     "action_min_height_rem": 2.75,
-    "padding_desktop_rem": 1.25,
-    "padding_mobile_rem": 1,
-    "label_font_rem": 0.9375,
-    "utility_font_rem": 0.8125,
-    "response_font": "Montserrat with existing Inter/system fallback",
-    "answers_visible_without_interaction": 3
+    "font": "Existing Inter with Arabic/Urdu utilities",
+    "answer_columns": 1,
+    "answer_panels": "unboxed sections",
+    "source_inspector": "native right-side dialog; bottom sheet up to 600px; nonmodal inline fallback",
+    "composer": "growing textarea; desktop Enter sends, Shift+Enter/touch Enter edit"
   }
 }

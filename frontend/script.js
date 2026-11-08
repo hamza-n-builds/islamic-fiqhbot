@@ -211,6 +211,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
             // Show interim in input while speaking
             userInput.value = final || interim;
+            resizeComposer();
             if (final) {
                 sttStatusText.textContent = 'Got it! Processing...';
             }
@@ -248,6 +249,7 @@ document.addEventListener('DOMContentLoaded', () => {
             recognition.stop();
         } else {
             userInput.value = '';
+            resizeComposer();
             recognition.start();
         }
     });
@@ -473,11 +475,12 @@ document.addEventListener('DOMContentLoaded', () => {
         saveChats();
         appendMessageUI('user', text, true);
         userInput.value = '';
+        resizeComposer();
 
-        // Loading indicator — mosque pulse
+        // Honest pending state; the UI does not invent provider/retrieval stages.
         const loadingDiv = document.createElement('div');
         loadingDiv.classList.add('message', 'bot-message', 'loading-msg');
-        loadingDiv.innerHTML = `<div class="message-content"><div class="thinking-icon"><i class="fas fa-mosque"></i></div><span>Reflecting<span class="typing-dots"><span></span><span></span><span></span></span></span></div>`;
+        loadingDiv.innerHTML = `<div class="message-content" role="status" aria-live="polite"><span class="pending-orbit" aria-hidden="true"></span><span>Preparing your answer<span class="typing-dots" aria-hidden="true"><span></span><span></span><span></span></span></span></div>`;
         chatContainer.insertBefore(loadingDiv, chatIntro);
         requestAnimationFrame(() => {
             chatContainer.scrollTop = chatContainer.scrollHeight;
@@ -543,29 +546,19 @@ document.addEventListener('DOMContentLoaded', () => {
     function buildSourcesAccordion(sources) {
         const container = document.createElement('div');
         container.classList.add('sources-accordion');
-
-        const topics = (sources.fiqh || []).map(f => f.topic_name || f.topic_id).filter(Boolean);
-        if (topics.length) {
-            const line = document.createElement('div');
-            line.className = 'src-static-line';
-            line.innerHTML = `<strong>Topic:</strong> ${escapeHtml(topics.join(', '))}`;
-            container.appendChild(line);
-        }
-
-        (sources.quran || []).forEach(q => {
-            const ref = q.ref || '';
-            const surah = q.surah ? ` - ${q.surah}` : '';
-            const wrapper = buildClickableLine(`Qur'an: (${ref}${surah})`, 'quran', q);
-            container.appendChild(wrapper);
-        });
-
-        (sources.hadith || []).forEach(h => {
-            const hasText = (h.text_ar && h.text_ar.trim()) || (h.text_en && h.text_en.trim());
-            if (!hasText) return;
-            const ref = (h.ref || '').replace(/&#39;|&apos;/g, "'");
-            const chapter = h.chapter ? ` - ${h.chapter}` : '';
-            const wrapper = buildClickableLine(`Hadith: (${ref}${chapter})`, 'hadith', h);
-            container.appendChild(wrapper);
+        sourceEntries(sources).forEach(entry => {
+            const record = entry.record;
+            let row;
+            if (entry.kind === 'fiqh') {
+                row = document.createElement('div');
+                row.className = 'src-static-line';
+                row.tabIndex = -1;
+                row.innerHTML = `<strong>Topic:</strong> ${escapeHtml(record.topic_name || record.topic_id)}`;
+            } else {
+                row = buildClickableLine(entry.label, entry.kind, record);
+            }
+            row.setAttribute('data-source-key', entry.key);
+            container.appendChild(row);
         });
 
         return container;
@@ -664,6 +657,136 @@ document.addEventListener('DOMContentLoaded', () => {
         return html;
     }
 
+    function sourceEntries(sources) {
+        const entries = [];
+        if (!sources || typeof sources !== 'object') return entries;
+        for (const kind of ['fiqh', 'quran', 'hadith']) {
+            if (!Array.isArray(sources[kind])) continue;
+            sources[kind].forEach((record, index) => {
+                if (!record || typeof record !== 'object') return;
+                let tag, label;
+                if (kind === 'fiqh' && typeof record.topic_name === 'string' && record.topic_name.trim()) {
+                    tag = `[${record.topic_name}]`; label = 'Fiqh note';
+                } else if (kind === 'quran' && typeof record.ref === 'string' && record.ref.trim()) {
+                    tag = `[Quran ${record.ref}]`; label = `Qur’an ${record.ref}`;
+                } else if (kind === 'hadith' && typeof record.ref === 'string' && record.ref.trim()) {
+                    if (![record.text_ar, record.text_en].some(value => typeof value === 'string' && value.trim())) return;
+                    tag = `[${record.ref.replace(/&#39;|&apos;/g, "'")}]`; label = record.ref.replace(/&#39;|&apos;/g, "'");
+                } else return;
+                entries.push({ kind, key: `${kind}-${index}`, tag, label, record });
+            });
+        }
+        return entries;
+    }
+
+    function formatAnswerInline(text, sources, school, depth = 0) {
+        const records = sourceEntries(sources);
+        const normalize = value => value.toLowerCase().replace(/\s+/g, ' ').trim();
+        const tokens = /\[[^\[\]\n]{1,256}\]|\*\*[^*\n]+\*\*|`[^`\n]+`/g;
+        let html = '', cursor = 0;
+        for (const match of String(text).matchAll(tokens)) {
+            html += escapeHtml(text.slice(cursor, match.index));
+            const token = match[0];
+            if (token.startsWith('**') && depth < 3) {
+                html += '<strong>' + formatAnswerInline(token.slice(2, -2), sources, school, depth + 1) + '</strong>';
+            } else if (token.startsWith('`')) {
+                html += '<code>' + escapeHtml(token.slice(1, -1)) + '</code>';
+            } else {
+                const entry = records.find(record => normalize(record.tag) === normalize(token));
+                if (entry && ['hanafi', 'shafi', 'maliki'].includes(school)) {
+                    html += `<button type="button" class="inline-citation" dir="ltr" data-citation-school="${school}" data-citation-key="${entry.key}" aria-haspopup="dialog" aria-label="${escapeHtml('View ' + entry.label + ' source for ' + school)}" title="${escapeHtml(token.slice(1, -1))}">${escapeHtml(entry.label)}<span aria-hidden="true">↗</span></button>`;
+                } else html += escapeHtml(token);
+            }
+            cursor = match.index + token.length;
+        }
+        return html + escapeHtml(text.slice(cursor));
+    }
+
+    function formatAnswerContent(text, sources, school) {
+        // A deliberately small Markdown subset. Never evaluate model HTML or links.
+        const lines = String(text).replace(/\r\n/g, '\n').split('\n');
+        const attrs = value => `${isUrduText(value) ? ' class="font-urdu"' : ''} dir="auto"`;
+        const inline = value => formatAnswerInline(value, sources, school);
+        let html = '', i = 0;
+        while (i < lines.length) {
+            if (!lines[i].trim()) { i++; continue; }
+            const heading = lines[i].match(/^#{1,6}\s+(.+)$/);
+            if (heading) { html += `<h4${attrs(heading[1])}>${inline(heading[1])}</h4>`; i++; continue; }
+            const bullet = lines[i].match(/^\s*[-*]\s+(.+)$/);
+            const numbered = lines[i].match(/^\s*(\d{1,4})[.)]\s+(.+)$/);
+            if (bullet || numbered) {
+                const ordered = Boolean(numbered);
+                const pattern = ordered ? /^\s*(\d{1,4})[.)]\s+(.+)$/ : /^\s*[-*]\s+(.+)$/;
+                html += ordered ? `<ol start="${Number(numbered[1])}">` : '<ul>';
+                while (i < lines.length) {
+                    const item = lines[i].match(pattern);
+                    if (!item) break;
+                    const content = item[ordered ? 2 : 1];
+                    html += `<li${attrs(content)}>${inline(content)}</li>`; i++;
+                }
+                html += ordered ? '</ol>' : '</ul>';
+                continue;
+            }
+            const paragraph = [];
+            while (i < lines.length && lines[i].trim()) {
+                if (paragraph.length && /^(?:#{1,6}\s|\s*[-*]\s|\s*\d{1,4}[.)]\s)/.test(lines[i])) break;
+                paragraph.push(lines[i++]);
+            }
+            const value = paragraph.join('\n');
+            html += `<p${attrs(value)}>${inline(value).replace(/\n/g, '<br>')}</p>`;
+        }
+        return html;
+    }
+
+    function bindResponseSources(root) {
+        const dialog = root.querySelector('.response-source-dialog');
+        if (!dialog) return;
+        const close = root.querySelector('.source-close-btn');
+        const viewport = root.closest?.('.chat-container');
+        let opener = null;
+        let previousScroll = null;
+        const restoreFocus = () => {
+            if (opener?.isConnected) opener.focus({ preventScroll: true });
+            if (viewport && Number.isFinite(previousScroll)) viewport.scrollTop = previousScroll;
+        };
+        const closeSources = () => {
+            if (typeof dialog.close === 'function') dialog.close();
+            else { dialog.removeAttribute('open'); restoreFocus(); }
+        };
+        root.querySelectorAll('[data-open-sources], .inline-citation').forEach(button => {
+            button.addEventListener('click', event => {
+                opener = event.currentTarget;
+                if (!dialog.open) {
+                    previousScroll = viewport?.scrollTop;
+                    if (typeof dialog.showModal === 'function') dialog.showModal();
+                    else { dialog.classList.add('dialog-inline-fallback'); dialog.setAttribute('open', ''); }
+                }
+                const school = opener.dataset.citationSchool;
+                const key = opener.dataset.citationKey;
+                if (!/^(hanafi|shafi|maliki)$/.test(school || '') || !/^(fiqh|quran|hadith)-\d+$/.test(key || '')) return;
+                const group = dialog.querySelector(`[data-source-group="${school}"]`);
+                const record = group?.querySelector(`[data-source-key="${key}"]`);
+                if (!record) return;
+                if (record.tagName === 'DETAILS') record.open = true;
+                requestAnimationFrame(() => {
+                    const target = record.querySelector('summary') || record;
+                    target.focus({ preventScroll: true });
+                    record.scrollIntoView({ block: 'nearest', behavior: 'auto' });
+                });
+            });
+        });
+        close.addEventListener('click', closeSources);
+        dialog.addEventListener('close', restoreFocus);
+        dialog.addEventListener('keydown', event => {
+            if (event.key === 'Escape' && typeof dialog.showModal !== 'function') closeSources();
+        });
+        dialog.addEventListener('click', event => {
+            if (event.target !== dialog) return;
+            const rect = dialog.getBoundingClientRect();
+            if (event.clientX < rect.left || event.clientX > rect.right || event.clientY < rect.top || event.clientY > rect.bottom) closeSources();
+        });
+    }
+
     function buildSchoolSections(sections) {
         const schools = [['hanafi', 'Hanafi'], ['shafi', 'Shafi‘i'], ['maliki', 'Maliki']];
         const statuses = { available: 'Answer', unavailable: 'Not available', withheld: 'Withheld' };
@@ -671,11 +794,7 @@ document.addEventListener('DOMContentLoaded', () => {
             !s || s.school !== schools[i][0] || !Object.hasOwn(statuses, s.status) || typeof s.answer !== 'string')) return '';
         return '<section class="school-responses" aria-label="School responses">' + sections.map((section, i) => {
             const available = section.status === 'available';
-            const body = section.answer.split(/\n\s*\n/).map(paragraph => {
-                const font = isUrduText(paragraph) ? ' class="font-urdu"' : '';
-                const safe = escapeHtml(paragraph).replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>').replace(/\n/g, '<br>');
-                return `<p${font} dir="auto">${safe}</p>`;
-            }).join('');
+            const body = formatAnswerContent(section.answer, available ? section.sources : {}, section.school);
             return `<div class="school-answer" data-state="${section.status}">
                 <div class="school-answer-heading"><h3 class="school-answer-title">${schools[i][1]}</h3>
                     ${available ? '' : `<span class="school-answer-state">${statuses[section.status]}</span>`}</div>
@@ -688,7 +807,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const titles = { hanafi: 'Hanafi', shafi: 'Shafi‘i', maliki: 'Maliki' };
         return sections.filter(section => section.status === 'available' && ['fiqh', 'quran', 'hadith']
             .some(kind => Array.isArray(section.sources?.[kind]) && section.sources[kind].some(item => item && typeof item === 'object')))
-            .map(section => `<section class="school-source-group" aria-label="${titles[section.school]} references">
+            .map(section => `<section class="school-source-group" data-source-group="${section.school}" aria-label="${titles[section.school]} references">
                 <h4>${titles[section.school]}</h4><div data-school-sources="${section.school}"></div></section>`).join('');
     }
 
@@ -703,13 +822,18 @@ document.addEventListener('DOMContentLoaded', () => {
             loading: '<path d="M20 12a8 8 0 1 1-8-8"/>',
             check: '<path d="m5 12 4 4L19 6"/>',
             error: '<path d="m6 6 12 12M6 18 18 6"/>',
+            close: '<path d="m6 6 12 12M6 18 18 6"/>',
+            spark: '<path d="m12 3 2.7 6.3L21 12l-6.3 2.7L12 21l-2.7-6.3L3 12l6.3-2.7L12 3Z"/>',
         };
         return `<svg class="response-icon${icon === 'loading' ? ' response-icon-loading' : ''}" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">${paths[icon] || paths.sources}</svg>${label ? `<span>${escapeHtml(label)}</span>` : ''}`;
     }
 
     function appendMessageUI(sender, text, animate, meta) {
+        const distanceFromBottom = chatContainer.scrollHeight - chatContainer.scrollTop - chatContainer.clientHeight;
+        const followReply = !Number.isFinite(distanceFromBottom) || distanceFromBottom < 160 || sender === 'user';
         const msgDiv = document.createElement('div');
         msgDiv.classList.add('message', sender === 'user' ? 'user-message' : 'bot-message');
+        if (animate && sender === 'bot') msgDiv.classList.add('response-enter');
 
         const contentDiv = document.createElement('div');
         contentDiv.classList.add('message-content');
@@ -747,25 +871,32 @@ document.addEventListener('DOMContentLoaded', () => {
             ? `<button type="button" class="speak-btn" title="Read aloud" aria-label="Read answer aloud" aria-pressed="false">${responseActionContent('listen', 'Listen')}</button>`
             : '';
         const copyButton = sender === 'bot'
-            ? `<button type="button" class="copy-btn" title="Copy message">${responseActionContent('copy', 'Copy')}</button>`
+            ? `<button type="button" class="copy-btn" title="Copy answer" aria-label="Copy answer">${responseActionContent('copy', 'Copy')}</button>`
             : '';
         const sourcesButton = hasSources
             ? `<button class="sources-btn" title="View sources"><i class="fas fa-book-open"></i> Sources</button>`
             : '';
 
         const schoolSources = schoolHtml ? buildSchoolSources(meta.answer_sections) : '';
+        const responseHeader = `<header class="response-header"><span class="response-avatar" aria-hidden="true">${responseActionContent('spark', '')}</span><strong>Fiqhbot</strong></header>`;
         contentDiv.innerHTML = schoolHtml
-            ? `<header class="response-header"><span class="response-dot" aria-hidden="true"></span><strong>Fiqhbot</strong><span class="response-header-divider" aria-hidden="true">·</span><span class="response-context">School comparison</span></header>
-                ${schoolHtml}${metaBadges}<div class="response-actions">${speakButton}${copyButton}</div>
-                ${schoolSources ? `<details class="response-sources"><summary>${responseActionContent('sources', 'Sources')}${responseActionContent('chevron', '')}</summary>
-                    <div class="response-sources-body"><p class="school-reference-note">References mapped to this topic; school-specific support has not been independently reviewed.</p>${schoolSources}</div></details>` : ''}`
-            : `<p>${formattedText}</p>${metaBadges}${speakButton}${copyButton}${sourcesButton}`;
+            ? `${responseHeader}
+                ${schoolHtml}<div class="response-actions" role="group" aria-label="Answer actions">${copyButton}${speakButton}
+                ${schoolSources ? `<button type="button" class="response-sources-btn" data-open-sources aria-haspopup="dialog" title="View answer sources">${responseActionContent('sources', 'Sources')}</button>` : ''}
+                <span class="response-action-status" role="status" aria-live="polite"></span></div>${metaBadges}
+                ${schoolSources ? `<dialog class="response-source-dialog" aria-label="Answer sources">
+                    <div class="source-inspector-header"><div><p class="source-inspector-eyebrow">Provided references</p><h2>Sources</h2></div><button type="button" class="source-close-btn" aria-label="Close sources" title="Close sources">${responseActionContent('close', '')}</button></div>
+                    <div class="response-sources-body"><p class="school-reference-note">References mapped to this topic; school-specific support has not been independently reviewed.</p>${schoolSources}</div></dialog>` : ''}`
+            : sender === 'bot'
+                ? `${responseHeader}<div class="response-prose"><p>${formattedText}</p></div><div class="response-actions" role="group" aria-label="Answer actions">${copyButton}${speakButton}${sourcesButton}<span class="response-action-status" role="status" aria-live="polite"></span></div>${metaBadges}`
+                : `<p>${formattedText}</p>`;
         if (schoolHtml) {
             meta.answer_sections.forEach(section => {
                 if (section.status !== 'available') return;
                 const holder = contentDiv.querySelector(`[data-school-sources="${section.school}"]`);
                 if (holder) holder.appendChild(buildSourcesAccordion(section.sources || {}));
             });
+            bindResponseSources(contentDiv);
         }
 
         if (hasSources) {
@@ -796,6 +927,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 speakBtn.innerHTML = responseActionContent('listen', 'Listen');
                 speakBtn.setAttribute('aria-label', 'Read answer aloud');
                 speakBtn.setAttribute('aria-pressed', 'false');
+                speakBtn.title = 'Read answer aloud';
                 isSpeaking = false;
             };
 
@@ -808,6 +940,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     speakBtn.innerHTML = responseActionContent('loading', 'Loading');
                     speakBtn.setAttribute('aria-label', 'Stop reading');
                     speakBtn.setAttribute('aria-pressed', 'true');
+                    speakBtn.title = 'Stop reading';
                     isSpeaking = true;
                     speakText(text, resetIcon).then(() => {
                         if (isSpeaking) speakBtn.innerHTML = responseActionContent('stop', 'Stop');
@@ -816,19 +949,26 @@ document.addEventListener('DOMContentLoaded', () => {
             });
 
             const copyBtn = contentDiv.querySelector('.copy-btn');
+            const copyStatus = contentDiv.querySelector('.response-action-status');
             copyBtn.addEventListener('click', async () => {
                 try {
                     await navigator.clipboard.writeText(text);
                     copyBtn.classList.add('copied');
                     copyBtn.innerHTML = responseActionContent('check', 'Copied');
+                    copyBtn.setAttribute('aria-label', 'Answer copied');
+                    if (copyStatus) copyStatus.textContent = 'Answer copied';
                     setTimeout(() => {
                         copyBtn.classList.remove('copied');
                         copyBtn.innerHTML = responseActionContent('copy', 'Copy');
+                        copyBtn.setAttribute('aria-label', 'Copy answer');
+                        if (copyStatus) copyStatus.textContent = '';
                     }, 2000);
                 } catch {
                     copyBtn.innerHTML = responseActionContent('error', 'Failed');
+                    if (copyStatus) copyStatus.textContent = 'Copy failed. Please select and copy the text.';
                     setTimeout(() => {
                         copyBtn.innerHTML = responseActionContent('copy', 'Copy');
+                        if (copyStatus) copyStatus.textContent = '';
                     }, 1500);
                 }
             });
@@ -843,7 +983,9 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         requestAnimationFrame(() => {
-            chatContainer.scrollTop = chatContainer.scrollHeight;
+            if (animate && sender === 'bot' && followReply && typeof msgDiv.scrollIntoView === 'function') {
+                msgDiv.scrollIntoView({ block: 'start', behavior: 'auto' });
+            } else if (followReply || !animate) chatContainer.scrollTop = chatContainer.scrollHeight;
         });
     }
 
@@ -876,11 +1018,23 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
     // ── Event Listeners ──────────────────────────────────────────
+    function resizeComposer() {
+        if (!userInput.style) return;
+        userInput.style.height = 'auto';
+        if (userInput.value) userInput.style.height = userInput.scrollHeight + 'px';
+    }
+
+    function handleComposerKeydown(event) {
+        if (event.key !== 'Enter' || event.shiftKey || event.isComposing || event.keyCode === 229) return;
+        if (window.matchMedia('(pointer: coarse)').matches) return;
+        event.preventDefault();
+        sendMessage();
+    }
+
     sendBtn.addEventListener('click', sendMessage);
-    userInput.addEventListener('keypress', (e) => {
-        if (e.key === 'Enter') sendMessage();
-    });
+    userInput.addEventListener('keydown', handleComposerKeydown);
     userInput.addEventListener('input', () => {
+        resizeComposer();
         if (isUrduText(userInput.value)) {
             userInput.classList.add('font-urdu-ui');
             userInput.setAttribute('lang', 'ur');

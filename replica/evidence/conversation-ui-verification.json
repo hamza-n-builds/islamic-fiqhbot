@@ -1,0 +1,70 @@
+{
+  "date": "2026-11-09",
+  "baseline_commit": "11c62bc",
+  "scope": "ChatGPT-inspired conversation presentation in the existing brown/gold theme, without OpenAI branding/code/assets",
+  "replica_modules": [
+    "design",
+    "build",
+    "test"
+  ],
+  "red_frontend": {
+    "new_tests": 8,
+    "failed": 8,
+    "reason": "Required presentation functions absent at baseline"
+  },
+  "frontend_function_checks": {
+    "tests": 26,
+    "failed": 0,
+    "browser_rendering": false
+  },
+  "python_regressions": {
+    "tests": 138,
+    "passed": true
+  },
+  "local_startup_http": {
+    "checks": [
+      "Actual datasets/model warm-up and /health readiness",
+      "HTML and four frontend assets served byte-for-byte",
+      "Same-origin dynamic config with blank browser API key",
+      "Invalid question rejected before generation",
+      "Real API rejects unverified history without an external provider call",
+      "Real API greetings/capabilities/clarifications have no accuracy or consensus claims",
+      "Real API serves canonical Bukhari 1395 and Muslim 11a with pinned source provenance",
+      "Ambiguous legacy Muslim 11 cannot resolve through the canonical API",
+      "Second launch reuses the ready instance without a browser"
+    ],
+    "external_network": "blocked in server processes",
+    "provider_generation_tested": false,
+    "browser_rendering_tested": false,
+    "startup_seconds": 13.49,
+    "status": "passed"
+  },
+  "specified_contrast": {
+    "pairs": 42,
+    "aa_failures": 0
+  },
+  "preservation": {
+    "backend_runtime_unchanged": true,
+    "dataset_bytes_unchanged": true,
+    "api_receipts_and_raw_answer_storage_unchanged": true,
+    "new_scholarly_approvals": 0
+  },
+  "ui_sha256": {
+    "frontend/script.js": "8d34f3457d51feeb090a4877bd57e8b1a82f23181ebd93c1065e1094ff22dcd2",
+    "frontend/modern.css": "03109704b5fb964d6947ca21378f466847e03b42d1f6f36fd78e83f3726cd143",
+    "frontend/index.html": "fd2a46bebe7d80ec7bdde93a89870693e68a49a384568cb1adfef78cfecbdd36"
+  },
+  "limits": [
+    "Browser access host unavailable: no native dialog/focus, viewport, font, keyboard or device rendering QA",
+    "Function fixtures do not establish browser behavior or pixel parity with ChatGPT",
+    "No live Gemini or WhatsApp send; no semantic/religious accuracy certification",
+    "No source/prompt/ruling changes, push or deployment"
+  ],
+  "final_checks": {
+    "javascript_syntax": "passed",
+    "preview_script_syntax": "passed",
+    "whitespace": "passed",
+    "known_secret_patterns": "passed; not an exhaustive secret scan",
+    "visual_browser_qa": "not performed; browser access host unavailable"
+  }
+}
