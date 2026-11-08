@@ -211,7 +211,8 @@ def ask():
     try:
         result = rag_engine.answer_question(
             question, None if madhhab == "General" else madhhab, prev_answer=prev_answer or None,
-            prev_answer_receipt=prev_answer_receipt or None)
+            prev_answer_receipt=prev_answer_receipt or None,
+            **({"compare_schools": True} if madhhab == "General" else {}))
         db.log_query_async(question, madhhab, result, channel="web")
         return jsonify(result)
     except httpx.RequestError:
@@ -414,7 +415,7 @@ def wa_inbound():
                 wa_send_text(sender, "I couldn't hear a question in that voice note. Please try again.")
                 return "ok", 200
             # Answer, reply with text, and (optionally) a spoken voice note back.
-            result = rag_engine.answer_question(question, None)
+            result = rag_engine.answer_question(question, None, compare_schools=True)
             db.log_query_async(question, "General", result, channel="whatsapp",
                          extra={"voice": True, "language": detected})
             reply_text = _format_for_whatsapp(result)
@@ -436,7 +437,7 @@ def wa_inbound():
             wa_send_text(sender, "Please send your question as a text message.")
             return "ok", 200
 
-        result = rag_engine.answer_question(question, None)  # madhhab selection via web UI; default General on WA
+        result = rag_engine.answer_question(question, None, compare_schools=True)
         db.log_query_async(question, "General", result, channel="whatsapp")
         wa_send_text(sender, _format_for_whatsapp(result))
     except Exception:

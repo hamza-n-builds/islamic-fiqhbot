@@ -13,6 +13,6 @@
   "external_network": "blocked in server processes",
   "provider_generation_tested": false,
   "browser_rendering_tested": false,
-  "startup_seconds": 8.83,
+  "startup_seconds": 7.14,
   "status": "passed"
 }

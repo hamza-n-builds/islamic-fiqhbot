@@ -89,7 +89,9 @@ def log_query(question, madhhab, result, channel="web", extra=None):
             "consensus":          result.get("consensus"),
             "citation_validation": result.get("citation_validation"),
             "scholarly_review":   result.get("scholarly_review"),
-            "topics":             [f.get("topic_id") for f in sources.get("fiqh", [])],
+            "response_schema":    result.get("response_schema"),
+            "school_statuses":    {s["school"]: s["status"] for s in result.get("answer_sections", [])},
+            "topics":             list(dict.fromkeys(f.get("topic_id") for f in sources.get("fiqh", []))),
             "quran_refs":         [q.get("ref") for q in sources.get("quran", [])],
             "hadith_refs":        [h.get("ref") for h in sources.get("hadith", [])],
         }

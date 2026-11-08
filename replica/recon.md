@@ -30,3 +30,10 @@ and explicit incomplete scholarly review. Cover old saved history, new answers,
 signed rephrasing, weak-match abstention, greetings/referrals, web and WhatsApp.
 The source registry and religious content remain unchanged; the three-school
 mobile response redesign is still a later task.
+
+F01/F02 direct-chat vertical slice (2026-11-08): default requests retrieve three
+school positions without selection. Native answer disclosures are implemented;
+empty/missing/withheld sections, bounded JSON parsing, school-bound receipts,
+rephrasing, old history, duplicate submits and pending chat switches are covered.
+Browser visual/keyboard checks remain pending. This is a functional response/UI
+change, not a full mobile visual redesign or scholarly approval.

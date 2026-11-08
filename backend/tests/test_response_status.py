@@ -132,7 +132,7 @@ class ResponseStatusTests(unittest.TestCase):
                 self.assertNotIn("scholarly_review", result)
 
     def test_api_returns_honest_status_contract(self):
-        response = self.api_client().post("/ask", json={"question": "What is the fixture ruling?"})
+        response = self.api_client().post("/ask", json={"question": "What is the fixture ruling?", "madhab": "Hanafi"})
         self.assertEqual(response.status_code, 200)
         self.assertTransparent(response.json)
 

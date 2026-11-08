@@ -1,0 +1,110 @@
+{
+  "date": "2026-11-08",
+  "baseline_commit": "088ff161a962b6b08ffbc6d87b0475fac69381a3",
+  "scope": "Three-school RAG plus bounded organization, school-bound provenance and direct-chat response disclosures",
+  "replica_modules": [
+    "backend",
+    "build",
+    "design",
+    "test"
+  ],
+  "red_phase": {
+    "exit_code": 1,
+    "tests": 17,
+    "summary": "Ran 17 tests in 0.262s\n\nFAILED (failures=2, errors=19)"
+  },
+  "python_regressions": {
+    "exit_code": 0,
+    "tests": 138,
+    "summary": "Ran 138 tests in 1.719s\n\nOK"
+  },
+  "frontend_function_tests": {
+    "tests": 14,
+    "failures": 0,
+    "browser_rendering": false
+  },
+  "real_startup_http": {
+    "checks": [
+      "Actual datasets/model warm-up and /health readiness",
+      "HTML and four frontend assets served byte-for-byte",
+      "Same-origin dynamic config with blank browser API key",
+      "Invalid question rejected before generation",
+      "Real API rejects unverified history without an external provider call",
+      "Real API greetings/capabilities/clarifications have no accuracy or consensus claims",
+      "Real API serves canonical Bukhari 1395 and Muslim 11a with pinned source provenance",
+      "Ambiguous legacy Muslim 11 cannot resolve through the canonical API",
+      "Second launch reuses the ready instance without a browser"
+    ],
+    "external_network": "blocked in server processes",
+    "provider_generation_tested": false,
+    "browser_rendering_tested": false,
+    "startup_seconds": 7.14,
+    "status": "passed"
+  },
+  "real_comparison_http": {
+    "date": "2026-11-08",
+    "checks": [
+      "Default /ask: real retrieval, three validated school sections, one organizer call",
+      "Signed rephrasing: school sections, references and new proof retained",
+      "Edited school answer rejected before organizer invocation"
+    ],
+    "external_network": "blocked",
+    "retrieval": "real model/datasets",
+    "organizer": "synthetic fixture; no live Gemini",
+    "religious_or_translation_quality_tested": false,
+    "browser_rendering_tested": false,
+    "status": "passed",
+    "topic_id": "five_daily_prayers",
+    "organizer_calls": 2
+  },
+  "specified_component_contrast": {
+    "pairs": 12,
+    "aa_failures": 0,
+    "scope": "New component tokens and worst-case intro gradient stops only; not full app accessibility QA"
+  },
+  "source_audit": {
+    "reference_resolution": "complete",
+    "issue_counts": {
+      "missing_quran": 0,
+      "missing_hadith": 0,
+      "referenced_quran_without_english": 0,
+      "referenced_hadith_without_english": 0
+    },
+    "scholar_review_statuses": {
+      "pending": 49,
+      "unspecified": 28
+    },
+    "all_dataset_bytes_unchanged": true,
+    "new_scholarly_approvals": 0,
+    "dataset_sha256": {
+      "fiqh_topics_complete_expanded.yaml": "3e4fb12c4f3c8c96bffe81dd14ec62aabcebe2a03a75f46647b781cb87436b33",
+      "hadith_identity_registry.json": "d42130038470453c7cca05962d7127f611daaf2f5e7a5dc43ee78fd00bf35f91",
+      "other_hadith.json": "65fe555e7461b54567acc37ffdc1385bdb1070e6cf69bfc1b2043b2c95cda8d6",
+      "quran_trilingual_clean.json": "f8fb0666033bd787d2073e386ff37ef4a74572640ce2faa837ccb23e23b41134",
+      "sahih_bukhari_muslim.json": "a2c6cdd02883595263f0780e6662efb11fc866ff4ea43974befc62076b41380e",
+      "topic_examples_expanded.yaml": "2deb1fa1e82f23a88eb01caff4e1ad78173bdef080ecb2914bbb6847a3f3ac04"
+    }
+  },
+  "runtime_sha256": {
+    "backend/rag_engine.py": "4e8fd892ba070964f4ddfdeb2ed04decc4f0e926906236bd2e142acdbac8b85c",
+    "backend/school_response.py": "ed0e835f42e7b5be6b48acd595644052773e0f34d4a78c35bdf6139b6dd8a3bb",
+    "backend/response_status.py": "e365a5eb98cfed64f50114dae0ff90f5bd258b5885416fb6913cf2e5d6e8f485",
+    "backend/app.py": "72c6cad2156d549809a19af46541211123a47a289cf453701a16a6bbe7bbb184",
+    "backend/db.py": "557942ea8fcd4c9e03f62c970574dc859e5641655fc5c5788252d59c489e9098",
+    "frontend/script.js": "239ff66406ac36c514556c0cf5a706dd43e903be9634ee6db70396246e833104",
+    "frontend/index.html": "79428c13fec129166921fe435c50058cc8d73d771b6b1a5bb259594566fd6ece",
+    "frontend/modern.css": "87b3be636d8352483fc5a28fe87759cef2ec58dfdad2ef327ce98523a936fde5"
+  },
+  "syntax_whitespace_and_known_secret_patterns": "passed; secret scan is not exhaustive",
+  "limitations": [
+    "No live Gemini generation or real WhatsApp send",
+    "No semantic claim support, school-position fidelity, religious accuracy or translation-quality certification",
+    "Topic-level references remain shared; school-specific support is not independently reviewed",
+    "All 77 topic reviews remain incomplete",
+    "Browser access host unavailable; real 390px/1440px layout, keyboard and device QA pending",
+    "Existing model fallback policy, provider timeout/rate-limit and other readiness work remain separate"
+  ],
+  "push_performed": false,
+  "deployment_performed": false,
+  "production_ready": false
+}

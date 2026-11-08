@@ -1,0 +1,16 @@
+{
+  "date": "2026-11-08",
+  "checks": [
+    "Default /ask: real retrieval, three validated school sections, one organizer call",
+    "Signed rephrasing: school sections, references and new proof retained",
+    "Edited school answer rejected before organizer invocation"
+  ],
+  "external_network": "blocked",
+  "retrieval": "real model/datasets",
+  "organizer": "synthetic fixture; no live Gemini",
+  "religious_or_translation_quality_tested": false,
+  "browser_rendering_tested": false,
+  "status": "passed",
+  "topic_id": "five_daily_prayers",
+  "organizer_calls": 2
+}

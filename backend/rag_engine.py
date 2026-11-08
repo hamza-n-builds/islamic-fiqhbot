@@ -14,6 +14,8 @@ import numpy as np
 from citation_guard import CitationError, ResponseReceipts, validate_citations
 from source_records import load_hadith_records, normalize_hadith_source
 from response_status import REVIEW_INSTRUCTION, REVIEW_SCOPE, validate_unreviewed_answer
+from school_response import (SCHOOLS, SCHEMA as SCHOOL_SCHEMA, MODE as SCHOOL_MODE, NOTICES,
+                             parse_school_output, validate_school_wording, flatten_sections, split_sections)
 
 _response_receipts = ResponseReceipts()
 
@@ -249,7 +251,7 @@ def retrieve_fiqh_ruling(query, madhhab=None, top_k=3, alpha=ALPHA):
         mk = madhhab.lower() if madhhab else None
         if mk == "shafi'i":
             mk = "shafi"
-        ruling = {mk: rulings[mk]} if (mk and mk in rulings) else rulings
+        ruling = ({mk: rulings[mk]} if mk in rulings else {}) if mk else rulings
         out.append({
             "type": "fiqh",
             "topic_id": topic["topic_id"],
@@ -272,7 +274,7 @@ def _fiqh_entry_by_id(topic_id, madhhab=None, score=0.0):
             mk = madhhab.lower() if madhhab else None
             if mk == "shafi'i":
                 mk = "shafi"
-            ruling = {mk: rulings[mk]} if (mk and mk in rulings) else rulings
+            ruling = ({mk: rulings[mk]} if mk in rulings else {}) if mk else rulings
             return {
                 "type": "fiqh", "topic_id": t["topic_id"], "topic_name": t["topic_name"],
                 "description": t.get("description", ""), "ruling": ruling,
@@ -1286,6 +1288,185 @@ def _receipt_context(tags, madhhab=None):
     return context if _context_tags(*context) == set(tags) else None
 
 
+def _school_notice(status, query):
+    target = _requested_target_language(query) or _detect_language(query)
+    language = ("roman" if "Roman Urdu" in target else "ur" if "Urdu script" in target
+                else "ar" if target == "Arabic" else "en")
+    return NOTICES[status][language]
+
+
+def _school_section(key, title, status, answer, sources=None):
+    section = {"school": key, "title": title, "status": status, "answer": answer,
+               "reference_scope": "topic_level_shared",
+               "sources": sources or {"fiqh": [], "quran": [], "hadith": []}}
+    if status == "available":
+        section["citation_validation"] = {"status": "passed", "scope": "provided_reference_membership"}
+        section["scholarly_review"] = {"status": "not_completed", "scope": REVIEW_SCOPE}
+    return section
+
+
+def _comparison_digest(sections, evidence):
+    rows = []
+    for section in sections:
+        key = section["school"]
+        row = {"school": key, "status": section["status"]}
+        if key in evidence:
+            tags, context = evidence[key]
+            row.update(tags=sorted(tags), source_digest=_context_fingerprint(tags, *context))
+        rows.append(row)
+    return hashlib.sha256(json.dumps({"schema": SCHOOL_SCHEMA, "sections": rows}, sort_keys=True).encode()).hexdigest()
+
+
+def _pack_comparison(sections, evidence):
+    answer = flatten_sections(sections)
+    sources = {"fiqh": [], "quran": [], "hadith": []}
+    for kind in sources:
+        seen = set()
+        for section in sections:
+            for record in section["sources"][kind]:
+                identity = json.dumps(record, sort_keys=True, ensure_ascii=True)
+                if identity not in seen:
+                    seen.add(identity)
+                    sources[kind].append(record)
+    result = {"ok": True, "mode": SCHOOL_MODE, "response_schema": SCHOOL_SCHEMA,
+              "answer": answer, "answer_sections": sections, "sources": sources, "out_of_scope": False,
+              "confidence": None, "confidence_percent": None, "confidence_label": None,
+              "confidence_reason": None, "consensus": None}
+    if evidence:
+        tags = sorted({tag for item in evidence.values() for tag in item[0]})
+        result["answer_receipt"] = _response_receipts.issue(answer, tags, _comparison_digest(sections, evidence))
+        result["citation_validation"] = {"status": "passed", "scope": "provided_reference_membership"}
+        result["scholarly_review"] = {"status": "not_completed", "scope": REVIEW_SCOPE}
+    return result
+
+
+def _school_prompt(query, contexts, previous=None):
+    scopes = {}
+    for key, (fiqh, hadith, quran) in contexts.items():
+        scopes[key] = {
+            "school": dict(SCHOOLS)[key],
+            "rulings": [{"topic_tag": f'[{r["topic_name"]}]',
+                         "notes": {name: {field: note[field] for field in ("ruling", "explanation") if field in note}
+                                   for name, note in r["ruling"].items() if isinstance(note, dict)}} for r in fiqh],
+            "topic_level_shared_references": {
+                "quran": [{"tag": f'[Quran {v["chapter"]}:{v["ayah"]}]', "text": v["english"]} for v in quran],
+                "hadith": [{"tag": f'[{h["source"]} #{h["hadith_no"]}]', "text": h["text_en"]} for h in hadith]},
+        }
+        if previous:
+            scopes[key]["previous_answer"] = previous[key]["answer"]
+            scopes[key]["required_citations"] = list(previous[key]["tags"])
+    language = _requested_target_language(query) or _detect_language(query)
+    task = ("Translate/re-express each previous answer while preserving its exact meaning and every required citation."
+            if previous else "Organize the retrieved school notes to answer the question.")
+    return f"""You organize retrieved Islamic knowledge-base material; you do not decide or invent rulings.
+{task}
+Write in {language}. Never use Hindi/Devanagari. Keep citation tags unchanged in Latin letters.
+Return ONLY a JSON object with exactly these school keys: {json.dumps(list(contexts))}.
+Each value must be an answer string of at most 6,000 characters, or null if the supplied material cannot answer.
+No summary, extra keys, school headings or commentary outside the JSON.
+Use ONLY the ruling/explanation under that SAME school key and its supplied references.
+Do not transfer another school's position into this school. Do not infer a missing position.
+Cite the supplied fiqh topic tag at least once in each answer. Use other exact reference tags only when relevant.
+References are attached to the topic; they are not independently verified evidence for each school's inference.
+Do not add facts from memory, unprovided references, URLs, or unbracketed reference numbers.
+{REVIEW_INSTRUCTION}
+For translation, retain every required citation in its original school; do not move, add or drop them.
+
+RETRIEVED SCHOOL CONTEXTS:
+{json.dumps(scopes, ensure_ascii=False)}
+
+USER QUESTION/INSTRUCTION:
+{query}
+"""
+
+
+def _organize_school_contexts(query, contexts, fixed=None, previous=None):
+    fixed = fixed or {}
+    if not contexts:
+        return _pack_comparison([fixed[key] for key, _ in SCHOOLS], {})
+    try:
+        values = parse_school_output(gemini_generate(_school_prompt(query, contexts, previous)), contexts)
+    except CitationError as error:
+        return _source_validation_failure(query, str(error))
+    sections, evidence = [], {}
+    for key, title in SCHOOLS:
+        if key in fixed:
+            sections.append(fixed[key])
+            continue
+        context = contexts[key]
+        try:
+            answer, tags = validate_citations(values[key], _context_tags(*context),
+                                               expected=previous[key]["tags"] if previous else None)
+            validate_unreviewed_answer(answer)
+            validate_school_wording(answer, key)
+            if not any(f'[{r["topic_name"]}]' in tags for r in context[0]):
+                raise CitationError("missing_school_ruling_citation")
+        except CitationError:
+            sections.append(_school_section(key, title, "withheld", _school_notice("withheld", query)))
+            continue
+        sources = _cited_sources(tags, *context)
+        for topic in sources["fiqh"]:
+            topic["madhhab"] = title
+        sections.append(_school_section(key, title, "available", answer, sources))
+        evidence[key] = (tags, context)
+    return _pack_comparison(sections, evidence)
+
+
+def _comparison_result(query, topic_id, topic_score):
+    # Retain hybrid retrieval plus the existing example-classifier anchor. Only
+    # that primary topic supplies school notes; a nearby second topic cannot fill gaps.
+    retrieved = retrieve_fiqh_ruling(query, madhhab=None, top_k=2)
+    primary = next((r for r in retrieved if r["topic_id"] == topic_id), None)
+    primary = _fiqh_entry_by_id(topic_id, score=topic_score) or primary
+    references = primary.get("references", {}) if primary else {}
+    quran = retrieve_quran(query, fiqh_refs=references.get("quran", []), top_k=2) if primary else []
+    quran = [v for v in quran if v.get("score", 0) >= QURAN_MIN_SCORE]
+    _, hadith = _curated_candidates(topic_id) if primary else ([], [])
+    if not hadith and ENABLE_HADITH_SEARCH and primary:
+        hadith = [h for h in retrieve_hadith(query, top_k=2) if h["score"] >= HADITH_MIN_SCORE]
+    contexts, fixed = {}, {}
+    for key, title in SCHOOLS:
+        context = _validated_context([primary] if primary else [], hadith, quran, title)
+        note = context[0][0].get("ruling", {}).get(key) if context[0] else None
+        if not isinstance(note, dict) or not isinstance(note.get("ruling"), str) or not note["ruling"].strip():
+            fixed[key] = _school_section(key, title, "unavailable", _school_notice("unavailable", query))
+        elif not _retrieval_policy_allows(topic_score, context[1], context[2]):
+            fixed[key] = _school_section(key, title, "withheld", _school_notice("withheld", query))
+        else:
+            contexts[key] = context
+    return _organize_school_contexts(query, contexts, fixed)
+
+
+def _reexpress_comparison(prev_answer, instruction, receipt):
+    proof = _response_receipts.verify(prev_answer, receipt)
+    if not proof:
+        return _source_validation_failure(instruction, "unverified_history")
+    all_tags, fingerprint = proof
+    try:
+        sections = split_sections(prev_answer)
+        contexts, fixed, evidence, previous = {}, {}, {}, {}
+        for section in sections:
+            key, title = section["school"], section["title"]
+            if section["status"] != "available":
+                fixed[key] = _school_section(key, title, section["status"], _school_notice(section["status"], instruction))
+                continue
+            answer, tags = validate_citations(section["answer"], all_tags)
+            validate_unreviewed_answer(answer)
+            validate_school_wording(answer, key)
+            context = _receipt_context(tags, title)
+            if context is None or not context[0]:
+                raise CitationError("unverified_history")
+            contexts[key] = context
+            evidence[key] = (tags, context)
+            previous[key] = {"answer": answer, "tags": tags}
+        if (set(all_tags) != {tag for tags, _ in evidence.values() for tag in tags}
+                or _comparison_digest(sections, evidence) != fingerprint):
+            raise CitationError("unverified_history")
+    except CitationError:
+        return _source_validation_failure(instruction, "unverified_history")
+    return _organize_school_contexts(instruction, contexts, fixed, previous)
+
+
 def _reexpress_result(prev_answer, instruction, madhhab=None, prev_answer_receipt=None):
     """
     Re-express only the exact server-issued answer bound to its signed receipt.
@@ -1294,6 +1475,14 @@ def _reexpress_result(prev_answer, instruction, madhhab=None, prev_answer_receip
     proof = _response_receipts.verify(prev_answer, prev_answer_receipt)
     tags, fingerprint = proof if proof else ((), None)
     context = _receipt_context(tags, madhhab) if tags else None
+    # Older selected-school history remains translatable after the UI switches
+    # to all schools. Accept only the exact old scope proven by its fingerprint.
+    if tags and madhhab is None and (context is None or _context_fingerprint(tags, *context) != fingerprint):
+        for _, title in SCHOOLS:
+            candidate = _receipt_context(tags, title)
+            if candidate is not None and _context_fingerprint(tags, *candidate) == fingerprint:
+                context = candidate
+                break
     if context is None or _context_fingerprint(tags, *context) != fingerprint:
         return _source_validation_failure(instruction, "unverified_history")
     fiqh, hadith, quran = context
@@ -1348,7 +1537,7 @@ ANSWER TO RE-EXPRESS:
     }, cited, fiqh, hadith, quran)
 
 
-def answer_question(query, madhhab=None, prev_answer=None, prev_answer_receipt=None):
+def answer_question(query, madhhab=None, prev_answer=None, prev_answer_receipt=None, *, compare_schools=False):
     """
     Full pipeline. Returns a JSON-serialisable dict:
       { ok, mode, answer, sources: {fiqh:[...], quran:[...], hadith:[...]},
@@ -1356,6 +1545,8 @@ def answer_question(query, madhhab=None, prev_answer=None, prev_answer_receipt=N
 
     Legacy confidence/consensus fields remain null; similarity is not accuracy.
     Citation/review status and receipts apply only to accepted generated answers.
+    Served defaults enable compare_schools; the default False retains flat
+    compatibility for existing Python-library callers and explicit school paths.
 
     prev_answer: the previous bot answer (optional). When the current message is
     a bare "explain/translate in <language>" instruction, we re-express THIS text
@@ -1398,6 +1589,8 @@ def answer_question(query, madhhab=None, prev_answer=None, prev_answer_receipt=N
     # just acknowledge and wait for the actual question.
     if _is_meta_instruction(query):
         if prev_answer and prev_answer.strip():
+            if compare_schools and prev_answer.startswith("## Hanafi\n"):
+                return _reexpress_comparison(prev_answer, query, prev_answer_receipt)
             return _reexpress_result(prev_answer, query, madhhab, prev_answer_receipt)
         return {
             "ok": True, "mode": "greeting", "out_of_scope": False,
@@ -1443,6 +1636,9 @@ def answer_question(query, madhhab=None, prev_answer=None, prev_answer_receipt=N
 
     if not _topic_match_is_eligible(top_topic_score):
         return _low_confidence_result(query, madhhab)
+
+    if compare_schools:
+        return _comparison_result(query, top_topic_id, top_topic_score)
 
     # ── General-knowledge routing (decided up front) ─────────────
     # Basic-fact questions use only the matched topic's local references. Weak
@@ -1494,6 +1690,8 @@ def answer_question(query, madhhab=None, prev_answer=None, prev_answer_receipt=N
         hadith = [h for h in retrieve_hadith(query, top_k=2) if h["score"] >= HADITH_MIN_SCORE]
 
     fiqh, hadith, quran = _validated_context(fiqh, hadith, quran, madhhab)
+    if madhhab and not fiqh:
+        return _source_validation_failure(query, "missing_school_context")
     allowed = _context_tags(fiqh, hadith, quran)
     if not allowed:
         return _source_validation_failure(query, "missing_source_context")

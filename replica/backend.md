@@ -82,3 +82,22 @@ the seven exact reference edits and the remaining review limits.
 See `response-status.md` and `evidence/response-status-verification.json`.
 No live Gemini generation, source/ruling edits, newly approved reviews, push or
 deployment are part of this batch.
+
+## Three-school RAG batch, 2026-11-08
+
+- [x] Retain actual retrieval and supply each school's own available notes.
+- [x] Remove missing-school fallback to another school's rulings.
+- [x] Organize available schools together through one provider-function invocation.
+- [x] Enforce strict JSON keys/types/size and independent per-school citation checks.
+- [x] Preserve good sections while withholding an unsupported individual section.
+- [x] Bind school ordering/statuses/citations/source contents in signed history.
+- [x] Preserve citation sets and school identity during rephrasing.
+- [x] Keep exact-scoped legacy receipts and explicit school requests compatible.
+- [x] Label shared topic references without inventing school-specific approval.
+- [x] Wire the default web/WhatsApp paths and persist the new contract/history.
+- [x] Remove unused direct-browser generation code; preserve private backend keys.
+- [x] Verify real loopback comparison with real retrieval and a synthetic organizer.
+- [ ] Evaluate live Gemini's organization/translation fidelity and semantic support.
+- [ ] Complete qualified review and actual mobile/desktop browser checks.
+
+Evidence and exact limits: `evidence/school-comparison-verification.json`.

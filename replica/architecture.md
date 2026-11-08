@@ -98,3 +98,24 @@ existing topic threshold, the stricter legacy cutoff retained without a consensu
 bonus, source-context presence and the existing citation gate. Weak matches now
 abstain before either generation path. This is not calibrated accuracy or proof
 of claim support. See `response-status.md` for compatibility and limits.
+
+## Three-school RAG vertical slice, 2026-11-08
+
+Default web/WhatsApp requests now enable school comparison on the existing RAG
+entry point. Retrieve the primary topic once, build separate Hanafi/Shafi'i/Maliki
+note scopes and resolve shared topic references through existing canonical guards.
+A single organizer invocation returns a strict JSON mapping for available scopes;
+each output passes its own source membership, required topic-citation and known
+consensus/cross-school-label checks. Missing schools stay unavailable; invalid
+sections are withheld. No secondary topic substitutes for a missing position.
+
+The API supplies ordered structured sections and deterministic school-labeled
+plain text. A schema-namespaced source digest and exact text HMAC bind school
+identity/status/citations across rephrasing. The direct-chat frontend presents
+native answer disclosures, preserves old history, keeps response ownership during
+chat switches and uses the backend only. Explicit legacy school requests remain
+compatible; direct library calls opt in through `compare_schools=True`.
+
+Topic-level reference mappings are labeled as shared, not school-reviewed evidence.
+See `school-comparison.md` and `design/school-responses.md`. The same semantic,
+scholarly, live provider and real-device validation limits remain in force.

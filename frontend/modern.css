@@ -4,6 +4,19 @@
    ========================================================= */
 
 :root {
+    --school-space: 1rem;
+    --school-gap: 0.625rem;
+    --school-radius: 0.875rem;
+    --school-touch-size: 2.75rem;
+    --school-body-size: 1rem;
+    --school-label-size: 0.8125rem;
+    --school-line-height: 1.75;
+    --school-focus-width: 0.125rem;
+    --school-icon-size: 1.125rem;
+    --school-accent-text: var(--accent-orange);
+    --school-muted-text: var(--text-muted);
+    --intro-title-size: clamp(1.75rem, 5vw, 2.5rem);
+    --intro-width: 34rem;
     --bg-dark: #171310;
     --bg-darker: #110e0c;
     --bg-sidebar-glass: #15120f;
@@ -30,7 +43,93 @@
     --input-placeholder-color: #746d67;
 }
 
+/* Direct chat and independent, keyboard-operable school answers. */
+.chat-intro {
+    margin: auto;
+    padding: var(--school-space);
+    max-inline-size: var(--intro-width);
+    text-align: center;
+    color: var(--school-muted-text);
+    line-height: var(--school-line-height);
+}
+.chat-intro[hidden] { display: none; }
+.chat-intro h1 {
+    color: var(--text-light);
+    font-size: var(--intro-title-size);
+    line-height: 1.2;
+    margin-block: var(--school-gap) var(--school-space);
+}
+.chat-intro-greeting { color: var(--school-accent-text); }
+.chat-intro-note { font-size: var(--school-label-size); }
+.school-responses {
+    display: grid;
+    gap: var(--school-gap);
+    min-inline-size: 0;
+    inline-size: 100%;
+}
+.bot-message.comparison-message .message-content {
+    inline-size: 100%;
+    max-inline-size: 100%;
+    max-width: 100%;
+}
+.school-answer {
+    min-inline-size: 0;
+    border: 1px solid var(--border-color);
+    border-radius: var(--school-radius);
+    background: var(--bg-dark);
+    overflow-wrap: anywhere;
+}
+.school-answer-summary {
+    display: flex;
+    align-items: center;
+    gap: var(--school-gap);
+    min-block-size: var(--school-touch-size);
+    padding: var(--school-space);
+    cursor: pointer;
+    list-style: none;
+    color: var(--text-light);
+}
+.school-answer-summary::-webkit-details-marker { display: none; }
+.school-answer-title { font-weight: 600; }
+.school-answer-state {
+    margin-inline-start: auto;
+    color: var(--school-muted-text);
+    font-size: var(--school-label-size);
+}
+.school-chevron {
+    inline-size: var(--school-icon-size);
+    block-size: var(--school-icon-size);
+    flex-shrink: 0;
+}
+.school-answer[open] > summary .school-chevron { transform: rotate(180deg); }
+.school-answer-body { padding: 0 var(--school-space) var(--school-space); }
+.school-answer-body > p {
+    font-size: var(--school-body-size);
+    line-height: var(--school-line-height);
+    margin-block: 0 var(--school-space);
+}
+.school-sources > summary {
+    min-block-size: var(--school-touch-size);
+    display: flex;
+    align-items: center;
+    color: var(--school-accent-text);
+    cursor: pointer;
+    font-size: var(--school-label-size);
+}
+.school-reference-note {
+    color: var(--school-muted-text);
+    font-size: var(--school-label-size);
+    line-height: var(--school-line-height);
+}
+.school-answer-summary:focus-visible, .school-sources > summary:focus-visible {
+    outline: var(--school-focus-width) solid var(--school-accent-text);
+    outline-offset: var(--school-focus-width);
+    border-radius: var(--school-gap);
+}
+
 [data-theme="light"] {
+    --school-accent-text: #855018;
+    --school-muted-text: #665f59;
     --bg-dark: #fbfaf7;
     --bg-darker: #f5f2ed;
     --bg-sidebar-glass: #f2eee8;

@@ -139,3 +139,29 @@ this startup fix. Their implementation has not been completed by this batch.
 - Evidence: weak main/general match regressions and strict legacy-cutoff test.
 - Remaining: calibrated relevance/ambiguity evaluation and qualified source-support
   review. These thresholds are heuristics, not proof of topical/religious support.
+
+### SCHOOL-001: A missing selected school falls back to other school rulings
+
+- Severity: S2 for school-context integrity; reproduced against `088ff16` using
+  a synthetic topic with Hanafi/Shafi'i notes and no Maliki note.
+- Steps: call `_fiqh_entry_by_id(topic_id, "Maliki")` on that topic.
+- Expected: empty selected-school note, not another school's material.
+- Actual: the old ternary falls back to the entire `rulings` mapping.
+- Fix: missing selected keys resolve to an empty mapping; the legacy explicit
+  school generation path also requires an actual selected-school context.
+  Comparison scopes mark missing/blank positions unavailable before organizing.
+- Status: fixed in `feat: add school-scoped RAG comparison and direct chat`.
+- Evidence: `test_school_comparison.py`; the original two concrete red failures
+  and unimplemented comparison contract are recorded in batch evidence.
+
+### SCHOOL-002: Default chat exposes no structured three-school answer contract
+
+- Severity: S2 for the owner's newly requested flow.
+- Steps: submit a question without a school using synthetic valid topic/source
+  fixtures and inspect the API response.
+- Expected: ordered school sections with independent validation/missing states.
+- Actual at `088ff16`: a single flat fiqh response and initial selection UI.
+- Fix: opt served defaults into comparison, strict organized output, independent
+  section validation and school-bound signed rephrasing; direct answer disclosures.
+- Status: fixed in the same comparison commit. Visual/semantic QA remain pending.
+- Evidence: default Flask route, real local HTTP and actual frontend-function tests.

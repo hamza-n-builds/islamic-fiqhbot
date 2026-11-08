@@ -59,10 +59,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const sttStatus = document.getElementById('stt-status');
     const sttStatusText = document.getElementById('stt-status-text');
     const sttCancelBtn = document.getElementById('stt-cancel-btn');
-    const madhabSelection = document.getElementById('madhab-selection');
-    const madhabCards = document.querySelectorAll('.madhab-card');
-    const sidebarMadhabName = document.getElementById('sidebar-madhab-name');
-    const changeMadhabBtn = document.getElementById('change-madhab-btn');
+    const chatIntro = document.getElementById('chat-intro');
     const newChatBtn = document.getElementById('new-chat-btn');
     const historyList = document.getElementById('history-list');
     const themeToggleBtn = document.getElementById('theme-toggle-btn');
@@ -76,6 +73,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // ── State ────────────────────────────────────────────────────
     let chats = [];
+    const pendingChats = new Set();
     try {
         const savedChats = JSON.parse(localStorage.getItem('islamic_chatbot_chats') || '[]');
         if (Array.isArray(savedChats)) {
@@ -89,15 +87,9 @@ document.addEventListener('DOMContentLoaded', () => {
         console.warn('Saved chat history could not be read:', error);
     }
     let currentChatId = localStorage.getItem('islamic_chatbot_current_id') || null;
-    let apiKey = '';
     let isRecording = false;
     let recognition = null;
     let currentAudio = null; // track server TTS audio so we can stop it
-
-    // Load API key from config.js (legacy; the backend now holds the real key)
-    if (typeof CONFIG !== 'undefined' && CONFIG.API_KEY && CONFIG.API_KEY.trim() !== '') {
-        apiKey = CONFIG.API_KEY;
-    }
 
     // ── Theme Management ──────────────────────────────────────────
     let currentTheme = localStorage.getItem('islamic_chatbot_theme') || 'dark';
@@ -343,92 +335,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
     // ════════════════════════════════════════════════════════════
-    // WHATSAPP INTEGRATION — DISABLED
-    // Uncomment this entire section when you're ready to use it.
-    // You'll need WHATSAPP_TOKEN and PHONE_NUMBER_ID in config.js
-    // ════════════════════════════════════════════════════════════
-
-    /*
-    const whatsappFab = document.getElementById('whatsapp-fab');
-
-    async function sendToWhatsApp(message, recipientPhone) {
-        // recipientPhone format: '923001234567' (country code + number, no +)
-
-        const token         = CONFIG.WHATSAPP_TOKEN;       // add to config.js
-        const phoneNumberId = CONFIG.PHONE_NUMBER_ID;      // add to config.js
-
-        if (!token || !phoneNumberId) {
-            console.error('WhatsApp config missing. Add WHATSAPP_TOKEN and PHONE_NUMBER_ID to config.js');
-            return;
-        }
-
-        const url = `https://graph.facebook.com/v18.0/${phoneNumberId}/messages`;
-
-        const body = {
-            messaging_product: 'whatsapp',
-            recipient_type: 'individual',
-            to: recipientPhone,
-            type: 'text',
-            text: { body: message }
-        };
-
-        try {
-            const response = await fetch(url, {
-                method: 'POST',
-                headers: {
-                    'Authorization': `Bearer ${token}`,
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(body)
-            });
-            const data = await response.json();
-            console.log('WhatsApp sent:', data);
-            return data;
-        } catch (err) {
-            console.error('WhatsApp send error:', err);
-        }
-    }
-
-    // Webhook handler — set this URL in your Meta App Dashboard
-    // POST /webhook receives incoming WhatsApp messages
-    async function handleWhatsAppWebhook(webhookBody) {
-        const entry   = webhookBody.entry?.[0];
-        const changes = entry?.changes?.[0];
-        const message = changes?.value?.messages?.[0];
-
-        if (!message || message.type !== 'text') return;
-
-        const from = message.from;           // sender's phone number
-        const text = message.text.body;      // message content
-
-        // Get madhab from a stored mapping (phone -> madhab)
-        const madhab = localStorage.getItem(`wa_madhab_${from}`) || 'General';
-
-        // Call your RAG backend here
-        const answer = await callGeminiAPI(text, madhab, []);
-
-        // Send reply back
-        await sendToWhatsApp(answer, from);
-    }
-
-    // FAB click — share last bot response to WhatsApp Web (no API needed)
-    // This opens wa.me with the last answer pre-filled — useful for testing
-    if (whatsappFab) {
-        whatsappFab.addEventListener('click', () => {
-            const chat = chats.find(c => c.id === currentChatId);
-            if (!chat) return;
-
-            const lastBot = [...chat.messages].reverse().find(m => m.sender === 'bot');
-            if (!lastBot) return;
-
-            const text = encodeURIComponent(lastBot.text.substring(0, 1000));
-            window.open(`https://wa.me/?text=${text}`, '_blank');
-        });
-    }
-    */
-
-
-    // ════════════════════════════════════════════════════════════
     // CHAT HISTORY MANAGEMENT
     // ════════════════════════════════════════════════════════════
 
@@ -437,7 +343,7 @@ document.addEventListener('DOMContentLoaded', () => {
             id: Date.now().toString(),
             title: 'New Chat',
             messages: [],
-            madhab: null,
+            madhab: 'General',
             timestamp: Date.now()
         };
         chats.unshift(newChat);
@@ -466,20 +372,9 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!chat) return;
 
         chatContainer.innerHTML = '';
-        chatContainer.appendChild(madhabSelection);
-
-        if (chat.madhab) {
-            setMadhabUI(chat.madhab);
-            madhabSelection.style.display = 'none';
-        } else if (chat.messages.length === 0) {
-            resetMadhabUI();
-            madhabSelection.style.display = 'block';
-        } else {
-            // User already sent messages without selecting — default to General
-            chat.madhab = 'General';
-            setMadhabUI('General');
-            madhabSelection.style.display = 'none';
-        }
+        chatContainer.appendChild(chatIntro);
+        chatIntro.hidden = chat.messages.length > 0;
+        sendBtn.disabled = pendingChats.has(id);
 
         chat.messages.forEach(msg => {
             appendMessageUI(msg.sender, msg.text, false, msg.meta);
@@ -547,53 +442,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
     // ════════════════════════════════════════════════════════════
-    // MADHAB SELECTION
-    // ════════════════════════════════════════════════════════════
-
-    madhabCards.forEach(card => {
-        card.addEventListener('click', () => {
-            const selected = card.getAttribute('data-madhab');
-            const chat = chats.find(c => c.id === currentChatId);
-            if (!chat) return;
-
-            const prevMadhab = chat.madhab;
-            chat.madhab = selected;
-            setMadhabUI(selected);
-            madhabSelection.style.display = 'none';
-            saveChats();
-
-            // Only push a bot message if this is the very first selection
-            if (!prevMadhab) {
-                const msg = `You have selected the **${selected}** approach. How can I assist you?`;
-                chat.messages.push({ sender: 'bot', text: msg });
-                saveChats();
-                appendMessageUI('bot', msg, false);
-            }
-        });
-    });
-
-    function setMadhabUI(madhab) {
-        sidebarMadhabName.textContent = madhab + (madhab === 'General' ? '' : ' Madhab');
-    }
-
-    function resetMadhabUI() {
-        sidebarMadhabName.textContent = 'General';
-    }
-
-    changeMadhabBtn.addEventListener('click', () => {
-        const chat = chats.find(c => c.id === currentChatId);
-        if (chat) {
-            chat.madhab = null;
-            saveChats();
-        }
-        madhabSelection.style.display = 'block';
-        requestAnimationFrame(() => {
-            chatContainer.scrollTop = chatContainer.scrollHeight;
-        });
-    });
-
-
-    // ════════════════════════════════════════════════════════════
     // SEND MESSAGE & API CALL
     // ════════════════════════════════════════════════════════════
 
@@ -605,14 +453,10 @@ document.addEventListener('DOMContentLoaded', () => {
         stopSpeech();
 
         const chat = chats.find(c => c.id === currentChatId);
-        if (!chat) return;
-
-        // If user bypasses madhab card selection, auto-dismiss cards and default to General
-        if (!chat.madhab) {
-            chat.madhab = 'General';
-            setMadhabUI('General');
-            madhabSelection.style.display = 'none';
-        }
+        if (!chat || pendingChats.has(chat.id)) return;
+        pendingChats.add(chat.id);
+        sendBtn.disabled = true;
+        chatIntro.hidden = true;
 
         // The most recent bot answer — sent along so a follow-up like
         // "explain in urdu" can re-express it instead of starting a new topic.
@@ -634,24 +478,28 @@ document.addEventListener('DOMContentLoaded', () => {
         const loadingDiv = document.createElement('div');
         loadingDiv.classList.add('message', 'bot-message', 'loading-msg');
         loadingDiv.innerHTML = `<div class="message-content"><div class="thinking-icon"><i class="fas fa-mosque"></i></div><span>Reflecting<span class="typing-dots"><span></span><span></span><span></span></span></span></div>`;
-        chatContainer.insertBefore(loadingDiv, madhabSelection);
+        chatContainer.insertBefore(loadingDiv, chatIntro);
         requestAnimationFrame(() => {
             chatContainer.scrollTop = chatContainer.scrollHeight;
         });
 
         try {
-            const result = await askBackend(text, chat.madhab || 'General', prevAnswer, prevReceipt);
+            // New questions compare all schools, including in older selected-school chats.
+            const result = await askBackend(text, 'General', prevAnswer, prevReceipt);
             loadingDiv.remove();
+            if (!chats.some(c => c.id === chat.id)) return; // Deleted while awaiting the response.
 
             if (!result || result.ok === false) {
                 const errMsg = (result && result.error) ? result.error : 'something went wrong.';
-                appendMessageUI('bot', 'Sorry, ' + errMsg, false);
+                if (currentChatId === chat.id) appendMessageUI('bot', 'Sorry, ' + errMsg, false);
                 return;
             }
 
             const answer = result.answer || '';
             const meta = {
                 mode: result.mode,
+                response_schema: result.response_schema,
+                answer_sections: result.answer_sections,
                 citation_validation: result.citation_validation,
                 scholarly_review: result.scholarly_review,
                 sources: result.sources,
@@ -661,7 +509,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             chat.messages.push({ sender: 'bot', text: answer, meta: meta });
             saveChats();
-            appendMessageUI('bot', answer, true, meta);
+            if (currentChatId === chat.id) appendMessageUI('bot', answer, true, meta);
 
             // Auto-rename chat from first question
             if (chat.title === 'New Chat' && chat.messages.length <= 3) {
@@ -679,8 +527,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 : error.status
                     ? `Sorry, the server returned an error (${error.status}). Please try again.`
                     : 'Sorry, something went wrong while reading the server response. Please try again.';
-            appendMessageUI('bot', message, false);
+            if (currentChatId === chat.id) appendMessageUI('bot', message, false);
             console.error(error);
+        } finally {
+            pendingChats.delete(chat.id);
+            sendBtn.disabled = pendingChats.has(currentChatId);
         }
     }
 
@@ -805,7 +656,7 @@ document.addEventListener('DOMContentLoaded', () => {
     function buildMetaBadges(meta) {
         // Old saved percentages/flags are intentionally ignored. A reference
         // membership check cannot certify answer accuracy or scholarly approval.
-        if (!meta || !['fiqh', 'general', 'reexpress'].includes(meta.mode) || meta.out_of_scope) return '';
+        if (!meta || !['fiqh', 'general', 'reexpress', 'fiqh_comparison'].includes(meta.mode) || meta.out_of_scope) return '';
         const validation = meta.citation_validation || {};
         if (validation.status !== 'passed' || validation.scope !== 'provided_reference_membership') return '';
         let html = '<div class="msg-meta"><span class="evidence-badge">References matched</span>';
@@ -815,6 +666,27 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         html += '<small class="evidence-note">Matching supplied references does not verify the answer\'s accuracy.</small></div>';
         return html;
+    }
+
+    function buildSchoolSections(sections) {
+        const schools = [['hanafi', 'Hanafi'], ['shafi', 'Shafi‘i'], ['maliki', 'Maliki']];
+        const statuses = { available: 'Answer', unavailable: 'Not available', withheld: 'Withheld' };
+        if (!Array.isArray(sections) || sections.length !== schools.length || sections.some((s, i) =>
+            !s || s.school !== schools[i][0] || !Object.hasOwn(statuses, s.status) || typeof s.answer !== 'string')) return '';
+        const firstAvailable = sections.findIndex(s => s.status === 'available');
+        return '<div class="school-responses">' + sections.map((section, i) => {
+            const available = section.status === 'available';
+            const body = escapeHtml(section.answer).replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>').replace(/\n/g, '<br>');
+            const font = isUrduText(section.answer) ? ' font-urdu' : '';
+            return `<details class="school-answer" ${i === firstAvailable ? 'open' : ''}>
+                <summary class="school-answer-summary"><span class="school-answer-title">${schools[i][1]}</span>
+                    <span class="school-answer-state">${statuses[section.status]}</span>
+                    <svg class="school-chevron" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="m6 9 6 6 6-6"/></svg></summary>
+                <div class="school-answer-body"><p class="${font}" dir="auto">${body}</p>
+                ${available ? `<details class="school-sources"><summary>Sources</summary>
+                    <p class="school-reference-note">References mapped to this topic; school-specific support has not been independently reviewed.</p>
+                    <div data-school-sources="${section.school}"></div></details>` : ''}</div></details>`;
+        }).join('') + '</div>';
     }
 
     function appendMessageUI(sender, text, animate, meta) {
@@ -847,7 +719,10 @@ document.addEventListener('DOMContentLoaded', () => {
             (Array.isArray(s.fiqh) ? s.fiqh.filter(Boolean).length : 0) +
             (Array.isArray(s.quran) ? s.quran.filter(Boolean).length : 0) +
             (Array.isArray(s.hadith) ? s.hadith.filter(Boolean).length : 0);
-        const hasSources = sender === 'bot'
+        const schoolHtml = sender === 'bot' && meta?.response_schema === 'school_comparison_v1'
+            ? buildSchoolSections(meta.answer_sections) : '';
+        if (schoolHtml) msgDiv.classList.add('comparison-message');
+        const hasSources = !schoolHtml && sender === 'bot'
             && !noSourceModes.includes(meta && meta.mode)
             && realSourceCount > 0;
         const metaBadges = buildMetaBadges(meta);
@@ -861,7 +736,13 @@ document.addEventListener('DOMContentLoaded', () => {
             ? `<button class="sources-btn" title="View sources"><i class="fas fa-book-open"></i> Sources</button>`
             : '';
 
-        contentDiv.innerHTML = `<p>${formattedText}</p>${metaBadges}${speakButton}${copyButton}${sourcesButton}`;
+        contentDiv.innerHTML = `${schoolHtml || `<p>${formattedText}</p>`}${metaBadges}${speakButton}${copyButton}${sourcesButton}`;
+        if (schoolHtml) {
+            meta.answer_sections.forEach(section => {
+                const holder = contentDiv.querySelector(`[data-school-sources="${section.school}"]`);
+                if (holder) holder.appendChild(buildSourcesAccordion(section.sources || {}));
+            });
+        }
 
         if (hasSources) {
             const sourcesDiv = document.createElement('div');
@@ -927,8 +808,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
         msgDiv.appendChild(contentDiv);
 
-        if (madhabSelection.parentNode === chatContainer) {
-            chatContainer.insertBefore(msgDiv, madhabSelection);
+        if (chatIntro.parentNode === chatContainer) {
+            chatContainer.insertBefore(msgDiv, chatIntro);
         } else {
             chatContainer.appendChild(msgDiv);
         }
@@ -964,46 +845,6 @@ document.addEventListener('DOMContentLoaded', () => {
         return await response.json();
     }
 
-
-
-    // ════════════════════════════════════════════════════════════
-    // GEMINI API (legacy direct call — kept only for the commented-out
-    // client-side WhatsApp block; the main chat now uses askBackend above)
-    // ════════════════════════════════════════════════════════════
-
-    async function callGeminiAPI(prompt, madhab, chatHistory) {
-        const madhabContext = madhab
-            ? `You are a knowledgeable Islamic scholar following the ${madhab} school of thought. Provide guidance based specifically on this school's rulings and methodology. If there are differences of opinion, mention them. Keep answers concise and direct.`
-            : `You are a knowledgeable Islamic scholar. Provide general Islamic guidance based on the Quran and Sunnah. Keep answers concise and direct.`;
-
-        const apiContents = [];
-        let contextAdded = false;
-
-        chatHistory.forEach(msg => {
-            const role = msg.sender === 'user' ? 'user' : 'model';
-            let text = msg.text;
-
-            if (role === 'user' && !contextAdded) {
-                text = `${madhabContext}\n\n${text}`;
-                contextAdded = true;
-            }
-
-            apiContents.push({ role, parts: [{ text }] });
-        });
-
-        const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-lite-preview-09-2025:generateContent?key=${apiKey}`;
-
-        const response = await fetch(url, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ contents: apiContents })
-        });
-
-        if (!response.ok) throw new Error('API Request Failed');
-
-        const data = await response.json();
-        return data.candidates[0].content.parts[0].text;
-    }
 
 
     // ── Event Listeners ──────────────────────────────────────────

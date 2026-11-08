@@ -1,0 +1,122 @@
+[
+  {
+    "fg": "dark-text",
+    "bg": "dark-surface",
+    "size": "normal",
+    "ratio": 16.41,
+    "aa": true,
+    "aaa": true,
+    "fg_hex": "#f5f1eb",
+    "bg_hex": "#171310"
+  },
+  {
+    "fg": "dark-muted",
+    "bg": "dark-surface",
+    "size": "normal",
+    "ratio": 7.26,
+    "aa": true,
+    "aaa": true,
+    "fg_hex": "#a9a19a",
+    "bg_hex": "#171310"
+  },
+  {
+    "fg": "dark-accent",
+    "bg": "dark-surface",
+    "size": "normal",
+    "ratio": 8.53,
+    "aa": true,
+    "aaa": true,
+    "fg_hex": "#e9a23b",
+    "bg_hex": "#171310"
+  },
+  {
+    "fg": "dark-text",
+    "bg": "dark-intro-worst-bg",
+    "size": "normal",
+    "ratio": 12.97,
+    "aa": true,
+    "aaa": true,
+    "fg_hex": "#f5f1eb",
+    "bg_hex": "#3b2317"
+  },
+  {
+    "fg": "dark-muted",
+    "bg": "dark-intro-worst-bg",
+    "size": "normal",
+    "ratio": 5.74,
+    "aa": true,
+    "aaa": false,
+    "fg_hex": "#a9a19a",
+    "bg_hex": "#3b2317"
+  },
+  {
+    "fg": "dark-accent",
+    "bg": "dark-intro-worst-bg",
+    "size": "normal",
+    "ratio": 6.74,
+    "aa": true,
+    "aaa": false,
+    "fg_hex": "#e9a23b",
+    "bg_hex": "#3b2317"
+  },
+  {
+    "fg": "light-text",
+    "bg": "light-surface",
+    "size": "normal",
+    "ratio": 16.35,
+    "aa": true,
+    "aaa": true,
+    "fg_hex": "#201b17",
+    "bg_hex": "#fbfaf7"
+  },
+  {
+    "fg": "light-muted",
+    "bg": "light-surface",
+    "size": "normal",
+    "ratio": 6.01,
+    "aa": true,
+    "aaa": false,
+    "fg_hex": "#665f59",
+    "bg_hex": "#fbfaf7"
+  },
+  {
+    "fg": "light-accent",
+    "bg": "light-surface",
+    "size": "normal",
+    "ratio": 6.37,
+    "aa": true,
+    "aaa": false,
+    "fg_hex": "#855018",
+    "bg_hex": "#fbfaf7"
+  },
+  {
+    "fg": "light-text",
+    "bg": "light-intro-worst-bg",
+    "size": "normal",
+    "ratio": 14.13,
+    "aa": true,
+    "aaa": true,
+    "fg_hex": "#201b17",
+    "bg_hex": "#efe9df"
+  },
+  {
+    "fg": "light-muted",
+    "bg": "light-intro-worst-bg",
+    "size": "normal",
+    "ratio": 5.2,
+    "aa": true,
+    "aaa": false,
+    "fg_hex": "#665f59",
+    "bg_hex": "#efe9df"
+  },
+  {
+    "fg": "light-accent",
+    "bg": "light-intro-worst-bg",
+    "size": "normal",
+    "ratio": 5.51,
+    "aa": true,
+    "aaa": false,
+    "fg_hex": "#855018",
+    "bg_hex": "#efe9df"
+  }
+]

@@ -43,7 +43,7 @@ def validate_unreviewed_answer(answer):
 
 def status_lines(result):
     """Fixed channel labels, never inferred from old percentages or dataset flags."""
-    if result.get("mode") not in {"fiqh", "general", "reexpress"} or result.get("out_of_scope"):
+    if result.get("mode") not in {"fiqh", "general", "reexpress", "fiqh_comparison"} or result.get("out_of_scope"):
         return []
     validation = result.get("citation_validation") or {}
     if validation.get("status") != "passed" or validation.get("scope") != CITATION_SCOPE:

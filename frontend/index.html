@@ -113,14 +113,13 @@
                     </span>
                     <span class="btn-text" id="theme-toggle-text">Light Mode</span>
                 </button>
-                <div class="current-madhab-display" title="Current Guidance">
+                <div class="current-madhab-display" title="Three-school guidance">
                     <div class="guidance-top">
-                        <small>Current Guidance</small>
+                        <small>Three-school guidance</small>
                         <span class="hijri-date-bottom" id="hijri-date-text">Loading...</span>
                     </div>
                     <div class="guidance-main">
-                        <strong id="sidebar-madhab-name">General</strong>
-                        <button id="change-madhab-btn">Change</button>
+                        <strong>Hanafi · Shafi‘i · Maliki</strong>
                     </div>
                     <div class="madhab-rail-icon" id="madhab-rail-icon">
                         <i class="fas fa-scale-balanced"></i>
@@ -137,48 +136,11 @@
             </button>
 
             <div class="chat-container" id="chat-container">
-                <div class="message bot-message">
-                    <div class="message-content">
-                        <p>Assalamu Alaikum Warahmatullah! ðŸ•Œ</p>
-                        <p>I'm here to provide Islamic guidance. To give you the most accurate answers, please
-                            select your preferred School of Thought (Madhab) or choose General Guidance.</p>
-                    </div>
-                </div>
-
-                <!-- Madhab Selection -->
-                <div class="madhab-selection" id="madhab-selection">
-                    <h3>Select Your School of Thought (Madhab)</h3>
-                    <p class="madhab-sub">Choose a school for tailored jurisprudential rulings, or select General Guidance.</p>
-                    <div class="madhab-grid">
-                        <div class="madhab-card" data-madhab="Hanafi">
-                            <div class="madhab-icon-wrapper">
-                                <i class="fas fa-scale-balanced"></i>
-                            </div>
-                            <h4>Hanafi School</h4>
-                            <p>Emphasis on reason and public benefit</p>
-                        </div>
-                        <div class="madhab-card" data-madhab="Shafi'i">
-                            <div class="madhab-icon-wrapper">
-                                <i class="fas fa-scroll"></i>
-                            </div>
-                            <h4>Shafi'i School</h4>
-                            <p>Balance between texts and reasoning</p>
-                        </div>
-                        <div class="madhab-card" data-madhab="Maliki">
-                            <div class="madhab-icon-wrapper">
-                                <i class="fas fa-mosque"></i>
-                            </div>
-                            <h4>Maliki School</h4>
-                            <p>Focus on Medinan practice</p>
-                        </div>
-                        <div class="madhab-card" data-madhab="General">
-                            <div class="madhab-icon-wrapper">
-                                <i class="fas fa-star-and-crescent"></i>
-                            </div>
-                            <h4>General Guidance</h4>
-                            <p>Basic Islamic principles</p>
-                        </div>
-                    </div>
+                <div class="chat-intro" id="chat-intro">
+                    <p class="chat-intro-greeting">Assalamu Alaikum</p>
+                    <h1>Ask your question.</h1>
+                    <p>Explore the Hanafi, Shafi‘i and Maliki positions from the available material, together in one answer.</p>
+                    <p class="chat-intro-note">For personal rulings, consult a qualified scholar.</p>
                 </div>
             </div>
 
@@ -197,7 +159,7 @@
                         <i class="fas fa-microphone"></i>
                     </button>
 
-                    <input type="text" id="user-input" placeholder="Ask your Islamic questions..." autocomplete="off">
+                    <input type="text" id="user-input" placeholder="Ask your Islamic question…" aria-label="Your Islamic question" maxlength="4000" autocomplete="off">
 
                     <button id="send-btn" title="Send message"><i class="fas fa-arrow-up"></i></button>
                 </div>

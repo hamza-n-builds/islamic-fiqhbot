@@ -7,7 +7,7 @@ An applied AI, multilingual Islamic guidance assistant engineered around a hybri
 ## 🌟 Overview
 
 * **Hybrid RAG Retrieval**: Combines keyword matching (BM25) with semantic embeddings (MiniLM) to retrieve candidate local source records. Relevance and religious support require separate verification.
-* **School of Thought (Madhab) Specificity**: Answers grounded according to the three schools currently present in the dataset (Hanafi, Shafi'i, Maliki) or general guidance.
+* **Three-school RAG**: Direct chat retrieves the available Hanafi, Shafi'i and Maliki positions together. Gemini organizes the retrieved material into separate answer sections; missing positions are not filled from another school.
 * **Citation Membership Validation**: Context-constrained prompts and server checks reject generated references outside the supplied source records. This does not establish that a claim follows from a source or certify a ruling.
 * **Multi-Channel**: Web client and Meta Cloud API WhatsApp webhook integration.
 
@@ -128,6 +128,41 @@ for unresolved dataset mappings/review status and
 [`replica/evidence/citation-verification.json`](replica/evidence/citation-verification.json)
 for the exact tests and limitations.
 
+### Direct chat and three-school answers
+
+The web client no longer asks for a school selection. A question is matched through
+the existing example classifier and BM25/MiniLM retrieval; the primary topic's
+school-specific ruling/explanation and locally resolved references are supplied
+to the organizer. One organized JSON response contains all available school
+answers, checked independently before display. The existing provider's model
+fallback policy is retained; this does not make three separate generation calls.
+
+Default `/ask` requests and WhatsApp use this flow. The web response has
+`mode: fiqh_comparison`, `response_schema: school_comparison_v1`, an ordered
+`answer_sections` array (`hanafi`, `shafi`, `maliki`) and a school-labeled plain
+`answer` for copying/read-aloud/channel compatibility. Each section is `available`,
+`unavailable` or `withheld`. Missing material is excluded from the organizer request;
+invalid output in one section is replaced by a fixed explanation. Malformed or
+unexpected JSON fails closed. No accepted sections means no passed check/receipt.
+
+The first available answer opens by default; all three response headings remain
+visible as independent native disclosure controls. Sources stay secondary within
+each answer. References in the current dataset are largely topic-level mappings,
+so the response explicitly reports `reference_scope: topic_level_shared`; they are
+not represented as independently reviewed school-specific evidence.
+
+Signed rephrasing preserves school identity and each section's citation set.
+Edited answers, changed ruling/source text and invalid proof are rejected before
+organizer invocation. Older selected-school history stays readable and its exact
+verified scope can still be rephrased. New questions in old chats request all
+schools. Explicit legacy school API parameters remain supported for compatibility;
+they are not exposed as a selection step in the new web UI.
+
+This remains RAG plus organization, not an independently verified ruling engine.
+Software checks do not establish that every generated sentence faithfully follows
+the retrieved note. Scholarly review, semantic/fidelity evaluation and live Gemini
+quality testing remain separate. See [`replica/school-comparison.md`](replica/school-comparison.md).
+
 ### Response status and review limits
 
 The application does not publish an accuracy percentage. Legacy `confidence`,
@@ -216,7 +251,7 @@ Open `http://127.0.0.1:5000/` in your browser. Test health status at
 | Method | Endpoint | Description |
 | :--- | :--- | :--- |
 | `GET` | `/health` | Server status and RAG engine warm-up status |
-| `POST` | `/ask` | Submit question with optional madhab selection |
+| `POST` | `/ask` | Direct question: three-school RAG by default; explicit legacy school parameters remain compatible |
 | `GET` | `/whatsapp` | Meta Webhook verification handshake |
 | `POST` | `/whatsapp` | Inbound WhatsApp message handler |
 

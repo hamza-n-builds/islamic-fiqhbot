@@ -68,13 +68,13 @@ class ApiBoundaryTests(unittest.TestCase):
 
     def test_bad_school_falls_back_to_general(self):
         self.client.post("/ask", json={"question": "hello", "madhab": "unsupported"})
-        self.rag.answer_question.assert_called_once_with("hello", None, prev_answer=None, prev_answer_receipt=None)
+        self.rag.answer_question.assert_called_once_with("hello", None, prev_answer=None, prev_answer_receipt=None, compare_schools=True)
 
     def test_translation_proof_is_forwarded_without_becoming_a_credential(self):
         response = self.client.post("/ask", json={"question": "explain in roman urdu", "prev_answer": "earlier text", "prev_answer_receipt": "opaque-proof"})
         self.assertEqual(response.status_code, 200)
         self.rag.answer_question.assert_called_once_with("explain in roman urdu", None,
-                                                       prev_answer="earlier text", prev_answer_receipt="opaque-proof")
+                                                       prev_answer="earlier text", prev_answer_receipt="opaque-proof", compare_schools=True)
 
     def test_provider_errors_do_not_disclose_internal_values(self):
         self.rag.answer_question.side_effect = RuntimeError("private-provider-value")
@@ -111,7 +111,7 @@ class ApiBoundaryTests(unittest.TestCase):
             response = self.client.post("/whatsapp", data=body, content_type="application/json",
                                         headers={"X-Hub-Signature-256": signature})
             self.assertEqual(response.status_code, 200)
-            self.rag.answer_question.assert_called_once_with("Test question", None)
+            self.rag.answer_question.assert_called_once_with("Test question", None, compare_schools=True)
             send.assert_called_once()
 
     def test_handshake_requires_explicit_token(self):

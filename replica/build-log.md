@@ -43,3 +43,19 @@
   unavailable, so mobile/desktop visual QA remains pending. Wording checks are
   conservative, not semantic verification. No live provider generation, push or
   deployment. See `evidence/response-status-verification.json`.
+
+- 2026-11-08, F01/F02 three-school RAG: removed the selected-school missing-key
+  fallback, scoped the actual primary-topic notes to each available school and
+  organized them through one provider-function invocation. Bounded JSON, required
+  topic citations, school-specific membership/wording gates and independent
+  withholding protect the structured contract. School identity/status/citations
+  and exact text/source contents are bound in comparison receipts; old exact-scoped
+  history stays compatible. The web opens directly into chat with native answer
+  disclosures and scoped sources; pending replies stay in their originating chat.
+  Unused direct-browser provider code was removed. Final: 138 Python regressions,
+  14 actual frontend-function checks, nine real startup/HTTP checks and three real
+  comparison HTTP checks passed. Comparison HTTP uses real retrieval plus a
+  synthetic organizer, not Gemini. Twelve specified new-component color pairs
+  pass AA. Dataset bytes and all review states are unchanged. Browser host
+  unavailable; mobile/desktop visual/keyboard checks, live provider fidelity and
+  scholarly/semantic validation remain pending. No push or deployment.

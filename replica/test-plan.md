@@ -82,3 +82,28 @@ Run the commands in `response-status.md`. Red-phase failures are recorded agains
 `a1ae80d`; final counts and limits are in `evidence/response-status-verification.json`.
 Live provider behavior, semantic/scholarly support and visual browser QA are not
 established by mocked fixtures or successful citation checks.
+
+## Three-school response vertical slice, 2026-11-08
+
+| Case | Expected | Evidence |
+| --- | --- | --- |
+| F01-C1 default /ask | All three ordered school sections; one organizer invocation | `test_school_comparison.py`, real loopback smoke |
+| F01-C2 absent/blank position | Unavailable; excluded from provider keys; no other-school fallback | School context regressions |
+| F01-C3 malformed/duplicate/extra/missing JSON key or invalid size/type | Entire structured output rejected | Strict parser/path regressions |
+| F01-C4 one invalid citation/null/consensus/cross-school label | Only that section withheld; valid others kept | Section boundary regressions |
+| F01-C5 weak match or no school notes | No speculative organizer call | Comparison pipeline tests |
+| F01-C6 nearby secondary topic | Cannot supply missing school material | Anchoring fixture |
+| F01-C7 signed translation | Same school identities and citation sets; new valid proof | Receipt and real HTTP smoke |
+| F01-C8 changed answer/source or dropped citation | Pre-call tampering rejection or affected translated section withheld | Provenance tests |
+| F01-C9 legacy selected history | Exact fingerprinted scope remains translatable | Legacy receipt/API regressions |
+| F01-C10 direct chat + rendering | Three native disclosures; independent sources; safe text; old chats compare all | Frontend VM tests |
+| F01-C11 chat switch/duplicate submit | Reply stays in original chat; one pending request per chat | Deferred-response frontend tests |
+| F01-C12 colors | 12 specified new-component text pairs pass AA | Replica contrast checker and token artifact |
+| F01-C13 visual/keyboard | Check real 390px/1440px layout, toggles, focus, dark/light, long/RTL text | Pending: browser host unavailable |
+
+The loopback comparison smoke warms the actual local model/data and replaces only
+the organizer with a test placeholder. It tests default comparison, signed
+rephrasing and pre-provider edited-history rejection. No live provider or religious
+accuracy/translation quality is evaluated. Existing startup/canonical checks and
+all prior regressions remain required. See `school-comparison.md` for commands and
+`evidence/school-comparison-verification.json` for exact results/preservation.

@@ -195,10 +195,10 @@ class CitationPathTests(unittest.TestCase):
 
     def test_real_api_route_round_trips_server_proof_into_translation(self):
         client = self.api_client()
-        first = client.post("/ask", json={"question": "What is the fixture ruling?"}).json
+        first = client.post("/ask", json={"question": "What is the fixture ruling?", "madhab": "Hanafi"}).json
         self.provider.return_value = "Fixture tarjuma [Fixture topic] [Quran 1:1]."
         with patch.object(rag, "_is_meta_instruction", return_value=True):
-            response = client.post("/ask", json={"question": "explain in roman urdu", "prev_answer": first["answer"], "prev_answer_receipt": first["answer_receipt"]})
+            response = client.post("/ask", json={"question": "explain in roman urdu", "madhab": "Hanafi", "prev_answer": first["answer"], "prev_answer_receipt": first["answer_receipt"]})
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.json["mode"], "reexpress")
         self.assertEqual(response.json["sources"]["quran"][0]["ref"], "1:1")
@@ -206,10 +206,10 @@ class CitationPathTests(unittest.TestCase):
 
     def test_real_api_route_rejects_edited_history_before_provider_call(self):
         client = self.api_client()
-        first = client.post("/ask", json={"question": "What is the fixture ruling?"}).json
+        first = client.post("/ask", json={"question": "What is the fixture ruling?", "madhab": "Hanafi"}).json
         self.provider.reset_mock()
         with patch.object(rag, "_is_meta_instruction", return_value=True):
-            response = client.post("/ask", json={"question": "explain in roman urdu", "prev_answer": first["answer"] + " Added claim.", "prev_answer_receipt": first["answer_receipt"]})
+            response = client.post("/ask", json={"question": "explain in roman urdu", "madhab": "Hanafi", "prev_answer": first["answer"] + " Added claim.", "prev_answer_receipt": first["answer_receipt"]})
         self.assertEqual(response.status_code, 200)
         self.provider.assert_not_called()
         self.assertBlocked(response.json)
