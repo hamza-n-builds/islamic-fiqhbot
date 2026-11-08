@@ -1,4 +1,11 @@
 :root {
+    --status-text-size: 0.8125rem;
+    --status-gap: 0.5rem;
+    --status-pad-block: 0.25rem;
+    --status-pad-inline: 0.625rem;
+    --status-radius: 1rem;
+    --status-top-space: 0.625rem;
+    --status-line-height: 1.5;
     /* Color Scheme (Preserved original brown and orange theme with modernized shades) */
     --bg-dark: #2c180f;             /* Secondary Brown */
     --bg-darker: #1a0d08;           /* Rich Dark Chocolate */
@@ -919,38 +926,41 @@ body {
     animation: slideDown 0.2s ease-out;
 }
 
-/* Meta badges (confidence + consensus) */
+/* Mechanical reference checks and incomplete review; no accuracy scoring. */
 .msg-meta {
-    margin-top: 10px;
-    padding-top: 8px;
+    margin-top: var(--status-top-space);
+    padding-top: var(--status-gap);
     border-top: 1px solid var(--border-color);
     display: flex;
     flex-wrap: wrap;
-    gap: 8px;
+    gap: var(--status-gap);
     align-items: center;
 }
 
-.conf-badge,
-.cons-badge {
+.evidence-badge {
     font-family: var(--font-main);
-    font-size: 0.75rem;
+    font-size: var(--status-text-size);
     font-weight: 600;
-    padding: 3px 10px;
-    border-radius: 20px;
-    white-space: nowrap;
-    letter-spacing: 0.02em;
+    padding: var(--status-pad-block) var(--status-pad-inline);
+    border-radius: var(--status-radius);
+    white-space: normal;
+    overflow-wrap: anywhere;
+    max-inline-size: 100%;
+    line-height: var(--status-line-height);
+    color: var(--text-light);
+    background: var(--btn-bg);
+    border: 1px solid var(--border-color);
     display: inline-flex;
     align-items: center;
     gap: 0.3rem;
 }
 
-.conf-very-high { background: rgba(39, 174, 96, 0.16); color: #2ecc71; border: 1px solid rgba(39, 174, 96, 0.2); }
-.conf-high      { background: rgba(46, 204, 113, 0.12); color: #58d68d; border: 1px solid rgba(46, 204, 113, 0.15); }
-.conf-medium    { background: rgba(243, 156, 18, 0.12); color: #f5b041; border: 1px solid rgba(243, 156, 18, 0.15); }
-.conf-low       { background: rgba(231, 76, 60, 0.15); color: #e74c3c; border: 1px solid rgba(231, 76, 60, 0.2); }
-
-.cons-yes { background: rgba(46, 204, 113, 0.12); color: #58d68d; border: 1px solid rgba(46, 204, 113, 0.15); }
-.cons-no  { background: rgba(243, 156, 18, 0.12); color: #f5b041; border: 1px solid rgba(243, 156, 18, 0.15); }
+.evidence-note {
+    flex-basis: 100%;
+    color: var(--text-muted);
+    font-size: var(--status-text-size);
+    line-height: var(--status-line-height);
+}
 
 .sources-accordion {
     display: flex;

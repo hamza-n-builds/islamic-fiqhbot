@@ -68,7 +68,10 @@ test('sendMessage reads the last bot proof and saves the newly issued one', asyn
     document: { createElement() { return { classList: { add() {} }, remove() {} }; } },
     askBackend: async (...received) => {
       args = received;
-      return { ok: true, mode: 'reexpress', answer: 'Translated fixture', answer_receipt: 'new-proof', sources: { fiqh: [], quran: [], hadith: [] } };
+      return { ok: true, mode: 'reexpress', answer: 'Translated fixture', answer_receipt: 'new-proof',
+        citation_validation: { status: 'passed', scope: 'provided_reference_membership' },
+        scholarly_review: { status: 'not_completed', scope: 'answer_and_ruling_support' },
+        sources: { fiqh: [], quran: [], hadith: [] } };
     },
     console,
   };
@@ -78,5 +81,56 @@ test('sendMessage reads the last bot proof and saves the newly issued one', asyn
   assert.deepEqual(args, ['translate', 'General', 'Exact old answer', 'old-proof']);
   assert.equal(chat.messages.at(-1).meta.answer_receipt, 'new-proof');
   assert.equal(chat.messages.at(-1).text, 'Translated fixture');
+  assert.equal(chat.messages.at(-1).meta.citation_validation.scope, 'provided_reference_membership');
+  assert.equal(chat.messages.at(-1).meta.scholarly_review.status, 'not_completed');
   assert.ok(saves >= 2);
+});
+
+test('legacy saved confidence and consensus never reappear as badges', () => {
+  const context = { escapeHtml: text => text };
+  vm.createContext(context);
+  vm.runInContext(extract('buildMetaBadges'), context);
+  for (const consensus of [true, false]) {
+    assert.equal(context.buildMetaBadges({ mode: 'fiqh', confidence_percent: 99,
+      confidence_label: 'Very High', consensus }), '');
+  }
+});
+
+test('new status clearly limits source checks and displays incomplete review', () => {
+  const context = { escapeHtml: text => text };
+  vm.createContext(context);
+  vm.runInContext(extract('buildMetaBadges'), context);
+  const meta = { mode: 'fiqh', confidence_percent: 99, consensus: true,
+    citation_validation: { status: 'passed', scope: 'provided_reference_membership' },
+    scholarly_review: { status: 'not_completed', scope: 'answer_and_ruling_support' } };
+  const html = context.buildMetaBadges(meta);
+  assert.match(html, /References matched/);
+  assert.match(html, /Scholarly review not completed/);
+  assert.match(html, /does not verify the answer's accuracy/);
+  assert.doesNotMatch(html, /99|Confidence:|agree|Scholars differ/);
+  for (const mode of ['greeting', 'capability', 'low_confidence']) {
+    assert.equal(context.buildMetaBadges({ ...meta, mode }), '');
+  }
+});
+
+test('unknown or rejected status does not acquire a passed badge', () => {
+  const context = {};
+  vm.createContext(context);
+  vm.runInContext(extract('buildMetaBadges'), context);
+  for (const citation_validation of [undefined, { status: 'rejected' }, { status: 'passed', scope: 'accuracy' }]) {
+    assert.equal(context.buildMetaBadges({ mode: 'fiqh', citation_validation }), '');
+  }
+});
+
+test('sources in old saved chats do not turn false consensus into disagreement', () => {
+  function element() {
+    return { innerHTML: '', children: [], classList: { add() {} },
+      appendChild(child) { this.children.push(child); } };
+  }
+  const context = { document: { createElement: element }, escapeHtml: text => text };
+  vm.createContext(context);
+  vm.runInContext(extract('buildSourcesAccordion'), context);
+  const result = context.buildSourcesAccordion({ fiqh: [{ topic_name: 'Fixture', consensus: false }] });
+  assert.equal(result.children.length, 1);
+  assert.doesNotMatch(result.children[0].innerHTML, /Scholars differ/);
 });

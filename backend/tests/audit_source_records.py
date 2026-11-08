@@ -4,6 +4,8 @@ Writes a JSON report containing identifiers/counts, never provider credentials o
 conversation contents. Missing references are reported, never guessed/replaced.
 """
 from collections import Counter
+import argparse
+from datetime import date
 import hashlib
 import json
 from pathlib import Path
@@ -17,6 +19,10 @@ from source_records import load_hadith_records, normalize_hadith_source
 
 
 def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--date", type=date.fromisoformat, default=date.today(),
+                        help="Evidence date as YYYY-MM-DD; use the client's local date")
+    args = parser.parse_args()
     data = BACKEND / "data"
     topics = yaml.safe_load((data / "fiqh_topics_complete_expanded.yaml").read_text(encoding="utf-8"))
     quran = json.loads((data / "quran_trilingual_clean.json").read_text(encoding="utf-8"))
@@ -47,7 +53,7 @@ def main():
     issues = {"missing_quran": missing_quran, "missing_hadith": missing_hadith,
               "referenced_quran_without_english": empty_quran, "referenced_hadith_without_english": empty_hadith}
     report = {
-        "date": "2026-11-04", "scope": "Pinned canonical identity and text availability; primary-page checks recorded in the registry; no semantic or scholarly certification",
+        "date": args.date.isoformat(), "scope": "Pinned canonical identity and text availability; primary-page checks recorded in the registry; no semantic or scholarly certification",
         "topics": len(topics), "quran_records": len(quran), "main_hadith_records": len(hadith),
         "supplementary_hadith_records": len(other), "scholar_review_statuses": dict(reviews),
         "reference_resolution": "incomplete" if any(issues.values()) else "complete",

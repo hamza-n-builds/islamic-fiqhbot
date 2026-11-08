@@ -2,7 +2,7 @@
 """
 db.py — optional MongoDB (Atlas) logging for the Islamic Fiqh chatbot.
 
-Logs every question + answer + confidence + sources to a 'queries' collection.
+Logs questions, answers, source-check/review status and sources to 'queries'.
 Designed to FAIL SILENTLY: if Mongo is unreachable or MONGODB_URI is unset, the
 chatbot keeps working normally — logging is a nice-to-have, never a blocker.
 """
@@ -86,7 +86,9 @@ def log_query(question, madhhab, result, channel="web", extra=None):
             "confidence":         result.get("confidence"),
             "confidence_percent": result.get("confidence_percent"),
             "confidence_label":   result.get("confidence_label"),
-            "consensus":          result.get("consensus", False),
+            "consensus":          result.get("consensus"),
+            "citation_validation": result.get("citation_validation"),
+            "scholarly_review":   result.get("scholarly_review"),
             "topics":             [f.get("topic_id") for f in sources.get("fiqh", [])],
             "quran_refs":         [q.get("ref") for q in sources.get("quran", [])],
             "hadith_refs":        [h.get("ref") for h in sources.get("hadith", [])],

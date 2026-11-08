@@ -63,3 +63,22 @@ Final verification: 97 Python tests, four frontend VM checks and eight real
 startup/HTTP checks passed. The canonical audit passes with all mapped references
 resolved. See `evidence/source-record-verification.json` for preservation checks,
 the seven exact reference edits and the remaining review limits.
+
+## Response status batch, 2026-11-08
+
+- [x] Remove public heuristic accuracy percentages and definitive consensus flags.
+- [x] Omit dataset consensus/certainty certification from generation prompts.
+- [x] Preserve stricter private abstention settings without a consensus bonus.
+- [x] Withhold weak/invalid topic matches before either generation path.
+- [x] Apply known-consensus wording checks to all generated/translated replies.
+- [x] Reject old signed consensus claims before translation generation.
+- [x] Display scoped reference checks and incomplete review in web/WhatsApp.
+- [x] Ignore old saved confidence/consensus metadata without deleting history.
+- [x] Persist check/review status in new history and optional logging.
+- [x] Cover actual pipeline, Flask routes, channel formatting and frontend functions.
+- [ ] Visually check badge wrapping on mobile/desktop: browser host unavailable.
+- [ ] Calibrate retrieval, evaluate claim support/translation, obtain scholarly review.
+
+See `response-status.md` and `evidence/response-status-verification.json`.
+No live Gemini generation, source/ruling edits, newly approved reviews, push or
+deployment are part of this batch.

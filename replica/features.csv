@@ -17,3 +17,7 @@ F01-08,F01,Canonical published identities without ambiguous legacy key fallback,
 F01-09,F01,Grade-review holds are excluded from generation context,yes,backend/tests/test_citation_integrity.py
 F01-10,F01,All currently mapped hadith identities checked against primary Arabic pages,yes,backend/data/hadith_identity_registry.json
 F01-11,F01,Canonicalize additional unregistered legacy narrations,pending,Original corpus preserved; explicit identity review required before runtime registration
+F01-12,F01,Do not present heuristic percentages or raw consensus as answer correctness,yes,backend/tests/test_response_status.py and backend/tests/test_chat_receipts.cjs
+F01-13,F01,Display scoped reference checks and incomplete scholarly review consistently,yes,backend/response_status.py and frontend status regressions
+F01-14,F01,Withhold weak matches and known unreviewed consensus wording,yes,backend/tests/test_response_status.py; wording guard is not semantic verification
+F01-15,F01,Visually verify response status at mobile and desktop sizes,pending,Browser access host unavailable; VM checks do not establish rendering

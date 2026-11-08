@@ -5,6 +5,7 @@
     "Same-origin dynamic config with blank browser API key",
     "Invalid question rejected before generation",
     "Real API rejects unverified history without an external provider call",
+    "Real API greetings/capabilities/clarifications have no accuracy or consensus claims",
     "Real API serves canonical Bukhari 1395 and Muslim 11a with pinned source provenance",
     "Ambiguous legacy Muslim 11 cannot resolve through the canonical API",
     "Second launch reuses the ready instance without a browser"
@@ -12,6 +13,6 @@
   "external_network": "blocked in server processes",
   "provider_generation_tested": false,
   "browser_rendering_tested": false,
-  "startup_seconds": 11.48,
+  "startup_seconds": 8.83,
   "status": "passed"
 }

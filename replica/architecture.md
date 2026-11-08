@@ -83,3 +83,18 @@ The structural audit now resolves every mapped reference with nonempty English.
 This is not a release approval: 49 topic reviews are pending and 28 unspecified;
 known topic/source support questions are listed in `source-record-review.md`.
 Confidence calibration and semantic/scholarly support remain separate work.
+
+## Response status batch, 2026-11-08
+
+Public heuristic accuracy fields and consensus flags now remain null. A scoped
+reference-membership result and an explicit incomplete answer/ruling review
+replace the old percentage/agreement presentation across web and WhatsApp.
+`response_status.py` holds shared review instructions, known-consensus wording
+checks and channel text. No dataset, topic wording, source identity or review
+approval is changed. Existing response receipts still bind original source data.
+
+Retrieval eligibility is private and conservative: finite similarity above the
+existing topic threshold, the stricter legacy cutoff retained without a consensus
+bonus, source-context presence and the existing citation gate. Weak matches now
+abstain before either generation path. This is not calibrated accuracy or proof
+of claim support. See `response-status.md` for compatibility and limits.

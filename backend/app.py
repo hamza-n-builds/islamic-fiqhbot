@@ -31,6 +31,7 @@ except Exception:
 import rag_engine
 import db   # optional MongoDB query logging (fails silently if unavailable)
 from source_records import load_hadith_records, normalize_hadith_source
+from response_status import status_lines
 
 app = Flask(__name__)
 app.config["MAX_CONTENT_LENGTH"] = 1024 * 1024
@@ -362,14 +363,10 @@ def _format_for_whatsapp(result):
     if not result.get("ok"):
         return "Sorry, something went wrong. Please try again."
     answer = result.get("answer", "")
-    if result.get("out_of_scope"):
+    lines = status_lines(result)
+    if not lines:
         return answer
-    pct = result.get("confidence_percent")
-    foot = f"\n\nConfidence: {pct}% ({result.get('confidence_label')})"
-    if result.get("consensus"):
-        foot += " • All major madhhabs agree"
-    foot += "\n_Always verify important matters with a qualified scholar._"
-    return f"{answer}{foot}"
+    return answer + "\n\n" + "\n".join(lines) + "\n_Verify important matters with a qualified scholar._"
 
 
 @app.post("/whatsapp")

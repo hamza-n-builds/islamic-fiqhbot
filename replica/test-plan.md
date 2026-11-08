@@ -61,3 +61,24 @@ are generation-eligible. The original legacy corpus is retained unchanged.
 All 77 topics still lack completed scholarly approval. Primary identity matching
 does not validate topic relevance, inferential fiqh support or a translation's
 quality. Priority review observations are in `source-record-review.md`.
+
+## Response status batch, 2026-11-08
+
+| Case | Expected | Evidence |
+| --- | --- | --- |
+| F01-S1 pending/unspecified/raw approved review flag | No percentage or promoted scholarly approval; consensus null | `test_response_status.py` |
+| F01-S2 general and signed rephrased answer | Same scoped citation check, explicit incomplete review, valid proof | Real pipeline and Flask-route fixtures |
+| F01-S3 weak/invalid match | No generation or general fallback before source-backed acceptance | Response-status regressions |
+| F01-S4 strict legacy cutoff + consensus flag | Consensus cannot make it pass | Private abstention regression |
+| F01-S5 known consensus/ijma wording | Whole output withheld on fiqh/general/translation paths | Shared wording guard tests; no semantic guarantee |
+| F01-S6 old signed consensus answer | Not forwarded to translation provider | Prior-receipt regression |
+| F01-S7 legacy saved percentages/flags | Not rendered as accuracy, agreement or disagreement | Actual frontend functions in Node VM |
+| F01-S8 status persistence | New citation/review status saved with new response proof | Same frontend suite |
+| F02-S1 greeting/referral/old metadata | No `None%`, percentage or agreement footer | WhatsApp formatter tests |
+| F02-S2 accepted response | Same reference/review labels and accuracy limitation as web | WhatsApp fixtures |
+| F01-S9 responsive badge layout | Visible limitation, wrapping, no overflow at 390/1440px | Pending: browser access host unavailable |
+
+Run the commands in `response-status.md`. Red-phase failures are recorded against
+`a1ae80d`; final counts and limits are in `evidence/response-status-verification.json`.
+Live provider behavior, semantic/scholarly support and visual browser QA are not
+established by mocked fixtures or successful citation checks.

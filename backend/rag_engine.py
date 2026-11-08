@@ -8,11 +8,12 @@ single clean entry point:  answer_question(query, madhhab) -> dict
 The dict is JSON-serialisable and shared by BOTH the web frontend (/ask) and
 the WhatsApp webhook, so the two channels always behave identically.
 """
-import os, re, time, json, string, hashlib, tempfile
+import os, re, time, json, string, hashlib, tempfile, math
 import yaml
 import numpy as np
 from citation_guard import CitationError, ResponseReceipts, validate_citations
 from source_records import load_hadith_records, normalize_hadith_source
+from response_status import REVIEW_INSTRUCTION, REVIEW_SCOPE, validate_unreviewed_answer
 
 _response_receipts = ResponseReceipts()
 
@@ -63,8 +64,9 @@ GENERAL_IF_BELOW   = float(os.environ.get("GENERAL_IF_BELOW", "0.65"))
 # answers can offer a locally resolvable citation candidate. Membership validation
 # below does not establish relevance or scholarly correctness.
 GENERAL_CITE_MIN   = float(os.environ.get("GENERAL_CITE_MIN", "0.35"))
-# Below this confidence %, decline and refer to a trusted scholarly resource
-# rather than generating a possibly-wrong ruling (configurable via env).
+# Legacy configuration name retained as a PRIVATE abstention-policy cutoff.
+# Its heuristic units are not measured answer accuracy and are never returned.
+# Consensus flags cannot boost this gate. Higher existing cutoffs stay restrictive.
 LOW_CONFIDENCE_PCT = int(os.environ.get("LOW_CONFIDENCE_PCT", "50"))
 ISLAMQA_URL        = os.environ.get("ISLAMQA_URL", "https://islamqa.info/en")
 GEMINI_KEY  = os.environ.get("GEMINI_API_KEY", "")
@@ -347,41 +349,26 @@ def retrieve_quran(query, fiqh_refs=None, top_k=3, bm25_candidates=30, alpha=ALP
     return out
 
 
-def compute_confidence(fiqh, hadith, quran, topic_score=0.0, topic_gap=0.0):
+def _topic_match_is_eligible(topic_score):
+    """Retrieval similarity is a routing threshold, never a probability of truth."""
+    return (isinstance(topic_score, (int, float)) and not isinstance(topic_score, bool)
+            and math.isfinite(topic_score) and 0 <= topic_score <= 1
+            and topic_score >= max(GENERAL_IF_BELOW, GENERAL_CITE_MIN))
+
+
+def _retrieval_policy_allows(topic_score, hadith, quran):
+    """Retain stricter legacy abstention settings without publishing a score.
+
+    This policy is uncalibrated. A passing result only permits a generation
+    attempt; citations, claim support and scholarly approval remain separate.
+    Removing the old consensus bonus can only tighten the previous fiqh gate.
+    The same minimum topic-match threshold now also protects the general path.
     """
-    Phrasing-stable, banded confidence. It scores the QUALITIES of the answer —
-    how clearly it matches a curated topic, whether the schools agree, and whether
-    it has scripture backing — rather than the raw embedding similarity, which
-    wobbles a few points with wording. So two phrasings of the same consensus
-    question land on the same number.
-    """
-    # Topic-match strength as discrete bands (not the raw score) -> stable base.
-    if   topic_score >= 0.70: score = 0.62     # strong, unambiguous match
-    elif topic_score >= 0.55: score = 0.50     # good match
-    else:                      score = 0.42     # borderline (rare on the fiqh path)
-
-    # Consensus is a stable yes/no — the biggest single lever.
-    if fiqh and fiqh[0].get("consensus"):
-        score += 0.20
-
-    # Scripture backing by PRESENCE (a topic's curated refs don't change with wording).
-    if quran:  score += 0.08
-    if hadith: score += 0.08
-
-    if score != score:   # NaN guard
-        score = 0.0
-    return round(min(score, 0.99), 3)
-
-
-def confidence_to_percent(score):
-    # Map 0–1 to 25–99%. Never 100 (Islamic humility — always defer to scholars);
-    # floor low enough that weak/uncertain answers read as genuinely Low.
-    pct = int(min(25 + (score * 74), 99))
-    if   pct >= 85: label = "Very High"
-    elif pct >= 70: label = "High"
-    elif pct >= 50: label = "Medium"
-    else:           label = "Low"
-    return pct, label
+    if not _topic_match_is_eligible(topic_score):
+        return False
+    policy = 0.62 if topic_score >= 0.70 else 0.50
+    policy += 0.08 * bool(quran) + 0.08 * bool(hadith)
+    return int(25 + round(policy, 3) * 74) >= LOW_CONFIDENCE_PCT
 
 
 # ---------------------------------------------------------------- generation
@@ -421,10 +408,10 @@ def build_rag_prompt(query, madhhab, fiqh, hadith, quran, target_language=None):
         for r in fiqh:
             parts.append(f'\n[{r["topic_name"]}] Topic ID: {r["topic_id"]}')
             parts.append(f'Description: {r["description"]}')
-            parts.append(f'Scholarly Consensus: {"Yes" if r["consensus"] else "No - scholars differ"}')
+            parts.append('Scholarly review: not completed; dataset notes only.')
             for mn, rd in r["ruling"].items():
                 label = "Shafi'i" if mn == "shafi" else mn.capitalize()
-                parts.append(f'  [{label}] Ruling: {rd.get("ruling","")} | Certainty: {rd.get("certainty","")}')
+                parts.append(f'  [{label}] Dataset ruling: {rd.get("ruling","")}')
                 parts.append(f'  Explanation: {rd.get("explanation","")}')
     if quran:
         parts.append("\n=== QURAN REFERENCES ===")
@@ -477,6 +464,7 @@ STRICT RULES YOU MUST FOLLOW:
 8. Maintain a respectful, neutral, scholarly tone.
 9. Use only the exact citation tags supplied in the context. Do not add URLs,
    unbracketed reference numbers, or other bracketed labels. Keep the reply under 20,000 characters.
+10. {REVIEW_INSTRUCTION}
 {madhhab_instruction}
 
 --- KNOWLEDGE BASE CONTEXT ---
@@ -569,8 +557,7 @@ def _context_tags(fiqh, hadith, quran):
 def _cited_sources(tags, fiqh, hadith, quran):
     return {
         "fiqh": [{"topic_id": r["topic_id"], "topic_name": r["topic_name"],
-                  "consensus": r["consensus"], "scholar_review": r.get("scholar_review"),
-                  "score": round(r["score"], 3)}
+                  "consensus": None, "scholar_review": r.get("scholar_review")}
                  for r in fiqh if f'[{r["topic_name"]}]' in tags],
         "quran": [{"ref": f'{v["chapter"]}:{v["ayah"]}', "surah": v.get("surah_name_en", ""),
                    "arabic": v.get("arabic", ""), "english": v.get("english", ""), "urdu": v.get("urdu", "")}
@@ -622,6 +609,11 @@ def _with_receipt(result, tags, fiqh, hadith, quran):
     result["answer_receipt"] = _response_receipts.issue(
         result["answer"], tags, _context_fingerprint(tags, fiqh, hadith, quran))
     result["citation_validation"] = {"status": "passed", "scope": "provided_reference_membership"}
+    # Compatibility fields stay null; neither retrieval nor a dataset flag is
+    # measured answer accuracy. A bare topic review flag cannot approve an answer.
+    result.update(confidence=None, confidence_percent=None, confidence_label=None,
+                  confidence_reason=None, consensus=None)
+    result["scholarly_review"] = {"status": "not_completed", "scope": REVIEW_SCOPE}
     return result
 
 
@@ -659,6 +651,7 @@ CITATION RULES (critical):
 - Cite each substantive point with the exact supplied bracketed tag. Do not invent URLs, topic tags or unbracketed reference numbers.
 - Do not extrapolate a new ruling from a broadly related passage. If CONTEXT is missing or insufficient, decline instead.
 - Keep the answer under 20,000 characters.
+- {REVIEW_INSTRUCTION}
 
 --- CONTEXT (the only references you may cite) ---
 {context}
@@ -746,6 +739,8 @@ def _is_sensitive_question(query):
 
 def _general_result(query, madhhab=None, topic_id=None, topic_score=0.0):
     """Answer only from a matched topic's locally resolvable source records."""
+    if not _topic_match_is_eligible(topic_score):
+        return _low_confidence_result(query, madhhab)
     quran_cands, hadith_cands = [], []
 
     # A mapped reference still needs relevance and scholarly review separately.
@@ -757,22 +752,23 @@ def _general_result(query, madhhab=None, topic_id=None, topic_score=0.0):
     if not allowed:
         return _source_validation_failure(query, "missing_source_context")
 
+    if not _retrieval_policy_allows(topic_score, hadith_cands, quran_cands):
+        return _low_confidence_result(query, madhhab)
+
     prompt = build_general_prompt(query, madhhab, quran_cands, hadith_cands,
                                   target_language=_detect_language(query))
     answer = gemini_generate(prompt)
 
     try:
         answer, tags = validate_citations(answer, allowed)
+        validate_unreviewed_answer(answer)
     except CitationError as error:
         return _source_validation_failure(query, str(error))
 
-    confidence = 0.62
-    pct, label = confidence_to_percent(confidence)
     return _with_receipt({
         "ok": True, "mode": "general", "general_knowledge": True,
         "out_of_scope": False,
         "answer": answer,
-        "confidence": confidence, "confidence_percent": pct, "confidence_label": label,
         "consensus": None,
         "sources": _cited_sources(tags, [], hadith_cands, quran_cands),
     }, tags, [], hadith_cands, quran_cands)
@@ -848,44 +844,18 @@ def _msg(kind, query, **fmt):
     return text.format(**fmt) if fmt else text
 
 
-def _low_confidence_result(query, madhhab, pct, label):
-    """
-    Returned when confidence is below LOW_CONFIDENCE_PCT. We deliberately do not
-    generate a ruling — making up an Islamic answer is prohibited for this
-    project — and instead refer the user to a trusted scholarly resource.
-    """
+def _low_confidence_result(query, madhhab):
+    """Legacy mode name: a fixed referral, without an accuracy assessment."""
     msg = _msg("referral", query, url=ISLAMQA_URL)
     return {
         "ok": True, "mode": "low_confidence", "out_of_scope": False,
         "low_confidence": True,
         "answer": msg,
-        "confidence": round(pct / 100, 3),
-        "confidence_percent": pct, "confidence_label": label,
-        "confidence_reason": (
-            "The system's confidence for this question was too low to give a "
-            "grounded ruling, so no answer was generated."
-        ),
-        "consensus": False,
+        "confidence": None, "confidence_percent": None, "confidence_label": None,
+        "consensus": None,
         "referral_url": ISLAMQA_URL,
         "sources": {"fiqh": [], "quran": [], "hadith": []},
     }
-
-
-def _confidence_reason(quran, hadith, top_topic_score, consensus):
-    """One plain sentence explaining what drove the confidence score."""
-    if   top_topic_score >= 0.85: match = "a very strong match to a curated topic"
-    elif top_topic_score >= 0.65: match = "a strong match to a curated topic"
-    elif top_topic_score >= 0.45: match = "a good match to a curated topic"
-    else:                          match = "a partial match to a curated topic"
-
-    if quran and hadith: backing = "backed by both Qur'an and hadith references"
-    elif quran:          backing = "backed by a Qur'an reference"
-    elif hadith:         backing = "backed by a hadith reference"
-    else:                backing = "with limited reference backing"
-
-    cons = ("and all major schools agree, which raises the score" if consensus
-            else "but the schools differ on this, so it doesn't get the consensus boost")
-    return f"This score reflects {match}, {backing}, {cons}."
 
 
 def _is_vague_question(query):
@@ -981,7 +951,7 @@ def _is_gibberish(query):
 
     # --- Cross-language "is there any real signal?" check for SHORT input ---
     # Long input (4+ words) is treated as a genuine attempt and passes through;
-    # retrieval + downstream confidence gating handle the rest.
+    # retrieval + downstream abstention policy handle the rest.
     if len(words) >= 4:
         return False
 
@@ -1327,6 +1297,20 @@ def _reexpress_result(prev_answer, instruction, madhhab=None, prev_answer_receip
     if context is None or _context_fingerprint(tags, *context) != fingerprint:
         return _source_validation_failure(instruction, "unverified_history")
     fiqh, hadith, quran = context
+    try:
+        validate_unreviewed_answer(prev_answer)
+    except CitationError as error:
+        return _source_validation_failure(instruction, str(error))
+    # Preserve original source fingerprints, but do not present unreviewed
+    # dataset certainty fields as evidence for a translated answer.
+    fiqh_notes = []
+    for record in fiqh:
+        notes = {}
+        for school, note in record["ruling"].items():
+            if isinstance(note, dict):
+                notes[school] = {key: note[key] for key in ("ruling", "explanation") if key in note}
+        fiqh_notes.append({"topic_name": record["topic_name"], "ruling": notes})
+    source_context = json.dumps({"fiqh": fiqh_notes, "hadith": hadith, "quran": quran}, ensure_ascii=False)
     target = _requested_target_language(instruction) or "the requested language"
     prompt = f"""Re-express the following Islamic answer in {target}.
 
@@ -1340,9 +1324,10 @@ RULES:
 - Keep all supplied citation tags. Add no other citations, URLs or unbracketed reference numbers.
 - Use the supplied source text only. If you cannot preserve the supported meaning, decline.
 - Keep the output under 20,000 characters.
+- {REVIEW_INSTRUCTION}
 
 SOURCE CONTEXT:
-{json.dumps({"fiqh": [{"topic_name": r["topic_name"], "ruling": r["ruling"]} for r in fiqh], "hadith": hadith, "quran": quran}, ensure_ascii=False)}
+{source_context}
 
 ANSWER TO RE-EXPRESS:
 {prev_answer}
@@ -1350,6 +1335,7 @@ ANSWER TO RE-EXPRESS:
     out = gemini_generate(prompt)
     try:
         out, cited = validate_citations(out, tags, expected=tags)
+        validate_unreviewed_answer(out)
     except CitationError as error:
         return _source_validation_failure(instruction, str(error))
     return _with_receipt({
@@ -1365,8 +1351,11 @@ ANSWER TO RE-EXPRESS:
 def answer_question(query, madhhab=None, prev_answer=None, prev_answer_receipt=None):
     """
     Full pipeline. Returns a JSON-serialisable dict:
-      { ok, mode, answer, confidence, confidence_percent, confidence_label,
-        consensus, sources: {fiqh:[...], quran:[...], hadith:[...]}, out_of_scope }
+      { ok, mode, answer, sources: {fiqh:[...], quran:[...], hadith:[...]},
+        citation_validation, scholarly_review, answer_receipt, out_of_scope }
+
+    Legacy confidence/consensus fields remain null; similarity is not accuracy.
+    Citation/review status and receipts apply only to accepted generated answers.
 
     prev_answer: the previous bot answer (optional). When the current message is
     a bare "explain/translate in <language>" instruction, we re-express THIS text
@@ -1387,7 +1376,7 @@ def answer_question(query, madhhab=None, prev_answer=None, prev_answer_receipt=N
             "ok": True, "mode": "greeting", "out_of_scope": False,
             "answer": _msg("greeting", query),
             "confidence": None, "confidence_percent": None, "confidence_label": None,
-            "consensus": False, "sources": {"fiqh": [], "quran": [], "hadith": []},
+            "consensus": None, "sources": {"fiqh": [], "quran": [], "hadith": []},
         }
 
     # ── Capability / "what can I ask" gate ───────────────────────
@@ -1400,7 +1389,7 @@ def answer_question(query, madhhab=None, prev_answer=None, prev_answer_receipt=N
             "ok": True, "mode": "capability", "out_of_scope": False,
             "answer": _msg("capability", query),
             "confidence": None, "confidence_percent": None, "confidence_label": None,
-            "consensus": False, "sources": {"fiqh": [], "quran": [], "hadith": []},
+            "consensus": None, "sources": {"fiqh": [], "quran": [], "hadith": []},
         }
 
     # Bare language/format instruction (e.g. "answer me in roman urdu") — not a
@@ -1414,7 +1403,7 @@ def answer_question(query, madhhab=None, prev_answer=None, prev_answer_receipt=N
             "ok": True, "mode": "greeting", "out_of_scope": False,
             "answer": _msg("ask_lang", query),
             "confidence": None, "confidence_percent": None, "confidence_label": None,
-            "consensus": False, "sources": {"fiqh": [], "quran": [], "hadith": []},
+            "consensus": None, "sources": {"fiqh": [], "quran": [], "hadith": []},
         }
 
     topic_matches = classify_topic(query, top_n=2)
@@ -1429,8 +1418,8 @@ def answer_question(query, madhhab=None, prev_answer=None, prev_answer_receipt=N
         return {
             "ok": True, "mode": "low_confidence", "out_of_scope": True,
             "answer": _msg("gibberish", query),
-            "confidence": None, "confidence_percent": None, "confidence_label": "Low",
-            "consensus": False, "sources": {"fiqh": [], "quran": [], "hadith": []},
+            "confidence": None, "confidence_percent": None, "confidence_label": None,
+            "consensus": None, "sources": {"fiqh": [], "quran": [], "hadith": []},
         }
 
     # ── Vague / contentless question gate ────────────────────────
@@ -1441,8 +1430,8 @@ def answer_question(query, madhhab=None, prev_answer=None, prev_answer_receipt=N
         return {
             "ok": True, "mode": "low_confidence", "out_of_scope": True,
             "answer": _msg("gibberish", query),
-            "confidence": None, "confidence_percent": None, "confidence_label": "Low",
-            "consensus": False, "sources": {"fiqh": [], "quran": [], "hadith": []},
+            "confidence": None, "confidence_percent": None, "confidence_label": None,
+            "consensus": None, "sources": {"fiqh": [], "quran": [], "hadith": []},
         }
     # Grave, contested, or highly personal matters (violence, sexuality,
     # apostasy, abortion, divorce specifics, etc.) are ALWAYS referred to a
@@ -1450,21 +1439,22 @@ def answer_question(query, madhhab=None, prev_answer=None, prev_answer_receipt=N
     # these, even if a curated topic weakly matches — the risk of a wrong or
     # oversimplified answer is too high.
     if _is_sensitive_question(query):
-        pct, label = confidence_to_percent(0.30)
-        return _low_confidence_result(query, madhhab, pct, label)
+        return _low_confidence_result(query, madhhab)
+
+    if not _topic_match_is_eligible(top_topic_score):
+        return _low_confidence_result(query, madhhab)
 
     # ── General-knowledge routing (decided up front) ─────────────
-    # Basic-fact questions ("how many prayers?") and anything that doesn't clearly
-    # match a curated fiqh topic are answered from general Islamic knowledge rather
-    # than forced through a grounded ruling that may grasp at the wrong topic.
-    if _force_general(query) or top_topic_score < GENERAL_IF_BELOW:
+    # Basic-fact questions use only the matched topic's local references. Weak
+    # matches have already been withheld; this is not a model-memory fallback.
+    if _force_general(query):
         return _general_result(query, madhhab, top_topic_id, top_topic_score)
 
     fiqh = retrieve_fiqh_ruling(query, madhhab=madhhab, top_k=2)
 
     # ── Classifier anchoring ─────────────────────────────────────
-    # The fine-tuned topic classifier (~97% accurate) is the source of truth for
-    # WHICH topic a question belongs to. Pure hybrid retrieval on topic text can
+    # The topic classifier anchors the candidate topic; it is not a correctness
+    # guarantee. Pure hybrid retrieval on topic text can
     # be fooled by near-identical wudu/fasting topics (e.g. vomiting vs bleeding).
     # When the classifier confidently disagrees with the hybrid top hit, promote
     # the classifier's topic so the ruling, references and sources all align.
@@ -1508,17 +1498,8 @@ def answer_question(query, madhhab=None, prev_answer=None, prev_answer_receipt=N
     if not allowed:
         return _source_validation_failure(query, "missing_source_context")
 
-    topic_gap = (topic_matches[0][1] - topic_matches[1][1]) if len(topic_matches) > 1 else top_topic_score
-    confidence = compute_confidence(fiqh, hadith, quran, topic_score=top_topic_score, topic_gap=topic_gap)
-    pct, label = confidence_to_percent(confidence)
-
-    # ── Low-confidence guard ─────────────────────────────────────
-    # If the system's own confidence is Low (< LOW_CONFIDENCE_PCT), we do NOT
-    # generate a ruling. Fabricating or guessing an Islamic answer is prohibited
-    # for this project, so we decline honestly and point the user to a trusted
-    # scholarly resource instead of returning a shaky answer.
-    if pct < LOW_CONFIDENCE_PCT:
-        return _low_confidence_result(query, madhhab, pct, label)
+    if not _retrieval_policy_allows(top_topic_score, hadith, quran):
+        return _low_confidence_result(query, madhhab)
 
     prompt = build_rag_prompt(query, madhhab, fiqh, hadith, quran,
                               target_language=_detect_language(query))
@@ -1528,6 +1509,7 @@ def answer_question(query, madhhab=None, prev_answer=None, prev_answer_receipt=N
         return _source_validation_failure(query, "insufficient_source_context")
     try:
         answer, tags = validate_citations(answer, allowed)
+        validate_unreviewed_answer(answer)
     except CitationError as error:
         return _source_validation_failure(query, str(error))
     answer = _collapse_topic_tags(answer)
@@ -1536,10 +1518,6 @@ def answer_question(query, madhhab=None, prev_answer=None, prev_answer_receipt=N
     return _with_receipt({
         "ok": True, "mode": "fiqh", "out_of_scope": False,
         "answer": answer,
-        "confidence": confidence, "confidence_percent": pct, "confidence_label": label,
-        "confidence_reason": _confidence_reason(
-            quran, hadith, top_topic_score, bool(fiqh[0].get("consensus")) if fiqh else False),
-        "consensus": all(r["consensus"] for r in sources["fiqh"]) if sources["fiqh"] else None,
         "sources": sources,
     }, tags, fiqh, hadith, quran)
 

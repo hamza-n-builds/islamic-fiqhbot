@@ -652,10 +652,8 @@ document.addEventListener('DOMContentLoaded', () => {
             const answer = result.answer || '';
             const meta = {
                 mode: result.mode,
-                confidence_percent: result.confidence_percent,
-                confidence_label: result.confidence_label,
-                confidence_reason: result.confidence_reason,
-                consensus: result.consensus,
+                citation_validation: result.citation_validation,
+                scholarly_review: result.scholarly_review,
                 sources: result.sources,
                 answer_receipt: result.answer_receipt,
                 out_of_scope: result.out_of_scope
@@ -700,10 +698,6 @@ document.addEventListener('DOMContentLoaded', () => {
             const line = document.createElement('div');
             line.className = 'src-static-line';
             line.innerHTML = `<strong>Topic:</strong> ${escapeHtml(topics.join(', '))}`;
-            const hasConsensus = (sources.fiqh || []).some(f => f.consensus === false);
-            if (hasConsensus) {
-                line.innerHTML += ` <span class="src-differ">(Scholars differ)</span>`;
-            }
             container.appendChild(line);
         }
 
@@ -809,27 +803,17 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function buildMetaBadges(meta) {
-        if (!meta || meta.mode === 'greeting' || meta.out_of_scope) return '';
-
-        const pct = Number(meta.confidence_percent);
-        const label = typeof meta.confidence_label === 'string' ? meta.confidence_label : '';
-        const lvl = label.toLowerCase().replace(/[^a-z0-9]+/g, '-');
-        const hasConsensus = meta.consensus === true || meta.consensus === false;
-        if (meta.confidence_percent == null && !hasConsensus) return '';
-
-        let html = '<div class="msg-meta">';
-
-        if (meta.confidence_percent != null && Number.isFinite(pct)) {
-            html += `<span class="conf-badge conf-${lvl}">Confidence: ${pct}% · ${escapeHtml(label)}</span>`;
+        // Old saved percentages/flags are intentionally ignored. A reference
+        // membership check cannot certify answer accuracy or scholarly approval.
+        if (!meta || !['fiqh', 'general', 'reexpress'].includes(meta.mode) || meta.out_of_scope) return '';
+        const validation = meta.citation_validation || {};
+        if (validation.status !== 'passed' || validation.scope !== 'provided_reference_membership') return '';
+        let html = '<div class="msg-meta"><span class="evidence-badge">References matched</span>';
+        const review = meta.scholarly_review || {};
+        if (review.status === 'not_completed' && review.scope === 'answer_and_ruling_support') {
+            html += '<span class="evidence-badge">Scholarly review not completed</span>';
         }
-
-        if (hasConsensus) {
-            html += meta.consensus
-                ? `<span class="cons-badge cons-yes"><i class="fas fa-check-circle"></i> All madhhabs agree</span>`
-                : `<span class="cons-badge cons-no"><i class="fas fa-info-circle"></i> Scholars differ</span>`;
-        }
-
-        html += '</div>';
+        html += '<small class="evidence-note">Matching supplied references does not verify the answer\'s accuracy.</small></div>';
         return html;
     }
 

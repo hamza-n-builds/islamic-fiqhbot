@@ -6,7 +6,7 @@ An applied AI, multilingual Islamic guidance assistant engineered around a hybri
 
 ## 🌟 Overview
 
-* **Hybrid RAG Retrieval**: Combines keyword-level precision (BM25) with semantic embeddings (MiniLM) to retrieve authentic sources with high precision.
+* **Hybrid RAG Retrieval**: Combines keyword matching (BM25) with semantic embeddings (MiniLM) to retrieve candidate local source records. Relevance and religious support require separate verification.
 * **School of Thought (Madhab) Specificity**: Answers grounded according to the three schools currently present in the dataset (Hanafi, Shafi'i, Maliki) or general guidance.
 * **Citation Membership Validation**: Context-constrained prompts and server checks reject generated references outside the supplied source records. This does not establish that a claim follows from a source or certify a ruling.
 * **Multi-Channel**: Web client and Meta Cloud API WhatsApp webhook integration.
@@ -127,6 +127,47 @@ See [`replica/evidence/source-record-audit.json`](replica/evidence/source-record
 for unresolved dataset mappings/review status and
 [`replica/evidence/citation-verification.json`](replica/evidence/citation-verification.json)
 for the exact tests and limitations.
+
+### Response status and review limits
+
+The application does not publish an accuracy percentage. Legacy `confidence`,
+`confidence_percent`, `confidence_label`, `confidence_reason` and `consensus`
+response fields are null. Accepted generated answers instead include:
+
+```json
+{
+  "citation_validation": {
+    "status": "passed",
+    "scope": "provided_reference_membership"
+  },
+  "scholarly_review": {
+    "status": "not_completed",
+    "scope": "answer_and_ruling_support"
+  }
+}
+```
+
+Web and WhatsApp say **References matched**, **Scholarly review not completed**,
+and explain that matching supplied references does not verify an answer's
+accuracy. Greetings, clarifications and referrals do not receive those badges.
+Old saved chat percentages/consensus flags are ignored when rendering; saved
+answer text is preserved. Historical text has not been re-reviewed.
+
+Dataset consensus/certainty flags are not supplied as scholarly certification in
+generation prompts. Consensus does not boost generation eligibility. A
+conservative wording guard withholds known consensus/ijma/unanimity wording and
+common all-schools-agree phrasing in English, Roman Urdu and Arabic-script forms,
+including translation follow-ups. It can also withhold a definition or negation
+containing those terms; it cannot detect every paraphrase or verify semantic
+support. No topic or answer has been newly approved by this change.
+
+Weak or invalid topic similarity now causes a fixed referral before generation,
+including the general-reference path. Retrieval thresholds remain uncalibrated
+abstention heuristics, not measured correctness. The legacy `LOW_CONFIDENCE_PCT`
+setting remains only as a private, conservative policy cutoff to preserve stricter
+existing installations; it is never displayed. See
+[`replica/response-status.md`](replica/response-status.md) for the contract,
+compatibility decisions and exact verification limits.
 
 Hadith references now resolve through a pinned canonical identity registry,
 shared by retrieval and `/hadith-text`. The legacy corpus mixes numbering schemes

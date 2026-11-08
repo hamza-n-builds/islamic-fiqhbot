@@ -23,3 +23,10 @@ legacy integer keys. All current mapped references resolve; supplementary grade
 holds are omitted from generation. Original corpus/rulings/review states remain
 preserved. Additional raw narrations need explicit canonical registration, while
 all topic-to-source religious support still needs qualified review.
+
+F01/F02 status presentation (2026-11-08): replace heuristic accuracy percentages
+and unreviewed agreement/disagreement badges with scoped reference membership
+and explicit incomplete scholarly review. Cover old saved history, new answers,
+signed rephrasing, weak-match abstention, greetings/referrals, web and WhatsApp.
+The source registry and religious content remain unchanged; the three-school
+mobile response redesign is still a later task.

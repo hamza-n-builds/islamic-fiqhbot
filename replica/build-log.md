@@ -29,3 +29,17 @@
   four frontend VM tests, eight real HTTP/startup checks passed; structural
   reference audit has no missing/textless mappings. Semantic/scholarly review
   remains pending; no live Gemini evaluation, push or deployment.
+
+- 2026-11-08, F01/F02 response transparency: reproduced heuristic/fixed accuracy,
+  consensus prompt/badges, weak general-route acceptance and WhatsApp `None%`
+  against `a1ae80d`. Null public legacy scores/consensus, explicit scoped reference
+  checks and incomplete answer/ruling review now replace those claims. Existing
+  saved metadata is ignored, history preserved. Weak/invalid matches abstain;
+  stricter private legacy cutoffs remain, with no consensus bonus. Known-consensus
+  wording is withheld in all generation paths and old signed translation input.
+  Final: 113 Python tests, eight frontend VM checks, nine real startup/HTTP checks
+  passed. Source audit has zero missing/textless references; all dataset bytes
+  match the previous batch and no scholarly approval was added. Browser host
+  unavailable, so mobile/desktop visual QA remains pending. Wording checks are
+  conservative, not semantic verification. No live provider generation, push or
+  deployment. See `evidence/response-status-verification.json`.

@@ -1,4 +1,4 @@
-# Startup bug record
+# FIQHBOT bug record
 
 ### STARTUP-001: An existing but broken Python exe bypasses setup
 
@@ -105,3 +105,37 @@ this startup fix. Their implementation has not been completed by this batch.
 - The identity remains inspectable but its text is excluded from generation/search.
   Qualified grade/fiqh support review remains open. The broader support-review
   queue is documented separately; no existing fiqh wording was approved.
+
+### STATUS-001: Heuristics and unreviewed flags imply answer correctness
+
+- Severity: S2 for response transparency; reproduced against `a1ae80d`.
+- Flow/cases: F01/F02; response-status and saved-chat regressions.
+- Steps: answer using a synthetic pending-review topic with `consensus: true`,
+  inspect the public score and model prompt; format a general answer/WhatsApp
+  greeting; render a saved chat with old confidence and consensus metadata.
+- Expected: no measured-accuracy or agreement claims without supporting review;
+  scoped reference-membership status and incomplete review on accepted answers.
+- Actual: arbitrary/fixed percentages, `Scholarly Consensus: Yes` in prompts,
+  agreement/disagreement badges, and WhatsApp `None%` on non-answer messages.
+- Fix: null legacy fields, omit prompt certification, ignore legacy saved-chat
+  scores/flags, persist scoped checks, and use the same limited labels on both
+  channels. Known consensus wording is withheld on all generation paths.
+- Status: fixed in `fix: replace misleading confidence with scoped response status`.
+- Evidence: `test_response_status.py`, `test_chat_receipts.cjs`, and
+  `evidence/response-status-verification.json`. No semantic/religious certification.
+
+### STATUS-002: Weak topic match bypasses the main gate via general generation
+
+- Severity: S2 for retrieval eligibility; reproduced against `a1ae80d`.
+- Steps: call the general response path with a synthetic 0.5 topic match and
+  locally resolvable source records; repeat with an invalid/infinite score.
+- Expected: withhold before provider generation below the existing topic threshold
+  or for invalid scores, regardless of dataset consensus flags.
+- Actual: the lower 0.35 candidate threshold enabled general generation and a
+  fixed confidence score even though the main fiqh topic threshold was 0.65.
+- Fix: finite 0..1 similarity, shared topic threshold, and private conservative
+  abstention cutoff without the consensus bonus. No published accuracy score.
+- Status: fixed in the same response-status commit.
+- Evidence: weak main/general match regressions and strict legacy-cutoff test.
+- Remaining: calibrated relevance/ambiguity evaluation and qualified source-support
+  review. These thresholds are heuristics, not proof of topical/religious support.

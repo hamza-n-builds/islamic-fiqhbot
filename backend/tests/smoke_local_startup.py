@@ -120,6 +120,17 @@ def main():
             assert rejected["citation_validation"]["reason"] == "unverified_history"
             assert "Untrusted fixture" not in rejected["answer"] and "answer_receipt" not in rejected
         report["checks"].append("Real API rejects unverified history without an external provider call")
+        for question, mode in (("Hello", "greeting"), ("what can I ask", "capability"), ("help", "low_confidence")):
+            status_request = urllib.request.Request(
+                url + "ask", data=json.dumps({"question": question}).encode(),
+                headers={"Content-Type": "application/json"})
+            with opener.open(status_request, timeout=5) as response:
+                result = json.load(response)
+                assert response.status == 200 and result["mode"] == mode
+                assert all(result.get(field) is None for field in
+                           ("confidence", "confidence_percent", "confidence_label", "consensus"))
+                assert "scholarly_review" not in result and "answer_receipt" not in result
+        report["checks"].append("Real API greetings/capabilities/clarifications have no accuracy or consensus claims")
         for collection, number in (("Sahih Bukhari", "1395"), ("Sahih Muslim", "11a")):
             query = urllib.parse.urlencode({"source": collection, "number": number})
             with opener.open(url + "hadith-text?" + query, timeout=5) as response:
